@@ -176,13 +176,12 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
       setAddingToPlaylist(targetPlaylistId);
       const album = JSON.parse(albumData);
       
-      // Make an AI-powered API call to analyze and add the album to the playlist
       const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${targetPlaylistId}&action=add_album`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ artist: album.artist, album: album.album }),
+        body: JSON.stringify({ uri: album.uri }),
       });
 
       if (!response.ok) {
@@ -192,7 +191,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
       const result = await response.json();
       
       // Show success message
-      alert(`Successfully added ${result.tracksAdded} tracks to the playlist!`);
+      alert('Successfully added album to playlist!');
 
       // Refresh the playlists after adding the album
       await fetchPlaylists();

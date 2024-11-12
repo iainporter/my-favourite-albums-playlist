@@ -33,35 +33,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     if (req.method === 'POST' && req.query.action === 'add_album') {
       const { playlist_id } = req.query;
-      const { artist, album } = req.body;
+      const { uri } = req.body;
 
-      if (!playlist_id || !artist || !album) {
+      if (!playlist_id || !uri) {
         return res.status(400).json({ error: 'Missing required parameters' });
       }
 
-      // Get playlist details for context
-      const playlistDetails = await spotifyApi.getPlaylist(playlist_id as string);
-      const playlistName = playlistDetails.body.name;
+      // Add the album to the playlist using the Spotify API
+      const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uris: [uri]
+        })
+      });
 
-      // Search for all tracks from the album
-      const tracks = await searchAlbumTracks(spotifyApi, artist, album);
-      
-      if (!tracks.length) {
-        return res.status(404).json({ error: 'Album not found on Spotify' });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Failed to add album to playlist');
       }
 
-      // Use AI to analyze which tracks would fit best in the playlist
-      const selectedTrackUris = await analyzeAlbumForPlaylist(tracks, playlistName);
-      
-      if (!selectedTrackUris.length) {
-        return res.status(404).json({ error: 'No suitable tracks found for this playlist' });
-      }
-
-      // Add the selected tracks to the playlist
-      await spotifyApi.addTracksToPlaylist(playlist_id as string, selectedTrackUris);
+      const result = await response.json();
       return res.status(200).json({ 
         success: true,
-        tracksAdded: selectedTrackUris.length
+        snapshot_id: result.snapshot_id
       });
     }
 
