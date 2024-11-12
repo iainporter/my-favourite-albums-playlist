@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import PlaylistManager from '../components/PlaylistManager';
+import FavoriteAlbums from '../components/FavoriteAlbums';
 
 export default function Home() {
   const router = useRouter();
@@ -28,9 +29,6 @@ export default function Home() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
             Spotify Playlist Manager
           </h1>
-          <p className="text-gray-400 text-center mb-12 text-lg">
-            Manage your Spotify playlists with ease
-          </p>
           
           {error && (
             <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-8 max-w-md mx-auto">
@@ -39,7 +37,7 @@ export default function Home() {
           )}
 
           {!accessToken ? (
-            <div className="text-center">
+            <div className="text-center mt-20">
               <button
                 onClick={handleLogin}
                 className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-green-500 to-green-400 rounded-full hover:from-green-400 hover:to-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-gray-900"
@@ -54,7 +52,14 @@ export default function Home() {
               </button>
             </div>
           ) : (
-            <PlaylistManager accessToken={accessToken} />
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 h-[calc(100vh-12rem)]">
+              <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm">
+                <PlaylistManager accessToken={accessToken} />
+              </div>
+              <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm">
+                <FavoriteAlbums />
+              </div>
+            </div>
           )}
         </div>
       </main>
