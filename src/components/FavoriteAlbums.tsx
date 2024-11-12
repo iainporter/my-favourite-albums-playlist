@@ -54,6 +54,39 @@ export default function FavoriteAlbums() {
     setCurrentPage(pageNumber);
   };
 
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let inQuotes = false;
+    let currentField = '';
+    let i = 0;
+
+    while (i < line.length) {
+      const char = line[i];
+
+      if (char === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          // Handle escaped quotes
+          currentField += '"';
+          i++;
+        } else {
+          // Toggle quote mode
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        // End of field
+        result.push(currentField.trim());
+        currentField = '';
+      } else {
+        currentField += char;
+      }
+      i++;
+    }
+
+    // Add the last field
+    result.push(currentField.trim());
+    return result;
+  };
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -61,21 +94,46 @@ export default function FavoriteAlbums() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
-      const rows = text.split('\n');
-      const parsedAlbums: Album[] = rows
-        .slice(1) // Skip header row
-        .filter(row => row.trim()) // Skip empty rows
-        .map((row, index) => {
-          const [artist, album, year, rating] = row.split(',').map(field => field.trim());
-          return {
-            id: `imported-${index}`,
-            artist,
-            album,
-            year,
-            rating
-          };
-        });
-      setAlbums(parsedAlbums);
+      // Split by newline but handle both \r\n and \n
+      const rows = text.split(/\r?\n/);
+      
+      try {
+        // Validate header row
+        const headerRow = parseCSVLine(rows[0]);
+        const expectedHeaders = ['Artist', 'Album', 'Year', 'Rating'];
+        const headersValid = expectedHeaders.every((header, index) => 
+          headerRow[index]?.toLowerCase() === header.toLowerCase()
+        );
+
+        if (!headersValid) {
+          alert('Invalid CSV format. Please ensure the first row contains: Artist, Album, Year, Rating');
+          return;
+        }
+
+        const parsedAlbums: Album[] = rows
+          .slice(1) // Skip header row
+          .filter(row => row.trim()) // Skip empty rows
+          .map((row, index) => {
+            const [artist, album, year, rating] = parseCSVLine(row);
+            if (!artist || !album) {
+              throw new Error(`Invalid row ${index + 2}: Artist and Album are required`);
+            }
+            return {
+              id: `imported-${index}`,
+              artist,
+              album,
+              year: year?.trim() || '',
+              rating: rating?.trim() || ''
+            };
+          });
+
+        setAlbums(parsedAlbums);
+        setCurrentPage(1); // Reset to first page
+        setSortState({ field: 'artist', direction: 'asc' }); // Reset sort
+      } catch (error) {
+        console.error('Error parsing CSV:', error);
+        alert('Error parsing CSV file. Please ensure the file is properly formatted.');
+      }
     };
     reader.readAsText(file);
   };
@@ -84,22 +142,48 @@ export default function FavoriteAlbums() {
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
         <h2 className="text-2xl font-bold text-white">My Favourite Albums</h2>
-        <input
-          type="file"
-          accept=".csv"
-          ref={fileInputRef}
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-        <button
-          className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200 flex items-center space-x-2"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Import Albums</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            className="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 transition-colors duration-200 flex items-center space-x-2"
+            onClick={() => {
+              const sampleData = `Artist,Album,Year,Rating
+"The Beatles","Abbey Road","1969","5"
+"Pink Floyd","Dark Side of the Moon","1973","5"
+"David Bowie","The Rise and Fall of Ziggy Stardust","1972","5"`;
+              
+              const blob = new Blob([sampleData], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'sample_albums.csv';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+            </svg>
+            <span>Download Sample</span>
+          </button>
+          <input
+            type="file"
+            accept=".csv"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <button
+            className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200 flex items-center space-x-2"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Import Albums</span>
+          </button>
+        </div>
       </div>
 
       {albums.length === 0 ? (
