@@ -1,0 +1,24 @@
+{
+  "spec": " add functionality to the nextJS project where the user can connect with their spotify account, load their playlists, select one or more and delete them",
+  "commitMessage": "Add Spotify integration with playlist management functionality",
+  "stats": {
+    "inputTokens": 18961,
+    "cacheWriteTokens": 3545,
+    "cacheReadTokens": 31905,
+    "outputTokens": 3356,
+    "totalTokens": null,
+    "cost": 0.09756618750000001,
+    "currency": "gbp",
+    "processingMillis": 66477,
+    "git": {
+      "filesChanged": 9,
+      "insertions": 1889,
+      "deletions": 301,
+      "linesChanged": 1889,
+      "testFilesChanged": 0,
+      "testInsertions": 0,
+      "testDeletions": 0,
+      "testLinesChanged": 0
+    }
+  }
+}
