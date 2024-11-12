@@ -246,7 +246,25 @@ export default function FavoriteAlbums() {
               </thead>
               <tbody className="bg-gray-700 divide-y divide-gray-600">
                 {currentAlbums.map((album) => (
-                  <tr key={album.id} className="text-gray-200">
+                  <tr 
+                    key={album.id} 
+                    className="text-gray-200 hover:bg-gray-600/50 transition-colors duration-200 cursor-move"
+                    draggable="true"
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('application/json', JSON.stringify(album));
+                      e.dataTransfer.effectAllowed = 'copy';
+                      // Add a custom class to the dragged element
+                      const dragIcon = document.createElement('div');
+                      dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
+                      dragIcon.innerHTML = `${album.artist} - ${album.album}`;
+                      document.body.appendChild(dragIcon);
+                      e.dataTransfer.setDragImage(dragIcon, 0, 0);
+                      setTimeout(() => document.body.removeChild(dragIcon), 0);
+                    }}
+                    onDragEnd={(e) => {
+                      e.preventDefault();
+                    }}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">{album.artist}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{album.album}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{album.year}</td>
