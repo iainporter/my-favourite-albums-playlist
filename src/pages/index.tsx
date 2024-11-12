@@ -57,7 +57,7 @@ export default function Home() {
                 <PlaylistManager accessToken={accessToken} />
               </div>
               <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm overflow-hidden">
-                <FavoriteAlbums />
+                <FavoriteAlbums accessToken={accessToken} />
               </div>
             </div>
           )}
