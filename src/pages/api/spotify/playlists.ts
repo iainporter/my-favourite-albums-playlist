@@ -32,10 +32,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       };
       
       return res.status(200).json(formattedData);
-    } else if (req.method === 'DELETE') {
-      const { playlist_id } = req.body;
-      await spotifyApi.unfollowPlaylist(playlist_id);
-      return res.status(200).json({ message: 'Playlist unfollowed successfully' });
     } else {
       return res.status(405).json({ error: 'Method not allowed' });
     }

@@ -12,7 +12,6 @@ interface PlaylistManagerProps {
 
 export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [selectedPlaylists, setSelectedPlaylists] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -46,35 +45,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     setIsLoading(false);
   };
 
-  const togglePlaylist = (playlistId: string) => {
-    const newSelected = new Set(selectedPlaylists);
-    if (newSelected.has(playlistId)) {
-      newSelected.delete(playlistId);
-    } else {
-      newSelected.add(playlistId);
-    }
-    setSelectedPlaylists(newSelected);
-  };
 
-  const deleteSelectedPlaylists = async () => {
-    setIsLoading(true);
-    try {
-      for (const playlistId of selectedPlaylists) {
-        await fetch('/api/spotify/playlists?access_token=' + accessToken, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ playlist_id: playlistId }),
-        });
-      }
-      await fetchPlaylists();
-      setSelectedPlaylists(new Set());
-    } catch (error) {
-      console.error('Error deleting playlists:', error);
-    }
-    setIsLoading(false);
-  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -107,12 +78,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
           {playlists.map((playlist) => (
             <div
               key={playlist.id}
-              onClick={() => togglePlaylist(playlist.id)}
-              className={`group flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-200
-                ${selectedPlaylists.has(playlist.id)
-                  ? 'bg-red-900/20 ring-1 ring-red-500'
-                  : 'hover:bg-gray-800/50'
-                }`}
+              className="group flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-800/50 transition-all duration-200"
             >
               <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
                 {playlist.images?.[0] ? (
@@ -134,16 +100,10 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
                 <h3 className="text-base font-medium text-white truncate">{playlist.name}</h3>
               </div>
 
-              <div className={`flex-shrink-0 ${selectedPlaylists.has(playlist.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}>
-                {selectedPlaylists.has(playlist.id) ? (
-                  <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
-                  </svg>
-                ) : (
-                  <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                  </svg>
-                )}
+              <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <svg className="w-6 h-6 text-spotify-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                </svg>
               </div>
             </div>
           ))}
@@ -156,17 +116,6 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
         <h2 className="text-2xl font-bold text-white">My Playlists</h2>
-        {selectedPlaylists.size > 0 && (
-          <button
-            onClick={deleteSelectedPlaylists}
-            className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors duration-200 flex items-center space-x-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            <span>Delete ({selectedPlaylists.size})</span>
-          </button>
-        )}
       </div>
 
       {renderContent()}
