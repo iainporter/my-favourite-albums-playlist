@@ -94,15 +94,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
 
 
 
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
-        </div>
-      );
-    }
-
+  const renderPlaylists = () => {
     if (!Array.isArray(playlists) || playlists.length === 0) {
       return (
         <div className="flex-1 flex items-center justify-center">
@@ -120,9 +112,8 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     }
 
     return (
-      <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
-        <div className="space-y-3 pb-4">
-          {playlists.map((playlist) => (
+      <div className="space-y-3 pb-4">
+        {playlists.map((playlist) => (
             <div key={playlist.id} className="mb-4">
               <div
                 onClick={() => togglePlaylist(playlist.id)}
@@ -213,7 +204,15 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
         <h2 className="text-2xl font-bold text-white">My Playlists</h2>
       </div>
 
-      {renderContent()}
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
+          {renderPlaylists()}
+        </div>
+      )}
     </div>
   );
 }
