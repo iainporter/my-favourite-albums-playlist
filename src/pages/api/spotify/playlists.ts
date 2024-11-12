@@ -7,6 +7,12 @@ const spotifyApi = new SpotifyWebApi({
   clientSecret: SPOTIFY_CONFIG.CLIENT_SECRET,
 });
 
+async function searchTrack(spotifyApi: SpotifyWebApi, artist: string, album: string) {
+  const query = `artist:${artist} album:${album}`;
+  const result = await spotifyApi.searchTracks(query);
+  return result.body.tracks?.items[0]?.uri;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { access_token } = req.query;
 
