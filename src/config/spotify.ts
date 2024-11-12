@@ -10,16 +10,3 @@ export const SPOTIFY_CONFIG = {
     'user-read-private',
   ],
 };
-
-export const searchSpotify = async (query: string) => {
-  try {
-    const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`);
-    if (!response.ok) {
-      throw new Error('Failed to search Spotify');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error searching Spotify:', error);
-    throw error;
-  }
-};

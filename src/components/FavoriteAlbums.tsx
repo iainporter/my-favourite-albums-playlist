@@ -1,5 +1,4 @@
 import { useState, useRef, useMemo } from 'react';
-import { searchSpotify } from '../config/spotify';
 import { Album } from '../types/album';
 
 type SortField = 'artist' | 'album' | 'year' | 'rating';
@@ -254,7 +253,11 @@ export default function FavoriteAlbums() {
                     onClick={async () => {
                       try {
                         const query = `${album.artist} ${album.album}`;
-                        const data = await searchSpotify(query);
+                        const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`);
+                        if (!response.ok) {
+                          throw new Error('Failed to search Spotify');
+                        }
+                        const data = await response.json();
                         console.log('Spotify search results:', data);
                         // TODO: Handle the search results (e.g., show in a modal or side panel)
                       } catch (error) {
