@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Album } from '../types/album';
 
 type SortField = 'artist' | 'album' | 'year' | 'rating';
@@ -41,14 +41,14 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
     const sorted = [...albums].sort((a, b) => {
       const aValue = String(a[sortState.field]).toLowerCase();
       const bValue = String(b[sortState.field]).toLowerCase();
-      
+
       if (sortState.field === 'year' || sortState.field === 'rating') {
         // Handle numeric sorting
         const aNum = parseFloat(aValue) || 0;
         const bNum = parseFloat(bValue) || 0;
         return sortState.direction === 'asc' ? aNum - bNum : bNum - aNum;
       }
-      
+
       // Handle string sorting
       if (aValue < bValue) return sortState.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortState.direction === 'asc' ? 1 : -1;
@@ -109,12 +109,12 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
       const text = e.target?.result as string;
       // Split by newline but handle both \r\n and \n
       const rows = text.split(/\r?\n/);
-      
+
       try {
         // Validate header row
         const headerRow = parseCSVLine(rows[0]);
         const expectedHeaders = ['Artist', 'Album', 'Year', 'Rating'];
-        const headersValid = expectedHeaders.every((header, index) => 
+        const headersValid = expectedHeaders.every((header, index) =>
           headerRow[index]?.toLowerCase() === header.toLowerCase()
         );
 
@@ -151,6 +151,29 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
     reader.readAsText(file);
   };
 
+  const handleAlbumClick = async (album: { artist: string; album: string }) => {
+    try {
+      const query = `${album.artist} ${album.album}`;
+      const response = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=10`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+      if (!response.ok) {
+        throw new Error('Failed to search Spotify');
+      }
+      const data = await response.json();
+      console.log('Spotify search results:', data);
+      setSearchResults({ [album.id]: data.albums.items });
+      setExpandedRow(album.id);
+    } catch (error) {
+      console.error('Error searching Spotify:', error);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
@@ -163,7 +186,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
 "The Beatles","Abbey Road","1969","5"
 "Pink Floyd","Dark Side of the Moon","1973","5"
 "David Bowie","The Rise and Fall of Ziggy Stardust","1972","5"`;
-              
+
               const blob = new Blob([sampleData], { type: 'text/csv' });
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
@@ -259,57 +282,57 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
               </thead>
               <tbody className="bg-gray-700 divide-y divide-gray-600">
                 {currentAlbums.map((album) => (
-                  <tr 
-                    key={album.id} 
-                    className="text-gray-200 hover:bg-gray-600/50 transition-colors duration-200 cursor-pointer"
-                    draggable="true"
-                    onClick={async () => {
-                      try {
-                        const query = `${album.artist} ${album.album}`;
-                        const response = await fetch(
-                          `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=10`,
-                          {
-                            headers: {
-                              'Authorization': `Bearer ${accessToken}`
-                            }
-                          }
-                        );
-                        if (!response.ok) {
-                          throw new Error('Failed to search Spotify');
-                        }
-                        const data = await response.json();
-                        console.log('Spotify search results:', data);
-                        // TODO: Handle the search results (e.g., show in a modal or side panel)
-                      } catch (error) {
-                        console.error('Error searching Spotify:', error);
-                      }
-                    }}
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData('application/json', JSON.stringify(album));
-                      e.dataTransfer.effectAllowed = 'copy';
-                      // Add a custom class to the dragged element
-                      const dragIcon = document.createElement('div');
-                      dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
-                      dragIcon.innerHTML = `${album.artist} - ${album.album}`;
-                      document.body.appendChild(dragIcon);
-                      e.dataTransfer.setDragImage(dragIcon, 0, 0);
-                      setTimeout(() => document.body.removeChild(dragIcon), 0);
-                    }}
-                    onDragEnd={(e) => {
-                      e.preventDefault();
-                    }}
-                    title="Drag to add to playlist"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">{album.artist}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{album.album}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{album.year}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{album.rating}</td>
-                  </tr>
+                  <React.Fragment key={album.id}>
+                    <tr
+                      className="text-gray-200 hover:bg-gray-600/50 transition-colors duration-200 cursor-pointer"
+                      draggable="true"
+                      onClick={() => handleAlbumClick(album)}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('application/json', JSON.stringify(album));
+                        e.dataTransfer.effectAllowed = 'copy';
+                        // Add a custom class to the dragged element
+                        const dragIcon = document.createElement('div');
+                        dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
+                        dragIcon.innerHTML = `${album.artist} - ${album.album}`;
+                        document.body.appendChild(dragIcon);
+                        e.dataTransfer.setDragImage(dragIcon, 0, 0);
+                        setTimeout(() => document.body.removeChild(dragIcon), 0);
+                      }}
+                      onDragEnd={(e) => {
+                        e.preventDefault();
+                      }}
+                      title="Drag to add to playlist"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">{album.artist}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{album.album}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{album.year}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{album.rating}</td>
+                    </tr>
+                    {expandedRow === album.id && searchResults[album.id] && (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-4 bg-gray-800">
+                          {searchResults[album.id].map((spotifyAlbum) => (
+                            <div key={spotifyAlbum.id} className="flex items-center space-x-4">
+                              <img
+                                src={spotifyAlbum.images[0]?.url}
+                                alt={spotifyAlbum.name}
+                                className="w-16 h-16 rounded-md object-cover"
+                              />
+                              <div>
+                                <h3 className="text-white">{spotifyAlbum.name}</h3>
+                                <p className="text-gray-400">{spotifyAlbum.release_date}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
           </div>
-          
+
           {albums.length > 0 && (
             <div className="sticky bottom-0 mt-4 flex items-center justify-between px-6 py-3 bg-gray-800/95 backdrop-blur-sm border-t border-gray-700">
               <div className="flex items-center text-sm text-gray-400">
