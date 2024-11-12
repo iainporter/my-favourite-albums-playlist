@@ -307,7 +307,8 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
                                   name: spotifyAlbum.name,
                                   artist: album.artist,
                                   releaseDate: spotifyAlbum.release_date,
-                                  image: spotifyAlbum.images[0]?.url
+                                  image: spotifyAlbum.images[0]?.url,
+                                  uri: spotifyAlbum.uri
                                 }));
                                 e.dataTransfer.effectAllowed = 'copy';
                                 const dragIcon = document.createElement('div');

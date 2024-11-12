@@ -172,13 +172,14 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     try {
       const album = JSON.parse(albumData);
       
-      // Make an API call to search for the album and add it to the playlist
-      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${targetPlaylistId}&action=add_album`, {
+      // Make an API call to add the album to the playlist
+      const response = await fetch(`https://api.spotify.com/v1/playlists/${targetPlaylistId}/tracks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
         },
-        body: JSON.stringify({ artist: album.artist, album: album.album }),
+        body: JSON.stringify({ uris: [album.uri]}),
       });
 
       if (!response.ok) {
