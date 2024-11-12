@@ -26,9 +26,15 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     try {
       const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}`);
       const data = await response.json();
-      setPlaylists(data.items);
+      if (data && Array.isArray(data.items)) {
+        setPlaylists(data.items);
+      } else {
+        console.error('Invalid playlist data format:', data);
+        setPlaylists([]);
+      }
     } catch (error) {
       console.error('Error fetching playlists:', error);
+      setPlaylists([]);
     }
     setIsLoading(false);
   };
@@ -63,17 +69,73 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     setIsLoading(false);
   };
 
-  if (isLoading) {
-    return <div className="text-center">Loading...</div>;
-  }
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
+        </div>
+      );
+    }
 
-  if (isLoading) {
+    if (!Array.isArray(playlists)) {
+      return (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-400">No playlists available</p>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
+      <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
+        <div className="space-y-3 pb-4">
+          {playlists.map((playlist) => (
+            <div
+              key={playlist.id}
+              onClick={() => togglePlaylist(playlist.id)}
+              className={`group flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-200
+                ${selectedPlaylists.has(playlist.id)
+                  ? 'bg-red-900/20 ring-1 ring-red-500'
+                  : 'hover:bg-gray-800/50'
+                }`}
+            >
+              <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
+                {playlist.images?.[0] ? (
+                  <img
+                    src={playlist.images[0].url}
+                    alt={playlist.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                    <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-medium text-white truncate">{playlist.name}</h3>
+              </div>
+
+              <div className={`flex-shrink-0 ${selectedPlaylists.has(playlist.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}>
+                {selectedPlaylists.has(playlist.id) ? (
+                  <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                  </svg>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
-  }
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -92,59 +154,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
         )}
       </div>
 
-      {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-spotify-green"></div>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
-          <div className="space-y-3 pb-4">
-            {playlists.map((playlist) => (
-              <div
-                key={playlist.id}
-                onClick={() => togglePlaylist(playlist.id)}
-                className={`group flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-200
-                  ${selectedPlaylists.has(playlist.id)
-                    ? 'bg-red-900/20 ring-1 ring-red-500'
-                    : 'hover:bg-gray-800/50'
-                  }`}
-              >
-                <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
-                  {playlist.images[0] ? (
-                    <img
-                      src={playlist.images[0].url}
-                      alt={playlist.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-white truncate">{playlist.name}</h3>
-                </div>
-
-                <div className={`flex-shrink-0 ${selectedPlaylists.has(playlist.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}>
-                  {selectedPlaylists.has(playlist.id) ? (
-                    <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
-                    </svg>
-                  ) : (
-                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                    </svg>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {renderContent()}
     </div>
   );
 }
