@@ -9,7 +9,11 @@ interface SortState {
   direction: SortDirection;
 }
 
-export default function FavoriteAlbums() {
+interface FavoriteAlbumsProps {
+  accessToken: string;
+}
+
+export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
@@ -296,7 +300,14 @@ export default function FavoriteAlbums() {
                     onClick={async () => {
                       try {
                         const query = `${album.artist} ${album.album}`;
-                        const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`);
+                        const response = await fetch(
+                          `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=10`,
+                          {
+                            headers: {
+                              'Authorization': `Bearer ${accessToken}`
+                            }
+                          }
+                        );
                         if (!response.ok) {
                           throw new Error('Failed to search Spotify');
                         }
