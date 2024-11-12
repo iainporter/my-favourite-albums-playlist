@@ -118,6 +118,37 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (accessToken && accessToken.length > 0) {
+      console.log('Access token available, fetching playlists...');
+      fetchPlaylists();
+    } else {
+      console.log('No access token available');
+    }
+  }, [accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchPlaylists = async () => {
+    setIsLoading(true);
+    try {
+      console.log('Fetching playlists with token:', accessToken);
+      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}`);
+      const data = await response.json();
+      console.log('Received playlist data:', data);
+      
+      if (data && data.items && Array.isArray(data.items)) {
+        console.log('Setting playlists:', data.items);
+        setPlaylists(data.items);
+      } else {
+        console.error('Invalid playlist data format:', data);
+        setPlaylists([]);
+      }
+    } catch (error) {
+      console.error('Error fetching playlists:', error);
+      setPlaylists([]);
+    }
+    setIsLoading(false);
+  };
+
   const togglePlaylist = async (playlistId: string) => {
     const playlist = playlists.find(p => p.id === playlistId);
     if (!playlist) return;
@@ -211,6 +242,24 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
       </div>
     );
   };
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
+        <h2 className="text-2xl font-bold text-white">My Playlists</h2>
+      </div>
+
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
+          {renderContent()}
+        </div>
+      )}
+    </div>
+  );
             <div key={playlist.id} className="mb-4">
               <div
                 onClick={() => togglePlaylist(playlist.id)}
