@@ -285,23 +285,8 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
                   <React.Fragment key={album.id}>
                     <tr
                       className="text-gray-200 hover:bg-gray-600/50 transition-colors duration-200 cursor-pointer"
-                      draggable="true"
                       onClick={() => handleAlbumClick(album)}
-                      onDragStart={(e) => {
-                        e.dataTransfer.setData('application/json', JSON.stringify(album));
-                        e.dataTransfer.effectAllowed = 'copy';
-                        // Add a custom class to the dragged element
-                        const dragIcon = document.createElement('div');
-                        dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
-                        dragIcon.innerHTML = `${album.artist} - ${album.album}`;
-                        document.body.appendChild(dragIcon);
-                        e.dataTransfer.setDragImage(dragIcon, 0, 0);
-                        setTimeout(() => document.body.removeChild(dragIcon), 0);
-                      }}
-                      onDragEnd={(e) => {
-                        e.preventDefault();
-                      }}
-                      title="Drag to add to playlist"
+                      title="Click to view Spotify matches"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">{album.artist}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{album.album}</td>
@@ -312,7 +297,27 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
                       <tr>
                         <td colSpan={4} className="px-6 py-4 bg-gray-800">
                           {searchResults[album.id].map((spotifyAlbum) => (
-                            <div key={spotifyAlbum.id} className="flex items-center space-x-4">
+                            <div 
+                              key={spotifyAlbum.id} 
+                              className="flex items-center space-x-4 p-2 hover:bg-gray-700 rounded-lg cursor-move"
+                              draggable="true"
+                              onDragStart={(e) => {
+                                e.dataTransfer.setData('application/json', JSON.stringify({
+                                  id: spotifyAlbum.id,
+                                  name: spotifyAlbum.name,
+                                  artist: album.artist,
+                                  releaseDate: spotifyAlbum.release_date,
+                                  image: spotifyAlbum.images[0]?.url
+                                }));
+                                e.dataTransfer.effectAllowed = 'copy';
+                                const dragIcon = document.createElement('div');
+                                dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
+                                dragIcon.innerHTML = `${album.artist} - ${spotifyAlbum.name}`;
+                                document.body.appendChild(dragIcon);
+                                e.dataTransfer.setDragImage(dragIcon, 0, 0);
+                                setTimeout(() => document.body.removeChild(dragIcon), 0);
+                              }}
+                            >
                               <img
                                 src={spotifyAlbum.images[0]?.url}
                                 alt={spotifyAlbum.name}
