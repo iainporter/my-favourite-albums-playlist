@@ -77,7 +77,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
         <h2 className="text-2xl font-bold text-white">My Playlists</h2>
         {selectedPlaylists.size > 0 && (
           <button
@@ -97,8 +97,8 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-spotify-green"></div>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto pr-4 -mr-4">
-          <div className="space-y-3">
+        <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
+          <div className="space-y-3 pb-4">
             {playlists.map((playlist) => (
               <div
                 key={playlist.id}
