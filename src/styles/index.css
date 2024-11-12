@@ -1,6 +1,29 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 
-/* Your own custom component styles */
+/* Custom styles */
+@layer base {
+  body {
+    @apply antialiased text-gray-100 bg-gray-900;
+  }
+}
+
+@layer components {
+  .playlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* Animations */
+@keyframes shine {
+  from {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  to {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
 
 @import 'tailwindcss/utilities';

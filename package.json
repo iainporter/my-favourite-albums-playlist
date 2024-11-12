@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/spotify-web-api-node": "^5.0.11",
     "next": "^15.0.3",
     "react": "18.2.0",

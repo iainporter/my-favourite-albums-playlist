@@ -4,8 +4,25 @@ module.exports = {
     './src/pages/**/*.{ts,tsx,js,jsx}'
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        spotify: {
+          green: '#1DB954',
+          black: '#191414',
+        },
+      },
+      animation: {
+        'shine': 'shine 1s linear infinite',
+      },
+      keyframes: {
+        shine: {
+          '0%': { transform: 'translateX(-100%) rotate(45deg)' },
+          '100%': { transform: 'translateX(100%) rotate(45deg)' },
+        },
+      },
+    },
   },
-  variants: {},
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/aspect-ratio'),
+  ],
 }
