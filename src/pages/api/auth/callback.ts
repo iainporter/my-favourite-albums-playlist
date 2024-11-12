@@ -9,11 +9,16 @@ const spotifyApi = new SpotifyWebApi({
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { code } = req.query;
+  const { code, state } = req.query;
+
+  if (!code) {
+    return res.redirect('/?error=no_code');
+  }
 
   try {
     const data = await spotifyApi.authorizationCodeGrant(code as string);
     
+    // Store tokens in cookies or handle them securely
     res.redirect(
       `/?access_token=${data.body.access_token}&refresh_token=${data.body.refresh_token}`
     );

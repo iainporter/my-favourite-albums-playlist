@@ -9,6 +9,12 @@ const spotifyApi = new SpotifyWebApi({
 });
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const authorizeURL = spotifyApi.createAuthorizeURL(SPOTIFY_CONFIG.SCOPES, '');
+  // Generate a random state string
+  const state = Math.random().toString(36).substring(7);
+  
+  const authorizeURL = spotifyApi.createAuthorizeURL(
+    SPOTIFY_CONFIG.SCOPES,
+    state
+  );
   res.redirect(authorizeURL);
 }

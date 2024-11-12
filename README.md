@@ -37,7 +37,11 @@ To obtain the Spotify credentials:
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
 2. Create a new application
 3. Copy the Client ID and Client Secret
-4. Add http://localhost:3000/api/auth/callback to the Redirect URIs in your Spotify app settings
+4. Click on "Edit Settings" in your Spotify app
+5. Under "Redirect URIs", add EXACTLY: `http://localhost:3000/api/auth/callback/` (note the trailing slash)
+6. Save the settings
+
+Important: The redirect URI must match EXACTLY with what's in your .env file and what's registered in the Spotify Dashboard, including the trailing slash.
 
 ## Getting Started
 Install dependencies:
