@@ -26,13 +26,40 @@ function formatDuration(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-const PlaylistItem = ({ playlist, onToggle, isLoading }: { 
+function TrackList({ tracks }: { tracks: Track[] }) {
+  return (
+    <div className="overflow-y-auto" style={{ height: 'calc(2.5rem * 10 + 2.5rem)' }}>
+      <table className="min-w-full divide-y divide-gray-700">
+        <thead className="bg-gray-800/50 sticky top-0 z-10">
+          <tr>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Track</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Artist</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Album</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-700 bg-gray-800/30">
+          {tracks.map((track) => (
+            <tr key={track.id} className="hover:bg-gray-700/50">
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-white">{track.name}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.artist}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function PlaylistItem({ playlist, onToggle, isLoading }: { 
   playlist: Playlist; 
   onToggle: () => void; 
   isLoading: boolean;
-}) => {
+}) {
   return (
-    <div key={playlist.id} className="mb-4">
+    <div className="mb-4">
       <div
         onClick={onToggle}
         className="group flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-800/50 transition-all duration-200 cursor-pointer"
@@ -79,28 +106,7 @@ const PlaylistItem = ({ playlist, onToggle, isLoading }: {
       {playlist.isExpanded && playlist.tracks && (
         <div className="ml-24 mt-4">
           <div className="bg-gray-800/30 rounded-lg overflow-hidden">
-            <div className="overflow-y-auto" style={{ height: 'calc(2.5rem * 10 + 2.5rem)' }}>
-              <table className="min-w-full divide-y divide-gray-700">
-                <thead className="bg-gray-800/50 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Track</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Artist</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Album</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700 bg-gray-800/30">
-                  {playlist.tracks.map((track) => (
-                    <tr key={track.id} className="hover:bg-gray-700/50">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-white">{track.name}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.artist}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <TrackList tracks={playlist.tracks} />
             <div className="bg-gray-800/50 px-4 py-2 border-t border-gray-700">
               <div className="text-sm text-gray-400">
                 {playlist.tracks.length} tracks
@@ -111,21 +117,29 @@ const PlaylistItem = ({ playlist, onToggle, isLoading }: {
       )}
     </div>
   );
+}
 };
+
+function NoPlaylists({ onRefresh }: { onRefresh: () => void }) {
+  return (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="text-center">
+        <p className="text-gray-400 mb-2">No playlists available</p>
+        <button
+          onClick={onRefresh}
+          className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200"
+        >
+          Refresh Playlists
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (accessToken && accessToken.length > 0) {
-      console.log('Access token available, fetching playlists...');
-      fetchPlaylists();
-    } else {
-      console.log('No access token available');
-    }
-  }, [accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchPlaylists = async () => {
     setIsLoading(true);
@@ -177,6 +191,52 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     }
     setLoadingTracks(null);
   };
+
+  useEffect(() => {
+    if (accessToken && accessToken.length > 0) {
+      console.log('Access token available, fetching playlists...');
+      fetchPlaylists();
+    } else {
+      console.log('No access token available');
+    }
+  }, [accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const renderContent = () => {
+    if (!Array.isArray(playlists) || playlists.length === 0) {
+      return <NoPlaylists onRefresh={fetchPlaylists} />;
+    }
+
+    return (
+      <div className="space-y-3 pb-4">
+        {playlists.map((playlist) => (
+          <PlaylistItem
+            key={playlist.id}
+            playlist={playlist}
+            onToggle={() => togglePlaylist(playlist.id)}
+            isLoading={loadingTracks === playlist.id}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
+        <h2 className="text-2xl font-bold text-white">My Playlists</h2>
+      </div>
+
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
+          {renderContent()}
+        </div>
+      )}
+    </div>
+  );
   };
 
   useEffect(() => {
