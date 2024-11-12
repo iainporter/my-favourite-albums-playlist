@@ -160,6 +160,34 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
 
+  const handleDrop = async (e: React.DragEvent, targetPlaylistId: string) => {
+    e.preventDefault();
+    const sourceData = e.dataTransfer.getData('text/plain');
+    
+    try {
+      const { trackId, sourcePlaylistId } = JSON.parse(sourceData);
+      
+      if (sourcePlaylistId === targetPlaylistId) {
+        return; // Don't do anything if dropping in the same playlist
+      }
+
+      // Here you would typically make an API call to add the track to the target playlist
+      // and optionally remove it from the source playlist
+      console.log(`Moving track ${trackId} from playlist ${sourcePlaylistId} to ${targetPlaylistId}`);
+      
+      // Refresh the playlists after the move
+      await fetchPlaylists();
+      
+      // If the target playlist is expanded, refresh its tracks
+      const targetPlaylist = playlists.find(p => p.id === targetPlaylistId);
+      if (targetPlaylist?.isExpanded) {
+        await togglePlaylist(targetPlaylistId);
+      }
+    } catch (error) {
+      console.error('Error handling drop:', error);
+    }
+  };
+
   const fetchPlaylists = async () => {
     setIsLoading(true);
     try {
