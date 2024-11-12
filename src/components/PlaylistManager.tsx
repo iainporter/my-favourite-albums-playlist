@@ -57,7 +57,7 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop }: {
   playlist: Playlist;
   onToggle: () => void;
   isLoading: boolean;
-  onDrop?: (e: React.DragEvent, playlistId: string) => void;
+  onDrop: (e: React.DragEvent, playlistId: string) => void;
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -82,7 +82,12 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop }: {
     <div className="mb-4">
       <div
         onClick={onToggle}
-        className="group flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-800/50 transition-all duration-200 cursor-pointer"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e)}
+        className={`group flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-800/50 transition-all duration-200 cursor-pointer ${
+          isDragOver ? 'bg-gray-700/50 border-2 border-spotify-green' : ''
+        }`}
       >
         <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
           {playlist.images?.[0] ? (
@@ -162,20 +167,25 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
 
   const handleDrop = async (e: React.DragEvent, targetPlaylistId: string) => {
     e.preventDefault();
-    const sourceData = e.dataTransfer.getData('text/plain');
+    const albumData = e.dataTransfer.getData('application/json');
     
     try {
-      const { trackId, sourcePlaylistId } = JSON.parse(sourceData);
+      const album = JSON.parse(albumData);
       
-      if (sourcePlaylistId === targetPlaylistId) {
-        return; // Don't do anything if dropping in the same playlist
+      // Make an API call to search for the album and add it to the playlist
+      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${targetPlaylistId}&action=add_album`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ artist: album.artist, album: album.album }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add album to playlist');
       }
 
-      // Here you would typically make an API call to add the track to the target playlist
-      // and optionally remove it from the source playlist
-      console.log(`Moving track ${trackId} from playlist ${sourcePlaylistId} to ${targetPlaylistId}`);
-      
-      // Refresh the playlists after the move
+      // Refresh the playlists after adding the album
       await fetchPlaylists();
       
       // If the target playlist is expanded, refresh its tracks

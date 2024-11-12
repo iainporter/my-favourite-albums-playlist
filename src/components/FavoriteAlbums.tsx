@@ -264,6 +264,7 @@ export default function FavoriteAlbums() {
                     onDragEnd={(e) => {
                       e.preventDefault();
                     }}
+                    title="Drag to add to playlist"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">{album.artist}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{album.album}</td>

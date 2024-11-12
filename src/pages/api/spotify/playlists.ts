@@ -23,6 +23,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   spotifyApi.setAccessToken(access_token as string);
 
   try {
+    if (req.method === 'POST' && req.query.action === 'add_album') {
+      const { playlist_id } = req.query;
+      const { artist, album } = req.body;
+
+      if (!playlist_id || !artist || !album) {
+        return res.status(400).json({ error: 'Missing required parameters' });
+      }
+
+      // Search for the album tracks
+      const trackUri = await searchTrack(spotifyApi, artist, album);
+      
+      if (!trackUri) {
+        return res.status(404).json({ error: 'Album not found on Spotify' });
+      }
+
+      // Add the track to the playlist
+      await spotifyApi.addTracksToPlaylist(playlist_id as string, [trackUri]);
+      return res.status(200).json({ success: true });
+    }
+
     if (req.method === 'GET') {
       const { playlist_id } = req.query;
 
