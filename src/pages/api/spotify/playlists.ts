@@ -18,15 +18,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     if (req.method === 'GET') {
+      console.log('Fetching user playlists...');
       const data = await spotifyApi.getUserPlaylists();
-      return res.status(200).json(data.body);
+      console.log('Playlists fetched:', data.body);
+      
+      // Ensure we're returning the expected format
+      const formattedData = {
+        items: data.body.items.map(playlist => ({
+          id: playlist.id,
+          name: playlist.name,
+          images: playlist.images || []
+        }))
+      };
+      
+      return res.status(200).json(formattedData);
     } else if (req.method === 'DELETE') {
       const { playlist_id } = req.body;
       await spotifyApi.unfollowPlaylist(playlist_id);
       return res.status(200).json({ message: 'Playlist unfollowed successfully' });
+    } else {
+      return res.status(405).json({ error: 'Method not allowed' });
     }
-  } catch (error) {
-    console.error('Error:', error);
-    return res.status(500).json({ error: 'Failed to process request' });
+  } catch (error: any) {
+    console.error('Error in playlist handler:', error);
+    // Check for specific Spotify API errors
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({
+        error: error.message || 'Spotify API error',
+        code: error.statusCode
+      });
+    }
+    return res.status(500).json({ 
+      error: 'Failed to process request',
+      details: error.message
+    });
   }
 }

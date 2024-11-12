@@ -16,17 +16,24 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (accessToken) {
+    if (accessToken && accessToken.length > 0) {
+      console.log('Access token available, fetching playlists...');
       fetchPlaylists();
+    } else {
+      console.log('No access token available');
     }
-  }, [accessToken]);
+  }, [accessToken]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchPlaylists = async () => {
     setIsLoading(true);
     try {
+      console.log('Fetching playlists with token:', accessToken);
       const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}`);
       const data = await response.json();
-      if (data && Array.isArray(data.items)) {
+      console.log('Received playlist data:', data);
+      
+      if (data && data.items && Array.isArray(data.items)) {
+        console.log('Setting playlists:', data.items);
         setPlaylists(data.items);
       } else {
         console.error('Invalid playlist data format:', data);
@@ -78,10 +85,18 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
       );
     }
 
-    if (!Array.isArray(playlists)) {
+    if (!Array.isArray(playlists) || playlists.length === 0) {
       return (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-400">No playlists available</p>
+          <div className="text-center">
+            <p className="text-gray-400 mb-2">No playlists available</p>
+            <button
+              onClick={fetchPlaylists}
+              className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200"
+            >
+              Refresh Playlists
+            </button>
+          </div>
         </div>
       );
     }
