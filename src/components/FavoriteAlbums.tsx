@@ -9,6 +9,13 @@ interface SortState {
   direction: SortDirection;
 }
 
+interface SpotifyAlbum {
+  id: string;
+  name: string;
+  release_date: string;
+  images: { url: string; height: number; width: number; }[];
+}
+
 interface FavoriteAlbumsProps {
   accessToken: string;
 }
@@ -19,6 +26,8 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   const [itemsPerPage] = useState(25);
   const [sortState, setSortState] = useState<SortState>({ field: 'artist', direction: 'asc' });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<{ [key: string]: SpotifyAlbum[] }>({});
 
   const handleSort = (field: SortField) => {
     setSortState(prevState => ({
