@@ -117,7 +117,6 @@ function PlaylistItem({ playlist, onToggle, isLoading }: {
       )}
     </div>
   );
-}
 };
 
 function NoPlaylists({ onRefresh }: { onRefresh: () => void }) {
