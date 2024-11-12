@@ -153,7 +153,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
 
   const handleAlbumClick = async (album: { artist: string; album: string }) => {
     try {
-      const query = `${album.artist} ${album.album}`;
+      const query = `artist:${album.artist} album:${album.album}`;
       const response = await fetch(
         `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=10`,
         {
