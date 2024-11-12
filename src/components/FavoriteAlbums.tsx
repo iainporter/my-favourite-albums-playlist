@@ -1,17 +1,54 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Album } from '../types/album';
+
+type SortField = 'artist' | 'album' | 'year' | 'rating';
+type SortDirection = 'asc' | 'desc';
+
+interface SortState {
+  field: SortField;
+  direction: SortDirection;
+}
 
 export default function FavoriteAlbums() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
+  const [sortState, setSortState] = useState<SortState>({ field: 'artist', direction: 'asc' });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSort = (field: SortField) => {
+    setSortState(prevState => ({
+      field,
+      direction: prevState.field === field && prevState.direction === 'asc' ? 'desc' : 'asc'
+    }));
+    setCurrentPage(1); // Reset to first page when sorting
+  };
+
+  const sortedAlbums = useMemo(() => {
+    const sorted = [...albums].sort((a, b) => {
+      const aValue = String(a[sortState.field]).toLowerCase();
+      const bValue = String(b[sortState.field]).toLowerCase();
+      
+      if (sortState.field === 'year' || sortState.field === 'rating') {
+        // Handle numeric sorting
+        const aNum = parseFloat(aValue) || 0;
+        const bNum = parseFloat(bValue) || 0;
+        return sortState.direction === 'asc' ? aNum - bNum : bNum - aNum;
+      }
+      
+      // Handle string sorting
+      if (aValue < bValue) return sortState.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortState.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [albums, sortState]);
 
   // Calculate pagination values
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentAlbums = albums.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(albums.length / itemsPerPage);
+  const currentAlbums = sortedAlbums.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(sortedAlbums.length / itemsPerPage);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -81,10 +118,46 @@ export default function FavoriteAlbums() {
             <table className="min-w-full">
               <thead className="sticky top-0 z-10">
                 <tr className="bg-gray-800 text-white">
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Artist</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Album</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Year</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Rating</th>
+                  {[
+                    { field: 'artist', label: 'Artist' },
+                    { field: 'album', label: 'Album' },
+                    { field: 'year', label: 'Year' },
+                    { field: 'rating', label: 'Rating' }
+                  ].map(({ field, label }) => (
+                    <th
+                      key={field}
+                      onClick={() => handleSort(field as SortField)}
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray-700 transition-colors duration-200"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>{label}</span>
+                        <div className="flex flex-col">
+                          <svg
+                            className={`w-3 h-3 ${
+                              sortState.field === field && sortState.direction === 'asc'
+                                ? 'text-spotify-green'
+                                : 'text-gray-400'
+                            }`}
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z" />
+                          </svg>
+                          <svg
+                            className={`w-3 h-3 ${
+                              sortState.field === field && sortState.direction === 'desc'
+                                ? 'text-spotify-green'
+                                : 'text-gray-400'
+                            }`}
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="bg-gray-700 divide-y divide-gray-600">
