@@ -105,43 +105,37 @@ export default function FavoriteAlbums() {
               <div className="flex items-center text-sm text-gray-400">
                 Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, albums.length)} of {albums.length} albums
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-4">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded-md ${
+                  className={`px-4 py-2 rounded-full flex items-center space-x-2 ${
                     currentPage === 1
                       ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                       : 'bg-spotify-green text-white hover:bg-green-600'
                   }`}
                 >
-                  Previous
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span>Previous</span>
                 </button>
-                <div className="flex items-center space-x-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 rounded-md ${
-                        currentPage === page
-                          ? 'bg-spotify-green text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
+                <span className="text-gray-400">
+                  Page {currentPage} of {totalPages}
+                </span>
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded-md ${
+                  className={`px-4 py-2 rounded-full flex items-center space-x-2 ${
                     currentPage === totalPages
                       ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                       : 'bg-spotify-green text-white hover:bg-green-600'
                   }`}
                 >
-                  Next
+                  <span>Next</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
             </div>
