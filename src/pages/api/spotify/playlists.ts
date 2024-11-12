@@ -18,6 +18,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     if (req.method === 'GET') {
+      const { playlist_id } = req.query;
+
+      if (playlist_id) {
+        // Fetch tracks for a specific playlist
+        console.log('Fetching tracks for playlist:', playlist_id);
+        const data = await spotifyApi.getPlaylistTracks(playlist_id as string);
+        
+        const formattedTracks = data.body.items.map(item => ({
+          id: item.track.id,
+          name: item.track.name,
+          artist: item.track.artists.map(artist => artist.name).join(', '),
+          album: item.track.album.name,
+          duration: item.track.duration_ms
+        }));
+
+        return res.status(200).json({ items: formattedTracks });
+      }
+
+      // Fetch all playlists
       console.log('Fetching user playlists...');
       const data = await spotifyApi.getUserPlaylists();
       console.log('Playlists fetched:', data.body);

@@ -1,9 +1,26 @@
 import { useState, useEffect } from 'react';
 
+interface Track {
+  id: string;
+  name: string;
+  artist: string;
+  album: string;
+  duration: number;
+}
+
 interface Playlist {
   id: string;
   name: string;
   images: { url: string }[];
+  tracks?: Track[];
+  isExpanded?: boolean;
+  currentPage?: number;
+}
+
+function formatDuration(ms: number): string {
+  const minutes = Math.floor(ms / 60000);
+  const seconds = Math.floor((ms % 60000) / 1000);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 interface PlaylistManagerProps {
@@ -13,6 +30,43 @@ interface PlaylistManagerProps {
 export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
+  const itemsPerPage = 10;
+
+  const togglePlaylist = async (playlistId: string) => {
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (!playlist) return;
+
+    if (playlist.isExpanded) {
+      // Collapse the playlist
+      setPlaylists(playlists.map(p => 
+        p.id === playlistId ? { ...p, isExpanded: false, currentPage: 1 } : p
+      ));
+      return;
+    }
+
+    // Expand and load tracks if not loaded
+    setLoadingTracks(playlistId);
+    try {
+      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${playlistId}`);
+      const data = await response.json();
+      
+      setPlaylists(playlists.map(p => 
+        p.id === playlistId 
+          ? { ...p, tracks: data.items, isExpanded: true, currentPage: 1 }
+          : { ...p, isExpanded: false }
+      ));
+    } catch (error) {
+      console.error('Error loading tracks:', error);
+    }
+    setLoadingTracks(null);
+  };
+
+  const handlePageChange = (playlistId: string, newPage: number) => {
+    setPlaylists(playlists.map(p => 
+      p.id === playlistId ? { ...p, currentPage: newPage } : p
+    ));
+  };
 
   useEffect(() => {
     if (accessToken && accessToken.length > 0) {
@@ -76,35 +130,121 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
       <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
         <div className="space-y-3 pb-4">
           {playlists.map((playlist) => (
-            <div
-              key={playlist.id}
-              className="group flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-800/50 transition-all duration-200"
-            >
-              <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
-                {playlist.images?.[0] ? (
-                  <img
-                    src={playlist.images[0].url}
-                    alt={playlist.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                    <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                    </svg>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-medium text-white truncate">{playlist.name}</h3>
+            <div key={playlist.id} className="mb-4">
+              <div
+                onClick={() => togglePlaylist(playlist.id)}
+                className="group flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-800/50 transition-all duration-200 cursor-pointer"
+              >
+                <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
+                  {playlist.images?.[0] ? (
+                    <img
+                      src={playlist.images[0].url}
+                      alt={playlist.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-white truncate">{playlist.name}</h3>
+                </div>
+
+                <div className="flex-shrink-0 transition-transform duration-200">
+                  <svg 
+                    className={`w-6 h-6 text-spotify-green transform ${playlist.isExpanded ? 'rotate-90' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                  </svg>
+                </div>
               </div>
 
-              <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <svg className="w-6 h-6 text-spotify-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                </svg>
-              </div>
+              {loadingTracks === playlist.id && (
+                <div className="ml-24 mt-4 flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-spotify-green"></div>
+                  <span className="text-gray-400">Loading tracks...</span>
+                </div>
+              )}
+
+              {playlist.isExpanded && playlist.tracks && (
+                <div className="ml-24 mt-4">
+                  <div className="bg-gray-800/30 rounded-lg overflow-hidden">
+                    <div className="max-h-[400px] overflow-y-auto">
+                      <table className="min-w-full divide-y divide-gray-700">
+                        <thead className="bg-gray-800/50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Track</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Artist</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Album</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-700">
+                          {playlist.tracks
+                            .slice(
+                              ((playlist.currentPage || 1) - 1) * itemsPerPage,
+                              (playlist.currentPage || 1) * itemsPerPage
+                            )
+                            .map((track) => (
+                              <tr key={track.id} className="hover:bg-gray-700/50">
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white">{track.name}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.artist}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration)}</td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {playlist.tracks.length > itemsPerPage && (
+                      <div className="bg-gray-800/50 px-4 py-3 flex items-center justify-between border-t border-gray-700">
+                        <div className="flex items-center text-sm text-gray-400">
+                          Showing {((playlist.currentPage || 1) - 1) * itemsPerPage + 1} to {Math.min((playlist.currentPage || 1) * itemsPerPage, playlist.tracks.length)} of {playlist.tracks.length} tracks
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handlePageChange(playlist.id, (playlist.currentPage || 1) - 1)}
+                            disabled={(playlist.currentPage || 1) === 1}
+                            className={`px-3 py-1 rounded-full flex items-center space-x-1 ${
+                              (playlist.currentPage || 1) === 1
+                                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                                : 'bg-spotify-green text-white hover:bg-green-600'
+                            }`}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            <span>Previous</span>
+                          </button>
+                          <button
+                            onClick={() => handlePageChange(playlist.id, (playlist.currentPage || 1) + 1)}
+                            disabled={(playlist.currentPage || 1) >= Math.ceil(playlist.tracks.length / itemsPerPage)}
+                            className={`px-3 py-1 rounded-full flex items-center space-x-1 ${
+                              (playlist.currentPage || 1) >= Math.ceil(playlist.tracks.length / itemsPerPage)
+                                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                                : 'bg-spotify-green text-white hover:bg-green-600'
+                            }`}
+                          >
+                            <span>Next</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
