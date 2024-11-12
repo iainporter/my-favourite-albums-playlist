@@ -7,5 +7,6 @@ export const SPOTIFY_CONFIG = {
     'playlist-read-collaborative',
     'playlist-modify-public',
     'playlist-modify-private',
+    'user-read-private',
   ],
 };

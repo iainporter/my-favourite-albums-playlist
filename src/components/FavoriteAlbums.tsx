@@ -248,8 +248,22 @@ export default function FavoriteAlbums() {
                 {currentAlbums.map((album) => (
                   <tr 
                     key={album.id} 
-                    className="text-gray-200 hover:bg-gray-600/50 transition-colors duration-200 cursor-move"
+                    className="text-gray-200 hover:bg-gray-600/50 transition-colors duration-200 cursor-pointer"
                     draggable="true"
+                    onClick={async () => {
+                      try {
+                        const query = `${album.artist} ${album.album}`;
+                        const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`);
+                        if (!response.ok) {
+                          throw new Error('Failed to search Spotify');
+                        }
+                        const data = await response.json();
+                        console.log('Spotify search results:', data);
+                        // TODO: Handle the search results (e.g., show in a modal or side panel)
+                      } catch (error) {
+                        console.error('Error searching Spotify:', error);
+                      }
+                    }}
                     onDragStart={(e) => {
                       e.dataTransfer.setData('application/json', JSON.stringify(album));
                       e.dataTransfer.effectAllowed = 'copy';
