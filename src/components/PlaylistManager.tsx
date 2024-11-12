@@ -14,7 +14,6 @@ interface Playlist {
   images: { url: string }[];
   tracks?: Track[];
   isExpanded?: boolean;
-  currentPage?: number;
 }
 
 function formatDuration(ms: number): string {
@@ -31,7 +30,6 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
-  const itemsPerPage = 10;
 
   const togglePlaylist = async (playlistId: string) => {
     const playlist = playlists.find(p => p.id === playlistId);
@@ -40,7 +38,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     if (playlist.isExpanded) {
       // Collapse the playlist
       setPlaylists(playlists.map(p => 
-        p.id === playlistId ? { ...p, isExpanded: false, currentPage: 1 } : p
+        p.id === playlistId ? { ...p, isExpanded: false } : p
       ));
       return;
     }
@@ -53,7 +51,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
       
       setPlaylists(playlists.map(p => 
         p.id === playlistId 
-          ? { ...p, tracks: data.items, isExpanded: true, currentPage: 1 }
+          ? { ...p, tracks: data.items, isExpanded: true }
           : { ...p, isExpanded: false }
       ));
     } catch (error) {
@@ -61,11 +59,6 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     }
     setLoadingTracks(null);
   };
-
-  const handlePageChange = (playlistId: string, newPage: number) => {
-    setPlaylists(playlists.map(p => 
-      p.id === playlistId ? { ...p, currentPage: newPage } : p
-    ));
   };
 
   useEffect(() => {
@@ -177,9 +170,9 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
               {playlist.isExpanded && playlist.tracks && (
                 <div className="ml-24 mt-4">
                   <div className="bg-gray-800/30 rounded-lg overflow-hidden">
-                    <div className="max-h-[400px] overflow-y-auto">
+                    <div className="overflow-y-auto" style={{ height: 'calc(2.5rem * 10 + 2.5rem)' }}>
                       <table className="min-w-full divide-y divide-gray-700">
-                        <thead className="bg-gray-800/50 sticky top-0">
+                        <thead className="bg-gray-800/50 sticky top-0 z-10">
                           <tr>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Track</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Artist</th>
@@ -187,61 +180,23 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-700">
-                          {playlist.tracks
-                            .slice(
-                              ((playlist.currentPage || 1) - 1) * itemsPerPage,
-                              (playlist.currentPage || 1) * itemsPerPage
-                            )
-                            .map((track) => (
-                              <tr key={track.id} className="hover:bg-gray-700/50">
-                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white">{track.name}</td>
-                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.artist}</td>
-                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
-                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration)}</td>
-                              </tr>
-                            ))}
+                        <tbody className="divide-y divide-gray-700 bg-gray-800/30">
+                          {playlist.tracks.map((track) => (
+                            <tr key={track.id} className="hover:bg-gray-700/50">
+                              <td className="px-4 py-3 whitespace-nowrap text-sm text-white">{track.name}</td>
+                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.artist}</td>
+                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
+                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration)}</td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
-
-                    {playlist.tracks.length > itemsPerPage && (
-                      <div className="bg-gray-800/50 px-4 py-3 flex items-center justify-between border-t border-gray-700">
-                        <div className="flex items-center text-sm text-gray-400">
-                          Showing {((playlist.currentPage || 1) - 1) * itemsPerPage + 1} to {Math.min((playlist.currentPage || 1) * itemsPerPage, playlist.tracks.length)} of {playlist.tracks.length} tracks
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handlePageChange(playlist.id, (playlist.currentPage || 1) - 1)}
-                            disabled={(playlist.currentPage || 1) === 1}
-                            className={`px-3 py-1 rounded-full flex items-center space-x-1 ${
-                              (playlist.currentPage || 1) === 1
-                                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                                : 'bg-spotify-green text-white hover:bg-green-600'
-                            }`}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                            <span>Previous</span>
-                          </button>
-                          <button
-                            onClick={() => handlePageChange(playlist.id, (playlist.currentPage || 1) + 1)}
-                            disabled={(playlist.currentPage || 1) >= Math.ceil(playlist.tracks.length / itemsPerPage)}
-                            className={`px-3 py-1 rounded-full flex items-center space-x-1 ${
-                              (playlist.currentPage || 1) >= Math.ceil(playlist.tracks.length / itemsPerPage)
-                                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                                : 'bg-spotify-green text-white hover:bg-green-600'
-                            }`}
-                          >
-                            <span>Next</span>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </button>
-                        </div>
+                    <div className="bg-gray-800/50 px-4 py-2 border-t border-gray-700">
+                      <div className="text-sm text-gray-400">
+                        {playlist.tracks.length} tracks
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               )}
