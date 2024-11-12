@@ -53,11 +53,31 @@ function TrackList({ tracks }: { tracks: Track[] }) {
   );
 }
 
-function PlaylistItem({ playlist, onToggle, isLoading }: {
+function PlaylistItem({ playlist, onToggle, isLoading, onDrop }: {
   playlist: Playlist;
   onToggle: () => void;
   isLoading: boolean;
+  onDrop?: (e: React.DragEvent, playlistId: string) => void;
 }) {
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    if (onDrop) {
+      onDrop(e, playlist.id);
+    }
+  };
   return (
     <div className="mb-4">
       <div
