@@ -53,11 +53,12 @@ function TrackList({ tracks }: { tracks: Track[] }) {
   );
 }
 
-function PlaylistItem({ playlist, onToggle, isLoading, onDrop }: {
+function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks }: {
   playlist: Playlist;
   onToggle: () => void;
   isLoading: boolean;
   onDrop: (e: React.DragEvent, playlistId: string) => void;
+  isAddingTracks?: boolean;
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -165,26 +166,33 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
 
+  const [addingToPlaylist, setAddingToPlaylist] = useState<string | null>(null);
+
   const handleDrop = async (e: React.DragEvent, targetPlaylistId: string) => {
     e.preventDefault();
     const albumData = e.dataTransfer.getData('application/json');
     
     try {
+      setAddingToPlaylist(targetPlaylistId);
       const album = JSON.parse(albumData);
       
-      // Make an API call to add the album to the playlist
-      const response = await fetch(`https://api.spotify.com/v1/playlists/${targetPlaylistId}/tracks`, {
+      // Make an AI-powered API call to analyze and add the album to the playlist
+      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${targetPlaylistId}&action=add_album`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
         },
-        body: JSON.stringify({ uris: [album.uri]}),
+        body: JSON.stringify({ artist: album.artist, album: album.album }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to add album to playlist');
       }
+
+      const result = await response.json();
+      
+      // Show success message
+      alert(`Successfully added ${result.tracksAdded} tracks to the playlist!`);
 
       // Refresh the playlists after adding the album
       await fetchPlaylists();
@@ -196,6 +204,9 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
       }
     } catch (error) {
       console.error('Error handling drop:', error);
+      alert('Failed to add album to playlist. Please try again.');
+    } finally {
+      setAddingToPlaylist(null);
     }
   };
 
@@ -272,6 +283,8 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
             playlist={playlist}
             onToggle={() => togglePlaylist(playlist.id)}
             isLoading={loadingTracks === playlist.id}
+            isAddingTracks={addingToPlaylist === playlist.id}
+            onDrop={handleDrop}
           />
         ))}
       </div>

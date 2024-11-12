@@ -7,10 +7,18 @@ const spotifyApi = new SpotifyWebApi({
   clientSecret: SPOTIFY_CONFIG.CLIENT_SECRET,
 });
 
-async function searchTrack(spotifyApi: SpotifyWebApi, artist: string, album: string) {
+async function searchAlbumTracks(spotifyApi: SpotifyWebApi, artist: string, album: string) {
   const query = `artist:${artist} album:${album}`;
   const result = await spotifyApi.searchTracks(query);
-  return result.body.tracks?.items[0]?.uri;
+  return result.body.tracks?.items || [];
+}
+
+async function analyzeAlbumForPlaylist(tracks: any[], playlistName: string) {
+  // Use OpenAI to analyze which tracks from the album would fit best in the playlist
+  const prompt = `Given the playlist named "${playlistName}", which of these tracks would be the best fit? Consider the mood, genre, and style of the playlist name. Return only track URIs separated by commas.`;
+  
+  // For now, return all tracks as we haven't implemented the actual AI call
+  return tracks.map(track => track.uri);
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -31,16 +39,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Missing required parameters' });
       }
 
-      // Search for the album tracks
-      const trackUri = await searchTrack(spotifyApi, artist, album);
+      // Get playlist details for context
+      const playlistDetails = await spotifyApi.getPlaylist(playlist_id as string);
+      const playlistName = playlistDetails.body.name;
+
+      // Search for all tracks from the album
+      const tracks = await searchAlbumTracks(spotifyApi, artist, album);
       
-      if (!trackUri) {
+      if (!tracks.length) {
         return res.status(404).json({ error: 'Album not found on Spotify' });
       }
 
-      // Add the track to the playlist
-      await spotifyApi.addTracksToPlaylist(playlist_id as string, [trackUri]);
-      return res.status(200).json({ success: true });
+      // Use AI to analyze which tracks would fit best in the playlist
+      const selectedTrackUris = await analyzeAlbumForPlaylist(tracks, playlistName);
+      
+      if (!selectedTrackUris.length) {
+        return res.status(404).json({ error: 'No suitable tracks found for this playlist' });
+      }
+
+      // Add the selected tracks to the playlist
+      await spotifyApi.addTracksToPlaylist(playlist_id as string, selectedTrackUris);
+      return res.status(200).json({ 
+        success: true,
+        tracksAdded: selectedTrackUris.length
+      });
     }
 
     if (req.method === 'GET') {
