@@ -3,7 +3,19 @@ import { Album } from '../types/album';
 
 export default function FavoriteAlbums() {
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(25);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Calculate pagination values
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentAlbums = albums.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(albums.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -64,27 +76,76 @@ export default function FavoriteAlbums() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr className="bg-gray-800 text-white">
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Artist</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Album</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Year</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Rating</th>
-              </tr>
-            </thead>
-            <tbody className="bg-gray-700 divide-y divide-gray-600">
-              {albums.map((album) => (
-                <tr key={album.id} className="text-gray-200">
-                  <td className="px-6 py-4 whitespace-nowrap">{album.artist}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{album.album}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{album.year}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{album.rating}</td>
+        <div className="flex-1 overflow-y-auto flex flex-col">
+          <div className="flex-1">
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gray-800 text-white">
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Artist</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Album</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Year</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Rating</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-gray-700 divide-y divide-gray-600">
+                {currentAlbums.map((album) => (
+                  <tr key={album.id} className="text-gray-200">
+                    <td className="px-6 py-4 whitespace-nowrap">{album.artist}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{album.album}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{album.year}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{album.rating}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {albums.length > 0 && (
+            <div className="mt-4 flex items-center justify-between px-6 py-3 bg-gray-800">
+              <div className="flex items-center text-sm text-gray-400">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, albums.length)} of {albums.length} albums
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === 1
+                      ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                      : 'bg-spotify-green text-white hover:bg-green-600'
+                  }`}
+                >
+                  Previous
+                </button>
+                <div className="flex items-center space-x-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === page
+                          ? 'bg-spotify-green text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === totalPages
+                      ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                      : 'bg-spotify-green text-white hover:bg-green-600'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
