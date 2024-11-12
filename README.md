@@ -17,6 +17,28 @@ yarn create next-app --example "https://github.com/vuongddang/nextjs-tailwindcss
 
 You can generate a new repository with the same directory structure and files by click `Use this template` button in the upper right or [click here](https://github.com/vuongddang/nextjs-tailwindcss-typescript-starter/generate).
 
+## Environment Variables
+
+The project uses environment variables for Spotify API configuration. To set these up:
+
+1. Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+
+2. Fill in the following variables in your `.env` file:
+```
+SPOTIFY_CLIENT_ID=your_spotify_client_id_here
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
+SPOTIFY_REDIRECT_URI=http://localhost:3000/api/auth/callback
+```
+
+To obtain the Spotify credentials:
+1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+2. Create a new application
+3. Copy the Client ID and Client Secret
+4. Add http://localhost:3000/api/auth/callback to the Redirect URIs in your Spotify app settings
+
 ## Getting Started
 Install dependencies:
 ```bash
