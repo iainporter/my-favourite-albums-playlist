@@ -18,30 +18,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
   const [sortState, setSortState] = useState<SortState>({ field: 'artist', direction: 'asc' });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const fetchAlbums = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/spotify/albums');
-        if (!response.ok) {
-          throw new Error('Failed to fetch albums');
-        }
-        const data = await response.json();
-        setAlbums(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch albums');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAlbums();
-  }, []);
 
   const handleSort = (field: SortField) => {
     setSortState(prevState => ({
@@ -213,27 +190,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center text-gray-400">
-            <svg className="animate-spin h-10 w-10 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p>Loading albums...</p>
-          </div>
-        </div>
-      ) : error ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center text-red-400">
-            <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-lg">Error loading albums</p>
-            <p className="text-sm mt-2">{error}</p>
-          </div>
-        </div>
-      ) : albums.length === 0 ? (
+      {albums.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-gray-400">
             <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
