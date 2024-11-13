@@ -74,8 +74,8 @@ yarn start
 ## How to Use
 
 1. Click the "Login with Spotify" button to authenticate
-2. Search for albums using the search bar
-3. Click the "+" button to add albums to your favorites
+2. Import your favourite albums from a csv file. There is a sample file you can use as the format
+3. Drag an album or individual tracks to your playlist
 4. Use the playlist manager to create a new playlist or add tracks to an existing one
 5. Manage your playlists directly from the interface
 
