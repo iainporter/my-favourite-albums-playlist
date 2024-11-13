@@ -77,6 +77,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(201).json(result);
     }
 
+    if (req.method === 'POST' && req.query.action === 'add_track') {
+      const { playlist_id } = req.query;
+      const { uri } = req.body;
+
+      if (!playlist_id || !uri) {
+        return res.status(400).json({ error: 'Missing required parameters' });
+      }
+
+      // Add single track to playlist using the direct endpoint
+      const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uris: [uri]
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Failed to add track to playlist');
+      }
+
+      const result = await response.json();
+      return res.status(200).json({ 
+        success: true,
+        snapshot_id: result.snapshot_id
+      });
+    }
+
     if (req.method === 'POST' && req.query.action === 'add_album') {
       const { playlist_id } = req.query;
       const { uri } = req.body;
