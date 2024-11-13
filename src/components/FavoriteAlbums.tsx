@@ -184,23 +184,48 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
     }
   };
 
-  const handleAlbumClick = async (album: { artist: string; album: string }) => {
+  const handleAlbumClick = async (album: { artist: string; album: string; id: string }) => {
     try {
-      const query = `artist:${album.artist} album:${album.album}`;
+      // First attempt: search with both artist and album
+      const fullQuery = `artist:${album.artist} album:${album.album}`;
       const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=10`,
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=10`,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           }
         }
       );
+      
       if (!response.ok) {
         throw new Error('Failed to search Spotify');
       }
+      
       const data = await response.json();
-      console.log('Spotify search results:', data);
-      setSearchResults({ [album.id]: data.albums.items });
+      
+      // If no results found, try searching with just the artist
+      if (data.albums.items.length === 0) {
+        console.log('No results found with album name, trying artist-only search');
+        const artistQuery = `artist:${album.artist}`;
+        const fallbackResponse = await fetch(
+          `https://api.spotify.com/v1/search?q=${encodeURIComponent(artistQuery)}&type=album&limit=10`,
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }
+        );
+        
+        if (!fallbackResponse.ok) {
+          throw new Error('Failed to perform fallback search');
+        }
+        
+        const fallbackData = await fallbackResponse.json();
+        setSearchResults({ [album.id]: fallbackData.albums.items });
+      } else {
+        setSearchResults({ [album.id]: data.albums.items });
+      }
+      
       setExpandedRow(album.id);
     } catch (error) {
       console.error('Error searching Spotify:', error);
