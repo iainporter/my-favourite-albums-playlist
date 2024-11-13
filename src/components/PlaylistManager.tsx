@@ -241,14 +241,21 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
 
       const result = await response.json();
       
-      // Refresh the playlists and tracks
+      // Refresh the playlists
       await fetchPlaylists();
       
-      // Force refresh the target playlist's tracks if it's expanded
-      const targetPlaylist = playlists.find(p => p.id === targetPlaylistId);
-      if (targetPlaylist?.isExpanded) {
-        await togglePlaylist(targetPlaylistId);
-        await togglePlaylist(targetPlaylistId); // Toggle twice to force refresh
+      // Fetch and expand the target playlist to show new tracks
+      try {
+        const tracksResponse = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${targetPlaylistId}`);
+        const tracksData = await tracksResponse.json();
+        
+        setPlaylists(currentPlaylists => currentPlaylists.map(p =>
+          p.id === targetPlaylistId
+            ? { ...p, tracks: tracksData.items, isExpanded: true }
+            : { ...p, isExpanded: false }
+        ));
+      } catch (error) {
+        console.error('Error loading updated tracks:', error);
       }
     } catch (error) {
       console.error('Error handling drop:', error);
