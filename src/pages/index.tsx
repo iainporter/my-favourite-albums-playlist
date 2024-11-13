@@ -46,7 +46,7 @@ export default function Home() {
                   <h2 className="text-xl font-semibold mb-4 text-green-400">How it works:</h2>
                   <ol className="text-left text-gray-300 space-y-3 list-decimal list-inside">
                     <li>Connect your Spotify account using the button below</li>
-                    <li>Browse and select your favorite albums</li>
+                    <li>Import a list of your favourite albums</li>
                     <li>Create new playlists or add tracks to existing ones</li>
                     <li>Manage your playlists with an intuitive interface</li>
                   </ol>

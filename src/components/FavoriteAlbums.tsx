@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
+import { Analytics } from "@vercel/analytics/react"
 import { Album } from '../types/album';
 
 type SortField = 'artist' | 'album' | 'year' | 'rating';
