@@ -423,7 +423,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
                                     albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
                                       <div 
                                         key={track.id}
-                                        className="flex items-center text-sm text-gray-300 p-2 hover:bg-gray-700/50 rounded cursor-move group"
+                                        className="flex items-center text-sm text-gray-300 p-2 hover:bg-gray-700/50 rounded cursor-move"
                                         draggable="true"
                                         onDragStart={(e) => {
                                           e.dataTransfer.setData('application/json', JSON.stringify({
@@ -444,22 +444,8 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
                                         }}
                                       >
                                         <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
-                                        <span className="ml-4 flex-1">{track.name}</span>
-                                        <button
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            const audio = new Audio(`https://open.spotify.com/embed/track/${track.id}`);
-                                            audio.play();
-                                          }}
-                                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-4 text-spotify-green hover:text-green-400"
-                                          title="Play track"
-                                        >
-                                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                          </svg>
-                                        </button>
-                                        <span className="text-gray-500">
+                                        <span className="ml-4">{track.name}</span>
+                                        <span className="ml-auto text-gray-500">
                                           {Math.floor(track.duration_ms / 60000)}:
                                           {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
                                         </span>
