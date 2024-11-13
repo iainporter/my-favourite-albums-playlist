@@ -419,7 +419,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
                                 </svg>
                               </div>
                               {expandedTracks === spotifyAlbum.id && (
-                                <div className="ml-20 mt-2 space-y-1">
+                                <div className="mt-2 space-y-1">
                                   {albumTracks[spotifyAlbum.id] ? (
                                     albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
                                       <div 
