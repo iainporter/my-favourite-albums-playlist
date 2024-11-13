@@ -37,7 +37,24 @@ export default function Home() {
           )}
 
           {!accessToken ? (
-            <div className="text-center mt-20">
+            <div className="text-center">
+              <div className="max-w-2xl mx-auto mb-12 space-y-6">
+                <p className="text-lg text-gray-300 leading-relaxed">
+                  Welcome to the Spotify Playlist Manager! This application helps you organize and create playlists from your favorite albums on Spotify.
+                </p>
+                <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm">
+                  <h2 className="text-xl font-semibold mb-4 text-green-400">How it works:</h2>
+                  <ol className="text-left text-gray-300 space-y-3 list-decimal list-inside">
+                    <li>Connect your Spotify account using the button below</li>
+                    <li>Browse and select your favorite albums</li>
+                    <li>Create new playlists or add tracks to existing ones</li>
+                    <li>Manage your playlists with an intuitive interface</li>
+                  </ol>
+                </div>
+                <p className="text-sm text-gray-400">
+                  Your Spotify account will only be used to manage your playlists and access your music library.
+                </p>
+              </div>
               <button
                 onClick={handleLogin}
                 className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-green-500 to-green-400 rounded-full hover:from-green-400 hover:to-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-gray-900"
