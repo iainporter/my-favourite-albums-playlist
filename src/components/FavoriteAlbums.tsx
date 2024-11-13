@@ -184,7 +184,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
     }
   };
 
-  const handleAlbumClick = async (album: { artist: string; album: string; id: string }) => {
+  const handleAlbumClick = async (album: Album) => {
     try {
       // First attempt: search with both artist and album
       const fullQuery = `artist:${album.artist} album:${album.album}`;
@@ -223,10 +223,10 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
         const fallbackData = await fallbackResponse.json();
         setSearchResults({ [album.id]: fallbackData.albums.items });
       } else {
-        setSearchResults({ [album.id]: data.albums.items });
+        setSearchResults({ [album.id || 'temp']: data.albums.items });
       }
       
-      setExpandedRow(album.id);
+      setExpandedRow(album.id || 'temp');
     } catch (error) {
       console.error('Error searching Spotify:', error);
     }
