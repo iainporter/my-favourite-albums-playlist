@@ -39,7 +39,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Missing required parameters' });
       }
 
-      // Add the album to the playlist using the Spotify API
+      // Extract album ID from URI (format: spotify:album:id)
+      const albumId = uri.split(':')[2];
+
+      // First, fetch all tracks from the album
+      const albumTracksResponse = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+        }
+      });
+
+      if (!albumTracksResponse.ok) {
+        const error = await albumTracksResponse.json();
+        throw new Error(error.error?.message || 'Failed to fetch album tracks');
+      }
+
+      const albumTracks = await albumTracksResponse.json();
+      const trackUris = albumTracks.items.map((track: any) => track.uri);
+
+      // Then add all tracks to the playlist
       const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, {
         method: 'POST',
         headers: {
@@ -47,13 +65,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          uris: [uri]
+          uris: trackUris
         })
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error?.message || 'Failed to add album to playlist');
+        throw new Error(error.error?.message || 'Failed to add tracks to playlist');
       }
 
       const result = await response.json();
