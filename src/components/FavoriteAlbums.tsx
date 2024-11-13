@@ -30,6 +30,11 @@ interface FavoriteAlbumsProps {
   accessToken: string;
 }
 
+interface YearFilter {
+  startYear: string;
+  endYear: string;
+}
+
 export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,6 +45,8 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   const [searchResults, setSearchResults] = useState<{ [key: string]: SpotifyAlbum[] }>({});
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
+  const [showFilterDialog, setShowFilterDialog] = useState(false);
+  const [yearFilter, setYearFilter] = useState<YearFilter>({ startYear: '', endYear: '' });
 
   const handleSort = (field: SortField) => {
     setSortState(prevState => ({
@@ -50,7 +57,20 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   };
 
   const sortedAlbums = useMemo(() => {
-    const sorted = [...albums].sort((a, b) => {
+    // First filter by year if filter is active
+    const filtered = [...albums].filter(album => {
+      if (!yearFilter.startYear && !yearFilter.endYear) return true;
+      const albumYear = parseInt(album.year);
+      if (isNaN(albumYear)) return false;
+      
+      const startYear = yearFilter.startYear ? parseInt(yearFilter.startYear) : -Infinity;
+      const endYear = yearFilter.endYear ? parseInt(yearFilter.endYear) : Infinity;
+      
+      return albumYear >= startYear && albumYear <= endYear;
+    });
+
+    // Then sort the filtered results
+    const sorted = filtered.sort((a, b) => {
       const aValue = String(a[sortState.field]).toLowerCase();
       const bValue = String(b[sortState.field]).toLowerCase();
 
@@ -236,7 +256,18 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
-        <h2 className="text-2xl font-bold text-white">My Favourite Albums</h2>
+        <div className="flex items-center space-x-4">
+          <h2 className="text-2xl font-bold text-white">My Favourite Albums</h2>
+          <button
+            onClick={() => setShowFilterDialog(true)}
+            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full transition-colors duration-200"
+            title="Filter albums"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+          </button>
+        </div>
         <div className="flex items-center space-x-3">
           <button
             className="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 transition-colors duration-200 flex items-center space-x-2"
@@ -508,6 +539,64 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Year Filter Dialog */}
+      {showFilterDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 w-96 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-white">Filter Albums by Year</h3>
+              <button
+                onClick={() => setShowFilterDialog(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Start Year</label>
+                <input
+                  type="number"
+                  value={yearFilter.startYear}
+                  onChange={(e) => setYearFilter(prev => ({ ...prev, startYear: e.target.value }))}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-spotify-green"
+                  placeholder="e.g., 1960"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">End Year</label>
+                <input
+                  type="number"
+                  value={yearFilter.endYear}
+                  onChange={(e) => setYearFilter(prev => ({ ...prev, endYear: e.target.value }))}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-spotify-green"
+                  placeholder="e.g., 2023"
+                />
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => {
+                    setYearFilter({ startYear: '', endYear: '' });
+                    setShowFilterDialog(false);
+                  }}
+                  className="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 transition-colors duration-200"
+                >
+                  Clear Filter
+                </button>
+                <button
+                  onClick={() => setShowFilterDialog(false)}
+                  className="px-4 py-2 text-sm bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200"
+                >
+                  Apply Filter
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
