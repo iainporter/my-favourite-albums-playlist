@@ -83,21 +83,17 @@ function TrackList({ tracks, playlistId, onRemoveTrack }: { tracks: Track[], pla
       <table className="min-w-full divide-y divide-gray-700">
         <thead className="bg-gray-800/50 sticky top-0 z-10">
           <tr>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"></th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Artist</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Track</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Album</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-700 bg-gray-800/30">
           {tracks.map((track) => (
             <tr key={track.id} className="hover:bg-gray-700/50">
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-white">{track.artist}</td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.name}</td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration)}</td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
                 <button
                   onClick={() => onRemoveTrack(track.id)}
                   className="text-gray-400 hover:text-red-500 transition-colors duration-200"
@@ -106,6 +102,10 @@ function TrackList({ tracks, playlistId, onRemoveTrack }: { tracks: Track[], pla
                   -
                 </button>
               </td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-white">{track.artist}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.name}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration)}</td>
             </tr>
           ))}
         </tbody>
