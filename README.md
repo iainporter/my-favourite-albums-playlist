@@ -1,74 +1,96 @@
-# Next.js TailwindCSS Typescript Starter
-This is a [Next.js](https://nextjs.org/) 12.x, [TailwindCSS](https://tailwindcss.com/) 3.x, and [TypeScript](https://www.typescriptlang.org/docs/home.html) 4.x starter template
+# My Favourite Albums Playlist
 
-For more details, see my blog post. [Nextjs TailwindCSS Typescript Starter](https://dev.to/vuongddang/nextjs-tailwindcss-typescript-starter-1c2m)
+A web application that allows users to create and manage Spotify playlists based on their favorite albums. Built with Next.js, TypeScript, and Tailwind CSS, this application integrates with the Spotify API to search for albums and create personalized playlists.
 
-## How to use this template
-Here're a few ways to create your new project using this template.
-### Using `create-next-app`
-Create a new next.js app from the template using [create-next-app](https://github.com/vercel/next.js/tree/canary/packages/create-next-app)
-```
-npx create-next-app --example "https://github.com/vuongddang/nextjs-tailwindcss-typescript-starter/tree/main"
-# or
-yarn create next-app --example "https://github.com/vuongddang/nextjs-tailwindcss-typescript-starter/tree/main"
-```
+## Features
 
-### Create new repository from github [template](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template)
+- Spotify Authentication
+- Album search functionality
+- Create playlists from favorite albums
+- Add/remove tracks from playlists
+- Responsive design with Tailwind CSS
 
-You can generate a new repository with the same directory structure and files by click `Use this template` button in the upper right or [click here](https://github.com/vuongddang/nextjs-tailwindcss-typescript-starter/generate).
+## Prerequisites
 
-## Environment Variables
+Before you begin, ensure you have:
 
-The project uses environment variables for Spotify API configuration. To set these up:
+- Node.js (v18 or higher)
+- npm or yarn package manager
+- A Spotify Developer account and application credentials
 
-1. Copy `.env.example` to `.env`:
+## Setup
+
+1. Clone the repository:
 ```bash
-cp .env.example .env
+git clone [repository-url]
+cd my-favourite-albums-playlist
 ```
 
-2. Fill in the following variables in your `.env` file:
-```
-SPOTIFY_CLIENT_ID=your_spotify_client_id_here
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
-SPOTIFY_REDIRECT_URI=http://localhost:3000/api/auth/callback
-```
-
-To obtain the Spotify credentials:
-1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-2. Create a new application
-3. Copy the Client ID and Client Secret
-4. Click on "Edit Settings" in your Spotify app
-5. Under "Redirect URIs", add EXACTLY: `http://localhost:3000/api/auth/callback/` (note the trailing slash)
-6. Save the settings
-
-Important: The redirect URI must match EXACTLY with what's in your .env file and what's registered in the Spotify Dashboard, including the trailing slash.
-
-## Getting Started
-Install dependencies:
+2. Install dependencies:
 ```bash
 npm install
 # or
 yarn install
 ```
-Run the development server:
 
+3. Configure environment variables:
+   - Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   - Fill in your Spotify credentials in `.env`:
+   ```
+   SPOTIFY_CLIENT_ID=your_spotify_client_id_here
+   SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
+   SPOTIFY_REDIRECT_URI=http://localhost:3000/api/auth/callback
+   ```
+
+   To get Spotify credentials:
+   1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+   2. Create a new application
+   3. Copy the Client ID and Client Secret
+   4. Add `http://localhost:3000/api/auth/callback` as a Redirect URI in your Spotify app settings
+
+## Running the Application
+
+1. Start the development server:
 ```bash
 npm run dev
 # or
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can start editing the page by modifying `src/pages/index.js`. The page auto-updates as you edit the file.
+3. For production builds:
+```bash
+npm run build
+npm start
+# or
+yarn build
+yarn start
+```
 
+## How to Use
 
-## Deploy on Vercel
+1. Click the "Login with Spotify" button to authenticate
+2. Search for albums using the search bar
+3. Click the "+" button to add albums to your favorites
+4. Use the playlist manager to create a new playlist or add tracks to an existing one
+5. Manage your playlists directly from the interface
 
-Once you have the project running locally you can [import](https://vercel.com/import/git) your project to Vercel and get it up and running in a few clicks.
+## Testing
 
-Other option is to click on the button below to create a new repository that look exactly like this one, and sets it up and running on Vercel. 
+Run the test suite:
+```bash
+npm test
+# or
+yarn test
+```
 
-[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/vuongddang/nextjs-tailwindcss-typescript-starter/tree/main)
-
-Check out [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+For watch mode:
+```bash
+npm run test:watch
+# or
+yarn test:watch
+```
