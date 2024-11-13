@@ -31,6 +31,52 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   spotifyApi.setAccessToken(access_token as string);
 
   try {
+    if (req.method === 'POST' && !req.query.action) {
+      // Create a new playlist
+      const { name } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ error: 'Missing playlist name' });
+      }
+
+      // First get the current user's ID
+      const userResponse = await fetch('https://api.spotify.com/v1/me', {
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+        }
+      });
+
+      if (!userResponse.ok) {
+        const error = await userResponse.json();
+        throw new Error(error.error?.message || 'Failed to fetch user data');
+      }
+
+      const userData = await userResponse.json();
+      const userId = userData.id;
+
+      // Create the playlist
+      const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          public: false,
+          description: 'Created from My Favourite Albums app'
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Failed to create playlist');
+      }
+
+      const result = await response.json();
+      return res.status(201).json(result);
+    }
+
     if (req.method === 'POST' && req.query.action === 'add_album') {
       const { playlist_id } = req.query;
       const { uri } = req.body;

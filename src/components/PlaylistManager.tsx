@@ -1,5 +1,56 @@
 import { useState, useEffect } from 'react';
 
+interface CreatePlaylistModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (name: string) => void;
+}
+
+function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalProps) {
+  const [playlistName, setPlaylistName] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(playlistName);
+    setPlaylistName('');
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-800 rounded-lg p-6 w-96">
+        <h2 className="text-xl font-bold text-white mb-4">Create New Playlist</h2>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={playlistName}
+            onChange={(e) => setPlaylistName(e.target.value)}
+            placeholder="Enter playlist name"
+            className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-spotify-green focus:outline-none mb-4"
+            required
+          />
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-full text-white hover:bg-gray-700 transition-colors duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200"
+            >
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 interface Track {
   id: string;
   name: string;
@@ -290,11 +341,50 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     );
   };
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const handleCreatePlaylist = async (name: string) => {
+    try {
+      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create playlist');
+      }
+
+      setIsCreateModalOpen(false);
+      await fetchPlaylists();
+    } catch (error) {
+      console.error('Error creating playlist:', error);
+      alert('Failed to create playlist. Please try again.');
+    }
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
         <h2 className="text-2xl font-bold text-white">My Playlists</h2>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200 flex items-center space-x-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Create Playlist</span>
+        </button>
       </div>
+      
+      <CreatePlaylistModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreatePlaylist}
+      />
 
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
