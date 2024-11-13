@@ -1,8 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { fetchWithTokenRefresh } from '../../../utils/spotifyApi';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { albumId } = req.query;
-  const accessToken = req.headers.authorization?.split(' ')[1];
+  const authHeader = req.headers.authorization;
+  const accessToken = authHeader?.split(' ')[1];
+  const refreshToken = req.headers['x-refresh-token'] as string;
 
   if (!accessToken) {
     return res.status(401).json({ error: 'No access token provided' });
@@ -13,13 +16,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchWithTokenRefresh(
       `https://api.spotify.com/v1/albums/${albumId}/tracks`,
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
-      }
+      },
+      refreshToken
     );
 
     if (!response.ok) {

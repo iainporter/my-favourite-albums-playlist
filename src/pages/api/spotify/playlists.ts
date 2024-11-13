@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { SPOTIFY_CONFIG } from '../../../config/spotify';
+import { fetchWithTokenRefresh } from '../../../utils/spotifyApi';
 
 const spotifyApi = new SpotifyWebApi({
   clientId: SPOTIFY_CONFIG.CLIENT_ID,
@@ -40,11 +41,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // First get the current user's ID
-      const userResponse = await fetch('https://api.spotify.com/v1/me', {
-        headers: {
-          'Authorization': `Bearer ${access_token}`,
-        }
-      });
+      const userResponse = await fetchWithTokenRefresh(
+        'https://api.spotify.com/v1/me',
+        {
+          headers: {
+            'Authorization': `Bearer ${access_token}`,
+          }
+        },
+        req.headers['x-refresh-token'] as string
+      );
 
       if (!userResponse.ok) {
         const error = await userResponse.json();

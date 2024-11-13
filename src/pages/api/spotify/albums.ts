@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
+import { fetchWithTokenRefresh } from '../../../utils/spotifyApi';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -12,13 +13,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const response = await fetch(
+    const response = await fetchWithTokenRefresh(
       'https://api.spotify.com/v1/me/albums',
       {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
         },
-      }
+      },
+      session.refreshToken
     );
 
     if (!response.ok) {
