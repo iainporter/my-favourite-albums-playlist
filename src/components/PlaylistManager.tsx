@@ -241,16 +241,14 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
 
       const result = await response.json();
       
-      // Show success message
-      alert('Successfully added album to playlist!');
-
-      // Refresh the playlists after adding the album
+      // Refresh the playlists and tracks
       await fetchPlaylists();
       
-      // If the target playlist is expanded, refresh its tracks
+      // Force refresh the target playlist's tracks if it's expanded
       const targetPlaylist = playlists.find(p => p.id === targetPlaylistId);
       if (targetPlaylist?.isExpanded) {
         await togglePlaylist(targetPlaylistId);
+        await togglePlaylist(targetPlaylistId); // Toggle twice to force refresh
       }
     } catch (error) {
       console.error('Error handling drop:', error);
