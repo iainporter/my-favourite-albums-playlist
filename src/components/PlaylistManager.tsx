@@ -186,14 +186,14 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, o
       </div>
 
       {isLoading && (
-        <div className="ml-24 mt-4 flex items-center space-x-2">
+        <div className="mt-4 flex items-center space-x-2">
           <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-spotify-green"></div>
           <span className="text-gray-400">Loading tracks...</span>
         </div>
       )}
 
       {playlist.isExpanded && playlist.tracks && (
-        <div className="ml-24 mt-4">
+        <div className="mt-4">
           <div className="bg-gray-800/30 rounded-lg overflow-hidden">
             <TrackList 
               tracks={playlist.tracks} 
