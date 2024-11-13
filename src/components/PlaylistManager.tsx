@@ -77,7 +77,7 @@ function formatDuration(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-function TrackList({ tracks }: { tracks: Track[] }) {
+function TrackList({ tracks, playlistId, onRemoveTrack }: { tracks: Track[], playlistId: string, onRemoveTrack: (trackId: string) => void }) {
   return (
     <div className="overflow-y-auto" style={{ height: 'calc(2.5rem * 10 + 2.5rem)' }}>
       <table className="min-w-full divide-y divide-gray-700">
@@ -87,6 +87,7 @@ function TrackList({ tracks }: { tracks: Track[] }) {
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Track</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Album</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-700 bg-gray-800/30">
@@ -96,6 +97,15 @@ function TrackList({ tracks }: { tracks: Track[] }) {
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.name}</td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration)}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                <button
+                  onClick={() => onRemoveTrack(track.id)}
+                  className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+                  title="Remove from playlist"
+                >
+                  -
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -104,12 +114,13 @@ function TrackList({ tracks }: { tracks: Track[] }) {
   );
 }
 
-function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks }: {
+function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, onRemoveTrack }: {
   playlist: Playlist;
   onToggle: () => void;
   isLoading: boolean;
   onDrop: (e: React.DragEvent, playlistId: string) => void;
   isAddingTracks?: boolean;
+  onRemoveTrack: (playlistId: string, trackId: string) => void;
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -183,7 +194,11 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks }:
       {playlist.isExpanded && playlist.tracks && (
         <div className="ml-24 mt-4">
           <div className="bg-gray-800/30 rounded-lg overflow-hidden">
-            <TrackList tracks={playlist.tracks} />
+            <TrackList 
+              tracks={playlist.tracks} 
+              playlistId={playlist.id}
+              onRemoveTrack={(trackId) => onRemoveTrack(playlist.id, trackId)}
+            />
             <div className="bg-gray-800/50 px-4 py-2 border-t border-gray-700">
               <div className="text-sm text-gray-400">
                 {playlist.tracks.length} tracks
@@ -218,6 +233,35 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
 
   const [addingToPlaylist, setAddingToPlaylist] = useState<string | null>(null);
+
+  const handleRemoveTrack = async (playlistId: string, trackId: string) => {
+    try {
+      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${playlistId}&action=remove_track`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ trackId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove track from playlist');
+      }
+
+      // Update the playlist in the UI
+      const tracksResponse = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${playlistId}`);
+      const tracksData = await tracksResponse.json();
+      
+      setPlaylists(currentPlaylists => currentPlaylists.map(p =>
+        p.id === playlistId
+          ? { ...p, tracks: tracksData.items }
+          : p
+      ));
+    } catch (error) {
+      console.error('Error removing track:', error);
+      alert('Failed to remove track from playlist. Please try again.');
+    }
+  };
 
   const handleDrop = async (e: React.DragEvent, targetPlaylistId: string) => {
     e.preventDefault();
@@ -340,6 +384,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
             isLoading={loadingTracks === playlist.id}
             isAddingTracks={addingToPlaylist === playlist.id}
             onDrop={handleDrop}
+            onRemoveTrack={handleRemoveTrack}
           />
         ))}
       </div>

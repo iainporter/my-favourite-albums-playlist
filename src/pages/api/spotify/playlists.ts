@@ -127,6 +127,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    if (req.method === 'POST' && req.query.action === 'remove_track') {
+      const { playlist_id } = req.query;
+      const { trackId } = req.body;
+
+      if (!playlist_id || !trackId) {
+        return res.status(400).json({ error: 'Missing required parameters' });
+      }
+
+      // Get the track URI
+      const trackResponse = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+        }
+      });
+
+      if (!trackResponse.ok) {
+        const error = await trackResponse.json();
+        throw new Error(error.error?.message || 'Failed to fetch track details');
+      }
+
+      const trackData = await trackResponse.json();
+      const trackUri = trackData.uri;
+
+      // Remove the track from the playlist
+      const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tracks: [{ uri: trackUri }]
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Failed to remove track from playlist');
+      }
+
+      const result = await response.json();
+      return res.status(200).json({ 
+        success: true,
+        snapshot_id: result.snapshot_id
+      });
+    }
+
     if (req.method === 'GET') {
       const { playlist_id } = req.query;
 
