@@ -265,22 +265,25 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
 
   const handleDrop = async (e: React.DragEvent, targetPlaylistId: string) => {
     e.preventDefault();
-    const albumData = e.dataTransfer.getData('application/json');
+    const data = e.dataTransfer.getData('application/json');
     
     try {
       setAddingToPlaylist(targetPlaylistId);
-      const album = JSON.parse(albumData);
+      const item = JSON.parse(data);
       
-      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${targetPlaylistId}&action=add_album`, {
+      // Check if it's a track or album based on the URI
+      const isTrack = item.uri?.startsWith('spotify:track:');
+      
+      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${targetPlaylistId}&action=${isTrack ? 'add_track' : 'add_album'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ uri: album.uri }),
+        body: JSON.stringify({ uri: item.uri }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add album to playlist');
+        throw new Error(`Failed to add ${isTrack ? 'track' : 'album'} to playlist`);
       }
 
       const result = await response.json();

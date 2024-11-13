@@ -398,7 +398,25 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
                                     albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
                                       <div 
                                         key={track.id}
-                                        className="flex items-center text-sm text-gray-300 p-2 hover:bg-gray-700/50 rounded"
+                                        className="flex items-center text-sm text-gray-300 p-2 hover:bg-gray-700/50 rounded cursor-move"
+                                        draggable="true"
+                                        onDragStart={(e) => {
+                                          e.dataTransfer.setData('application/json', JSON.stringify({
+                                            id: track.id,
+                                            name: track.name,
+                                            artist: album.artist,
+                                            album: spotifyAlbum.name,
+                                            duration: track.duration_ms,
+                                            uri: `spotify:track:${track.id}`
+                                          }));
+                                          e.dataTransfer.effectAllowed = 'copy';
+                                          const dragIcon = document.createElement('div');
+                                          dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
+                                          dragIcon.innerHTML = `${track.name} - ${album.artist}`;
+                                          document.body.appendChild(dragIcon);
+                                          e.dataTransfer.setDragImage(dragIcon, 0, 0);
+                                          setTimeout(() => document.body.removeChild(dragIcon), 0);
+                                        }}
                                       >
                                         <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
                                         <span className="ml-4">{track.name}</span>
