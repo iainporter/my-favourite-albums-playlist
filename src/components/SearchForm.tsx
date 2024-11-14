@@ -365,7 +365,10 @@ export default function SearchForm({
                   onSearchStateChange({
                     currentPage: newPage,
                     artist,
-                    album
+                    album,
+                    totalResults,
+                    nextUrl,
+                    previousUrl
                   });
                 }
               }
