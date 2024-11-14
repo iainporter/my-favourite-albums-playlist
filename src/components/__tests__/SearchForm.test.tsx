@@ -15,7 +15,7 @@ describe('SearchForm', () => {
     jest.clearAllMocks();
   });
 
-  it('preserves pagination state when switching between tabs', async () => {
+  it('renders with initial props and handles search correctly', async () => {
     // Mock the initial search response with pagination
     const mockSearchResponse = {
       albums: {
@@ -39,7 +39,106 @@ describe('SearchForm', () => {
       })
     );
 
-    // Render the component with initial search results
+    // Render the component with all required and optional props
+    render(
+      <SearchForm
+        accessToken={mockAccessToken}
+        albumSearchResults={[]}
+        setAlbumSearchResults={mockSetAlbumSearchResults}
+        initialPage={1}
+        initialArtist="Initial Artist"
+        initialAlbum="Initial Album"
+        initialTotalResults={0}
+        initialNextUrl={null}
+        initialPrevUrl={null}
+        onSearchStateChange={mockOnSearchStateChange}
+      />
+    );
+
+    // Verify initial state
+    expect(screen.getByLabelText(/artist/i)).toHaveValue('Initial Artist');
+    expect(screen.getByLabelText(/album/i)).toHaveValue('Initial Album');
+
+    // Perform search
+    const artistInput = screen.getByLabelText(/artist/i);
+    const albumInput = screen.getByLabelText(/album/i);
+    const searchButton = screen.getByText(/search spotify/i);
+
+    fireEvent.change(artistInput, { target: { value: 'Test Artist' } });
+    fireEvent.change(albumInput, { target: { value: 'Test Album' } });
+    fireEvent.click(searchButton);
+
+    // Verify search request
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('q=artist:Test%20Artist%20album:Test%20Album'),
+        expect.any(Object)
+      );
+    });
+
+    // Verify search results are set
+    await waitFor(() => {
+      expect(mockSetAlbumSearchResults).toHaveBeenCalledWith(mockSearchResponse.albums.items);
+    });
+
+    // Verify pagination state
+    expect(screen.getByText('Next')).toBeEnabled();
+    expect(screen.getByText('Next')).toHaveClass('bg-spotify-green');
+    expect(screen.getByText('Page 1')).toBeInTheDocument();
+    expect(screen.getByText(/showing 1-20 of 50 results/i)).toBeInTheDocument();
+
+    // Verify search state change was called with correct data
+    expect(mockOnSearchStateChange).toHaveBeenCalledWith(expect.objectContaining({
+      currentPage: 1,
+      artist: 'Test Artist',
+      album: 'Test Album',
+      totalResults: 50,
+      nextUrl: 'http://api.spotify.com/v1/search?page=2',
+      previousUrl: null
+    }));
+  });
+
+  it('handles pagination correctly', async () => {
+    const mockFirstPage = {
+      albums: {
+        items: Array(20).fill(null).map((_, i) => ({
+          id: `album-${i}`,
+          name: `Album ${i}`,
+          release_date: '2023-01-01',
+          images: [{ url: 'test-image-url', height: 300, width: 300 }],
+          uri: `spotify:album:${i}`
+        })),
+        total: 50,
+        next: 'http://api.spotify.com/v1/search?page=2',
+        previous: null
+      }
+    };
+
+    const mockSecondPage = {
+      albums: {
+        items: Array(20).fill(null).map((_, i) => ({
+          id: `album-${i + 20}`,
+          name: `Album ${i + 20}`,
+          release_date: '2023-01-01',
+          images: [{ url: 'test-image-url', height: 300, width: 300 }],
+          uri: `spotify:album:${i + 20}`
+        })),
+        total: 50,
+        next: null,
+        previous: 'http://api.spotify.com/v1/search?page=1'
+      }
+    };
+
+    (global.fetch as jest.Mock)
+      .mockImplementationOnce(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockFirstPage)
+      }))
+      .mockImplementationOnce(() => Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockSecondPage)
+      }));
+
     render(
       <SearchForm
         accessToken={mockAccessToken}
@@ -49,37 +148,33 @@ describe('SearchForm', () => {
       />
     );
 
-    // Perform initial search
+    // Initial search
     const artistInput = screen.getByLabelText(/artist/i);
     const searchButton = screen.getByText(/search spotify/i);
 
     fireEvent.change(artistInput, { target: { value: 'Test Artist' } });
     fireEvent.click(searchButton);
 
-    // Wait for search results to load
+    // Wait for first page results
     await waitFor(() => {
-      expect(mockSetAlbumSearchResults).toHaveBeenCalled();
+      expect(mockSetAlbumSearchResults).toHaveBeenCalledWith(mockFirstPage.albums.items);
     });
 
-    // Verify Next button is enabled
+    // Click next page
     const nextButton = screen.getByText('Next');
-    expect(nextButton).toBeEnabled();
-    expect(nextButton).toHaveClass('bg-spotify-green');
+    fireEvent.click(nextButton);
 
-    // Simulate switching to Import tab and back
-    // Note: This is typically handled by the parent component, 
-    // but we can verify that the search state is preserved through onSearchStateChange
-    const lastSearchState = mockOnSearchStateChange.mock.calls[mockOnSearchStateChange.mock.calls.length - 1][0];
-    
-    // Verify the search state was saved with correct pagination
-    expect(lastSearchState).toEqual(expect.objectContaining({
-      currentPage: 1,
-      artist: 'Test Artist',
-      album: ''
-    }));
-
-    // Verify the Next button is still enabled and pagination info is preserved
-    expect(screen.getByText('Page 1')).toBeInTheDocument();
-    expect(screen.getByText(/showing 1-20 of 50 results/i)).toBeInTheDocument();
+    // Verify second page results
+    await waitFor(() => {
+      expect(mockSetAlbumSearchResults).toHaveBeenCalledWith(mockSecondPage.albums.items);
+      expect(mockOnSearchStateChange).toHaveBeenCalledWith(expect.objectContaining({
+        currentPage: 2,
+        artist: 'Test Artist',
+        album: '',
+        totalResults: 50,
+        nextUrl: null,
+        previousUrl: 'http://api.spotify.com/v1/search?page=1'
+      }));
+    });
   });
 });
