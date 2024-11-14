@@ -245,7 +245,7 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
           </div>
           ))
         )}
-        {(nextUrl || previousUrl) && (
+        {(nextUrl || previousUrl) && albumSearchResults.length > 0 && (
           <div className="flex justify-between items-center mt-6">
             <button
               onClick={() => {
@@ -284,7 +284,7 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
         )}
       </div>
 
-      {(nextUrl || previousUrl) && (
+      {(nextUrl || previousUrl) && albumSearchResults.length > 0 && (
         <div className="sticky bottom-0 mt-4 flex justify-between items-center py-3 bg-gray-800/95 backdrop-blur-sm border-t border-gray-700">
           <button
             onClick={() => {
