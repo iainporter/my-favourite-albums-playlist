@@ -49,6 +49,11 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
     album: ''
   });
 
+  // Preserve search state when switching tabs
+  const handleTabChange = (tab: 'import' | 'search') => {
+    setActiveTab(tab);
+  };
+
   const handleSort = (field: SortField) => {
     setSortState(prevState => ({
       field,
@@ -254,7 +259,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
                   ? 'text-spotify-green border-b-2 border-spotify-green'
                   : 'text-gray-400 hover:text-white'
               }`}
-              onClick={() => setActiveTab('import')}
+              onClick={() => handleTabChange('import')}
             >
               Import
             </button>
@@ -264,7 +269,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
                   ? 'text-spotify-green border-b-2 border-spotify-green'
                   : 'text-gray-400 hover:text-white'
               }`}
-              onClick={() => setActiveTab('search')}
+              onClick={() => handleTabChange('search')}
             >
               Search
             </button>

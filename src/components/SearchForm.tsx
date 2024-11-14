@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface SpotifyAlbum {
   id: string;
@@ -41,6 +41,15 @@ export default function SearchForm({
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [currentPage, setCurrentPage] = useState(initialPage);
+
+  // Update state when initialArtist or initialAlbum changes
+  useEffect(() => {
+    setArtist(initialArtist);
+  }, [initialArtist]);
+
+  useEffect(() => {
+    setAlbum(initialAlbum);
+  }, [initialAlbum]);
   const [totalResults, setTotalResults] = useState(0);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [previousUrl, setPreviousUrl] = useState<string | null>(null);
