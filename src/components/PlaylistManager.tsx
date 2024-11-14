@@ -428,9 +428,12 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex flex-col space-y-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
+      <div className="sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">My Playlists</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-white">My Playlists</h2>
+            <p className="text-sm text-gray-400 mt-1">Total: {playlists.length} playlists</p>
+          </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200 flex items-center space-x-2"
@@ -441,6 +444,26 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
             <span>Create Playlist</span>
           </button>
         </div>
+      </div>
+      
+      <CreatePlaylistModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreatePlaylist}
+      />
+
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
+          {renderContent()}
+        </div>
+      )}
+      
+      {/* Navigation buttons at the bottom */}
+      <div className="sticky bottom-0 bg-gray-800/95 backdrop-blur-sm py-3 border-t border-gray-700">
         <div className="flex justify-center space-x-4">
           <button
             onClick={() => prevUrl && fetchPlaylists(prevUrl)}
@@ -466,22 +489,6 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
           </button>
         </div>
       </div>
-      
-      <CreatePlaylistModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={handleCreatePlaylist}
-      />
-
-      {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto pr-4 -mr-4 min-h-0">
-          {renderContent()}
-        </div>
-      )}
     </div>
   );
 }
