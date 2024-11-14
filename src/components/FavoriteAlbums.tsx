@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
+import SearchForm from './SearchForm';
 import { Analytics } from "@vercel/analytics/react"
 import { Album } from '../types/album';
 
@@ -31,6 +32,7 @@ interface FavoriteAlbumsProps {
 }
 
 export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
+  const [activeTab, setActiveTab] = useState<'import' | 'search'>('import');
   const [albums, setAlbums] = useState<Album[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
@@ -236,7 +238,31 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
-        <h2 className="text-2xl font-bold text-white">My Favourite Albums</h2>
+        <div className="flex flex-col space-y-4">
+          <h2 className="text-2xl font-bold text-white">My Favourite Albums</h2>
+          <div className="flex space-x-4 border-b border-gray-700">
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                activeTab === 'import'
+                  ? 'text-spotify-green border-b-2 border-spotify-green'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              onClick={() => setActiveTab('import')}
+            >
+              Import
+            </button>
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                activeTab === 'search'
+                  ? 'text-spotify-green border-b-2 border-spotify-green'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              onClick={() => setActiveTab('search')}
+            >
+              Search
+            </button>
+          </div>
+        </div>
         <div className="flex items-center space-x-3">
           <button
             className="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 transition-colors duration-200 flex items-center space-x-2"
@@ -281,7 +307,11 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
         </div>
       </div>
 
-      {albums.length === 0 ? (
+      {activeTab === 'search' ? (
+        <div className="flex-1 overflow-y-auto px-6">
+          <SearchForm accessToken={accessToken} />
+        </div>
+      ) : albums.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-gray-400">
             <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
