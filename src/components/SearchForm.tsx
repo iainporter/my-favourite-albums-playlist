@@ -161,11 +161,6 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-4">
-        {totalResults > 0 && (
-          <div className="text-gray-300 text-sm">
-            Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalResults)} of {totalResults} results
-          </div>
-        )}
         {albumSearchResults.length === 0 ? (
           <div className="text-center text-gray-400 py-8">No Results Found</div>
         ) : (
