@@ -30,25 +30,34 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [previousUrl, setPreviousUrl] = useState<string | null>(null);
   const itemsPerPage = 20;
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (e.type === 'submit') {
+  const handleSearch = async (e: React.FormEvent | string) => {
+    if (typeof e !== 'string' && e.preventDefault) {
+      e.preventDefault();
+    }
+    if (typeof e !== 'string' && e.type === 'submit') {
       setCurrentPage(1); // Reset to first page on new search
     }
     try {
-      // First attempt: search with both artist and album if both are provided
-      const fullQuery = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
-      const offset = (currentPage - 1) * itemsPerPage;
-      const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=${itemsPerPage}&offset=${offset}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
+      let searchUrl;
+      if (typeof e === 'string') {
+        // If a URL is provided, use it directly
+        searchUrl = e;
+      } else {
+        // Otherwise, construct the search URL
+        const fullQuery = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
+        const offset = (currentPage - 1) * itemsPerPage;
+        searchUrl = `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=${itemsPerPage}&offset=${offset}`;
+      }
+
+      const response = await fetch(searchUrl, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
         }
-      );
+      });
       
       if (!response.ok) {
         throw new Error('Failed to search Spotify');
@@ -56,6 +65,8 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
       
       const data = await response.json();
       setTotalResults(data.albums.total);
+      setNextUrl(data.albums.next);
+      setPreviousUrl(data.albums.previous);
       
       // If no results found and we have an artist, try searching with just the artist
       if (data.albums.items.length === 0 && artist) {
@@ -231,16 +242,18 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
           </div>
           ))
         )}
-        {totalResults > itemsPerPage && (
+        {(nextUrl || previousUrl) && (
           <div className="flex justify-between items-center mt-6">
             <button
               onClick={() => {
-                setCurrentPage(prev => Math.max(prev - 1, 1));
-                handleSearch(new Event('submit') as any);
+                if (previousUrl) {
+                  setCurrentPage(prev => prev - 1);
+                  handleSearch(previousUrl);
+                }
               }}
-              disabled={currentPage === 1}
+              disabled={!previousUrl}
               className={`px-4 py-2 rounded-full ${
-                currentPage === 1
+                !previousUrl
                   ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                   : 'bg-spotify-green text-white hover:bg-green-600'
               } transition-colors duration-200`}
@@ -250,12 +263,14 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
             <span className="text-gray-300">Page {currentPage}</span>
             <button
               onClick={() => {
-                setCurrentPage(prev => prev + 1);
-                handleSearch(new Event('submit') as any);
+                if (nextUrl) {
+                  setCurrentPage(prev => prev + 1);
+                  handleSearch(nextUrl);
+                }
               }}
-              disabled={currentPage * itemsPerPage >= totalResults}
+              disabled={!nextUrl}
               className={`px-4 py-2 rounded-full ${
-                currentPage * itemsPerPage >= totalResults
+                !nextUrl
                   ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                   : 'bg-spotify-green text-white hover:bg-green-600'
               } transition-colors duration-200`}
