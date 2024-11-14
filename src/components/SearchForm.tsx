@@ -20,19 +20,42 @@ interface SearchFormProps {
   accessToken: string;
   albumSearchResults: SpotifyAlbum[];
   setAlbumSearchResults: (albums: SpotifyAlbum[]) => void;
+  initialPage?: number;
+  initialArtist?: string;
+  initialAlbum?: string;
+  onSearchStateChange?: (state: { currentPage: number; artist: string; album: string }) => void;
 }
 
-export default function SearchForm({ accessToken, albumSearchResults, setAlbumSearchResults }: SearchFormProps) {
-  const [artist, setArtist] = useState('');
-  const [album, setAlbum] = useState('');
+export default function SearchForm({ 
+  accessToken, 
+  albumSearchResults, 
+  setAlbumSearchResults,
+  initialPage = 1,
+  initialArtist = '',
+  initialAlbum = '',
+  onSearchStateChange
+}: SearchFormProps) {
+  const [artist, setArtist] = useState(initialArtist);
+  const [album, setAlbum] = useState(initialAlbum);
   const [trackSearchResults, setTrackSearchResults] = useState<SpotifyTrack[]>([]);
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalResults, setTotalResults] = useState(0);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [previousUrl, setPreviousUrl] = useState<string | null>(null);
   const itemsPerPage = 20;
+
+  // Save search state to parent component
+  const saveSearchState = () => {
+    if (onSearchStateChange) {
+      onSearchStateChange({
+        currentPage,
+        artist,
+        album
+      });
+    }
+  };
 
   const handleSearch = async (e: React.FormEvent | string) => {
     if (typeof e !== 'string' && e.preventDefault) {
@@ -90,6 +113,7 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
       } else {
         setAlbumSearchResults(data.albums.items);
       }
+      saveSearchState();
     } catch (error) {
       console.error('Error searching Spotify:', error);
       setAlbumSearchResults([]);
@@ -252,8 +276,16 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
           <button
             onClick={() => {
               if (previousUrl) {
-                setCurrentPage(prev => prev - 1);
+                const newPage = currentPage - 1;
+                setCurrentPage(newPage);
                 handleSearch(previousUrl);
+                if (onSearchStateChange) {
+                  onSearchStateChange({
+                    currentPage: newPage,
+                    artist,
+                    album
+                  });
+                }
               }
             }}
             disabled={!previousUrl}
@@ -269,8 +301,16 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
           <button
             onClick={() => {
               if (nextUrl) {
-                setCurrentPage(prev => prev + 1);
+                const newPage = currentPage + 1;
+                setCurrentPage(newPage);
                 handleSearch(nextUrl);
+                if (onSearchStateChange) {
+                  onSearchStateChange({
+                    currentPage: newPage,
+                    artist,
+                    album
+                  });
+                }
               }
             }}
             disabled={!nextUrl}

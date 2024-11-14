@@ -43,6 +43,11 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [searchAlbumResults, setSearchAlbumResults] = useState<SpotifyAlbum[]>([]);
+  const [searchState, setSearchState] = useState({
+    currentPage: 1,
+    artist: '',
+    album: ''
+  });
 
   const handleSort = (field: SortField) => {
     setSortState(prevState => ({
@@ -315,6 +320,10 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
             accessToken={accessToken}
             albumSearchResults={searchAlbumResults}
             setAlbumSearchResults={setSearchAlbumResults}
+            initialPage={searchState.currentPage}
+            initialArtist={searchState.artist}
+            initialAlbum={searchState.album}
+            onSearchStateChange={setSearchState}
           />
         </div>
       ) : albums.length === 0 ? (
