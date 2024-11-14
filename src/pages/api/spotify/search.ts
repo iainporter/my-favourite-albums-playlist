@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { q } = req.query;
+  const { q, offset = '0', limit = '20' } = req.query;
   if (!q) {
     return res.status(400).json({ error: 'Query parameter is required' });
   }
@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const response = await fetchWithTokenRefresh(
-      `https://api.spotify.com/v1/search?q=${encodeURIComponent(String(q))}&type=album&limit=10`,
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(String(q))}&type=album&limit=${limit}&offset=${offset}`,
       {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,

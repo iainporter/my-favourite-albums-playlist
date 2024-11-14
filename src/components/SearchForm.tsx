@@ -28,14 +28,21 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
   const [trackSearchResults, setTrackSearchResults] = useState<SpotifyTrack[]>([]);
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const itemsPerPage = 20;
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (e.type === 'submit') {
+      setCurrentPage(1); // Reset to first page on new search
+    }
     try {
       // First attempt: search with both artist and album if both are provided
       const fullQuery = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
+      const offset = (currentPage - 1) * itemsPerPage;
       const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=10`,
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=${itemsPerPage}&offset=${offset}`,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`
@@ -48,6 +55,7 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
       }
       
       const data = await response.json();
+      setTotalResults(data.albums.total);
       
       // If no results found and we have an artist, try searching with just the artist
       if (data.albums.items.length === 0 && artist) {
@@ -134,6 +142,11 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
       </form>
 
       <div className="space-y-4">
+        {totalResults > 0 && (
+          <div className="text-gray-300 text-sm">
+            Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalResults)} of {totalResults} results
+          </div>
+        )}
         {albumSearchResults.length === 0 ? (
           <div className="text-center text-gray-400 py-8">No Results Found</div>
         ) : (
@@ -217,6 +230,39 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
             )}
           </div>
           ))
+        )}
+        {totalResults > itemsPerPage && (
+          <div className="flex justify-between items-center mt-6">
+            <button
+              onClick={() => {
+                setCurrentPage(prev => Math.max(prev - 1, 1));
+                handleSearch(new Event('submit') as any);
+              }}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-full ${
+                currentPage === 1
+                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  : 'bg-spotify-green text-white hover:bg-green-600'
+              } transition-colors duration-200`}
+            >
+              Previous
+            </button>
+            <span className="text-gray-300">Page {currentPage}</span>
+            <button
+              onClick={() => {
+                setCurrentPage(prev => prev + 1);
+                handleSearch(new Event('submit') as any);
+              }}
+              disabled={currentPage * itemsPerPage >= totalResults}
+              className={`px-4 py-2 rounded-full ${
+                currentPage * itemsPerPage >= totalResults
+                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  : 'bg-spotify-green text-white hover:bg-green-600'
+              } transition-colors duration-200`}
+            >
+              Next
+            </button>
+          </div>
         )}
       </div>
     </div>
