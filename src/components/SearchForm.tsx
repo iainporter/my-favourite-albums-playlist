@@ -43,6 +43,7 @@ export default function SearchForm({
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [currentPage, setCurrentPage] = useState(initialPage);
+  const [totalResults, setTotalResults] = useState(initialTotalResults);
 
   // Update state when initial values change
   useEffect(() => {
@@ -68,7 +69,6 @@ export default function SearchForm({
       });
     }
   }, [currentPage, artist, album, totalResults, onSearchStateChange]);
-  const [totalResults, setTotalResults] = useState(initialTotalResults);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [previousUrl, setPreviousUrl] = useState<string | null>(null);
   const itemsPerPage = 20;
