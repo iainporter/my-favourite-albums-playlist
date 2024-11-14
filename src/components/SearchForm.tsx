@@ -132,7 +132,10 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
       </form>
 
       <div className="space-y-4">
-        {searchResults.map((spotifyAlbum) => (
+        {searchResults.length === 0 ? (
+          <div className="text-center text-gray-400 py-8">No Results Found</div>
+        ) : (
+          searchResults.map((spotifyAlbum) => (
           <div key={spotifyAlbum.id} className="bg-gray-800 rounded-lg overflow-hidden">
             <div 
               className="flex items-center space-x-4 p-4 hover:bg-gray-700 cursor-pointer"
@@ -212,6 +215,7 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
             )}
           </div>
         ))}
+        )}
       </div>
     </div>
   );
