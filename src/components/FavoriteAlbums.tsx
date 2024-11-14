@@ -173,7 +173,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const response = await fetch(`/api/spotify/tracks?albumId=${albumId}`, {
+      const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
