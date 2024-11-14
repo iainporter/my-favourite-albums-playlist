@@ -24,7 +24,16 @@ interface SearchFormProps {
   initialArtist?: string;
   initialAlbum?: string;
   initialTotalResults?: number;
-  onSearchStateChange?: (state: { currentPage: number; artist: string; album: string; totalResults: number }) => void;
+  initialNextUrl?: string | null;
+  initialPrevUrl?: string | null;
+  onSearchStateChange?: (state: { 
+    currentPage: number; 
+    artist: string; 
+    album: string; 
+    totalResults: number;
+    nextUrl: string | null;
+    previousUrl: string | null;
+  }) => void;
 }
 
 export default function SearchForm({ 
@@ -35,6 +44,8 @@ export default function SearchForm({
   initialArtist = '',
   initialAlbum = '',
   initialTotalResults = 0,
+  initialNextUrl = null,
+  initialPrevUrl = null,
   onSearchStateChange
 }: SearchFormProps) {
   const [artist, setArtist] = useState(initialArtist);
@@ -65,10 +76,12 @@ export default function SearchForm({
         currentPage,
         artist,
         album,
-        totalResults
+        totalResults,
+        nextUrl,
+        previousUrl
       });
     }
-  }, [currentPage, artist, album, totalResults, onSearchStateChange]);
+  }, [currentPage, artist, album, totalResults, nextUrl, previousUrl, onSearchStateChange]);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [previousUrl, setPreviousUrl] = useState<string | null>(null);
   const itemsPerPage = 20;
@@ -80,7 +93,9 @@ export default function SearchForm({
         currentPage,
         artist,
         album,
-        totalResults
+        totalResults,
+        nextUrl,
+        previousUrl
       });
     }
   };

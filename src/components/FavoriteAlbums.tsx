@@ -46,20 +46,24 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   const [searchState, setSearchState] = useState({
     currentPage: 1,
     artist: '',
-    album: ''
+    album: '',
+    nextUrl: null as string | null,
+    previousUrl: null as string | null
   });
 
-  // Preserve search results and total results along with state
+  // Preserve search results, total results, and pagination URLs along with state
   const [preservedSearchResults, setPreservedSearchResults] = useState<SpotifyAlbum[]>([]);
   const [preservedTotalResults, setPreservedTotalResults] = useState<number>(0);
+  const [preservedNextUrl, setPreservedNextUrl] = useState<string | null>(null);
+  const [preservedPrevUrl, setPreservedPrevUrl] = useState<string | null>(null);
 
   // Preserve search state when switching tabs
   const handleTabChange = (tab: 'import' | 'search') => {
     if (tab === 'import') {
-      // Save current search results before switching to import
+      // Save current search results and pagination state before switching to import
       setPreservedSearchResults(searchAlbumResults);
     } else {
-      // Restore search results when switching back to search
+      // Restore search results and pagination state when switching back to search
       setSearchAlbumResults(preservedSearchResults);
     }
     setActiveTab(tab);
@@ -340,6 +344,8 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
             initialArtist={searchState.artist}
             initialAlbum={searchState.album}
             initialTotalResults={preservedTotalResults}
+            initialNextUrl={searchState.nextUrl}
+            initialPrevUrl={searchState.previousUrl}
             onSearchStateChange={(state) => {
               setSearchState(state);
               setPreservedTotalResults(state.totalResults);
