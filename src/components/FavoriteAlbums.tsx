@@ -49,8 +49,9 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
     album: ''
   });
 
-  // Preserve search results along with state
+  // Preserve search results and total results along with state
   const [preservedSearchResults, setPreservedSearchResults] = useState<SpotifyAlbum[]>([]);
+  const [preservedTotalResults, setPreservedTotalResults] = useState<number>(0);
 
   // Preserve search state when switching tabs
   const handleTabChange = (tab: 'import' | 'search') => {
@@ -338,7 +339,11 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
             initialPage={searchState.currentPage}
             initialArtist={searchState.artist}
             initialAlbum={searchState.album}
-            onSearchStateChange={setSearchState}
+            initialTotalResults={preservedTotalResults}
+            onSearchStateChange={(state) => {
+              setSearchState(state);
+              setPreservedTotalResults(state.totalResults);
+            }}
           />
         </div>
       ) : albums.length === 0 ? (
