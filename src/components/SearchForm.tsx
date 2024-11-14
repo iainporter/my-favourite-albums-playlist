@@ -127,7 +127,7 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
           type="submit"
           className="w-full px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200"
         >
-          Search
+          Search Spotify
         </button>
       </form>
 
