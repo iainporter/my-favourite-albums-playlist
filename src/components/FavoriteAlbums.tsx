@@ -42,6 +42,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   const [searchResults, setSearchResults] = useState<{ [key: string]: SpotifyAlbum[] }>({});
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
+  const [searchAlbumResults, setSearchAlbumResults] = useState<SpotifyAlbum[]>([]);
 
   const handleSort = (field: SortField) => {
     setSortState(prevState => ({
@@ -309,7 +310,11 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
 
       {activeTab === 'search' ? (
         <div className="flex-1 overflow-y-auto px-6">
-          <SearchForm accessToken={accessToken} />
+          <SearchForm 
+            accessToken={accessToken}
+            albumSearchResults={searchAlbumResults}
+            setAlbumSearchResults={setSearchAlbumResults}
+          />
         </div>
       ) : albums.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">

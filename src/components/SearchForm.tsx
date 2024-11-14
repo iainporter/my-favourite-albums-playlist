@@ -18,12 +18,13 @@ interface SpotifyTrack {
 
 interface SearchFormProps {
   accessToken: string;
+  albumSearchResults: SpotifyAlbum[];
+  setAlbumSearchResults: (albums: SpotifyAlbum[]) => void;
 }
 
-export default function SearchForm({ accessToken }: SearchFormProps) {
+export default function SearchForm({ accessToken, albumSearchResults, setAlbumSearchResults }: SearchFormProps) {
   const [artist, setArtist] = useState('');
   const [album, setAlbum] = useState('');
-  const [albumSearchResults, setAlbumSearchResults] = useState<SpotifyAlbum[]>([]);
   const [trackSearchResults, setTrackSearchResults] = useState<SpotifyTrack[]>([]);
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
