@@ -435,9 +435,11 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
           <div>
             <h2 className="text-2xl font-bold text-white">My Playlists</h2>
             <p className="text-sm text-gray-400 mt-1">
-
-              Showing {playlists.length > 0 ? ((prevUrl ? Math.floor(totalPlaylists / 20) * 20 : 0) + 1) : 0}-
-              {playlists.length > 0 ? ((prevUrl ? Math.floor(totalPlaylists / 20) * 20 : 0) + playlists.length) : 0} of {totalPlaylists} results
+              {totalPlaylists > 0 && (
+                `Showing ${playlists.length > 0 ? (prevUrl ? (Math.floor(totalPlaylists / 20) * 20) + 1 : 1) : 0}-${
+                  playlists.length > 0 ? (prevUrl ? (Math.floor(totalPlaylists / 20) * 20) + playlists.length : playlists.length) : 0
+                } of ${totalPlaylists} playlists`
+              )}
             </p>
           </div>
           <button
@@ -469,32 +471,43 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
       )}
       
       {/* Navigation buttons at the bottom */}
-      <div className="sticky bottom-0 bg-gray-800/95 backdrop-blur-sm py-3 border-t border-gray-700">
-        <div className="flex justify-center space-x-4">
-          <button
-            onClick={() => prevUrl && fetchPlaylists(prevUrl)}
-            disabled={!prevUrl || isLoading}
-            className={`px-4 py-2 rounded-full transition-colors duration-200 ${
-              prevUrl && !isLoading
-                ? 'bg-spotify-green text-white hover:bg-green-600'
-                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Previous
-          </button>
-          <button
-            onClick={() => nextUrl && fetchPlaylists(nextUrl)}
-            disabled={!nextUrl || isLoading}
-            className={`px-4 py-2 rounded-full transition-colors duration-200 ${
-              nextUrl && !isLoading
-                ? 'bg-spotify-green text-white hover:bg-green-600'
-                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Next
-          </button>
+      {(nextUrl || prevUrl) && (
+        <div className="sticky bottom-0 bg-gray-800/95 backdrop-blur-sm py-3 border-t border-gray-700">
+          <div className="flex justify-center items-center space-x-4">
+            <button
+              onClick={() => prevUrl && fetchPlaylists(prevUrl)}
+              disabled={!prevUrl || isLoading}
+              className={`px-4 py-2 rounded-full transition-colors duration-200 flex items-center space-x-2 ${
+                prevUrl && !isLoading
+                  ? 'bg-spotify-green text-white hover:bg-green-600'
+                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span>Previous</span>
+            </button>
+            <span className="text-gray-400">
+              Page {Math.floor(playlists.length > 0 ? (prevUrl ? (Math.floor(totalPlaylists / 20)) + 1 : 1) : 0)} of {Math.ceil(totalPlaylists / 20)}
+            </span>
+            <button
+              onClick={() => nextUrl && fetchPlaylists(nextUrl)}
+              disabled={!nextUrl || isLoading}
+              className={`px-4 py-2 rounded-full transition-colors duration-200 flex items-center space-x-2 ${
+                nextUrl && !isLoading
+                  ? 'bg-spotify-green text-white hover:bg-green-600'
+                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <span>Next</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
