@@ -55,6 +55,8 @@ export default function SearchForm({
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalResults, setTotalResults] = useState(initialTotalResults);
+  const [nextUrl, setNextUrl] = useState<string | null>(initialNextUrl);
+  const [previousUrl, setPreviousUrl] = useState<string | null>(initialPrevUrl);
 
   // Update state when initial values change
   useEffect(() => {
@@ -82,8 +84,6 @@ export default function SearchForm({
       });
     }
   }, [currentPage, artist, album, totalResults, nextUrl, previousUrl, onSearchStateChange]);
-  const [nextUrl, setNextUrl] = useState<string | null>(null);
-  const [previousUrl, setPreviousUrl] = useState<string | null>(null);
   const itemsPerPage = 20;
 
   // Save search state to parent component
