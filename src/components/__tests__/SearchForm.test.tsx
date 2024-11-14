@@ -71,8 +71,12 @@ describe('SearchForm', () => {
     // Wait for the search request
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('q=artist:Test%20Artist%20album:Test%20Album'),
-        expect.any(Object)
+        'https://api.spotify.com/v1/search?q=artist%3ATest%20Artist%20album%3ATest%20Album&type=album&limit=20&offset=0',
+        expect.objectContaining({
+          headers: {
+            'Authorization': `Bearer ${mockAccessToken}`
+          }
+        })
       );
     });
 
