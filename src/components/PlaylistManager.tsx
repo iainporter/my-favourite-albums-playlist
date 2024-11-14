@@ -232,8 +232,9 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
-
   const [addingToPlaylist, setAddingToPlaylist] = useState<string | null>(null);
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
 
   const handleRemoveTrack = async (playlistId: string, trackId: string) => {
     try {
@@ -313,24 +314,30 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
     }
   };
 
-  const fetchPlaylists = async () => {
+  const fetchPlaylists = async (url?: string) => {
     setIsLoading(true);
     try {
       console.log('Fetching playlists with token:', accessToken);
-      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}`);
+      const response = await fetch(url || `/api/spotify/playlists?access_token=${accessToken}`);
       const data = await response.json();
       console.log('Received playlist data:', data);
 
       if (data && data.items && Array.isArray(data.items)) {
         console.log('Setting playlists:', data.items);
         setPlaylists(data.items);
+        setNextUrl(data.next);
+        setPrevUrl(data.previous);
       } else {
         console.error('Invalid playlist data format:', data);
         setPlaylists([]);
+        setNextUrl(null);
+        setPrevUrl(null);
       }
     } catch (error) {
       console.error('Error fetching playlists:', error);
       setPlaylists([]);
+      setNextUrl(null);
+      setPrevUrl(null);
     }
     setIsLoading(false);
   };
@@ -421,17 +428,43 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
-        <h2 className="text-2xl font-bold text-white">My Playlists</h2>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200 flex items-center space-x-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Create Playlist</span>
-        </button>
+      <div className="flex flex-col space-y-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-white">My Playlists</h2>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200 flex items-center space-x-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Create Playlist</span>
+          </button>
+        </div>
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={() => prevUrl && fetchPlaylists(prevUrl)}
+            disabled={!prevUrl || isLoading}
+            className={`px-4 py-2 rounded-full transition-colors duration-200 ${
+              prevUrl && !isLoading
+                ? 'bg-spotify-green text-white hover:bg-green-600'
+                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => nextUrl && fetchPlaylists(nextUrl)}
+            disabled={!nextUrl || isLoading}
+            className={`px-4 py-2 rounded-full transition-colors duration-200 ${
+              nextUrl && !isLoading
+                ? 'bg-spotify-green text-white hover:bg-green-600'
+                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            Next
+          </button>
+        </div>
       </div>
       
       <CreatePlaylistModal

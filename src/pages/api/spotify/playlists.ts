@@ -230,18 +230,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json({ items: formattedTracks });
       }
 
-      // Fetch all playlists
+      // Fetch all playlists with pagination
       console.log('Fetching user playlists...');
-      const data = await spotifyApi.getUserPlaylists();
+      const limit = 20; // Number of playlists per page
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const data = await spotifyApi.getUserPlaylists({ limit, offset });
       console.log('Playlists fetched:', data.body);
       
-      // Ensure we're returning the expected format
+      // Ensure we're returning the expected format with pagination info
       const formattedData = {
         items: data.body.items.map(playlist => ({
           id: playlist.id,
           name: playlist.name,
           images: playlist.images || []
-        }))
+        })),
+        next: data.body.next ? `/api/spotify/playlists?access_token=${access_token}&offset=${offset + limit}` : null,
+        previous: offset > 0 ? `/api/spotify/playlists?access_token=${access_token}&offset=${Math.max(0, offset - limit)}` : null,
+        total: data.body.total
       };
       
       return res.status(200).json(formattedData);
