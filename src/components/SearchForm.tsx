@@ -111,7 +111,10 @@ export default function SearchForm({
         onSearchStateChange({
           currentPage: newPage,
           artist,
-          album
+          album,
+          totalResults,
+          nextUrl,
+          previousUrl
         });
       }
     }
@@ -334,7 +337,10 @@ export default function SearchForm({
                   onSearchStateChange({
                     currentPage: newPage,
                     artist,
-                    album
+                    album,
+                    totalResults,
+                    nextUrl,
+                    previousUrl
                   });
                 }
               }
