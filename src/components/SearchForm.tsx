@@ -72,7 +72,7 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
       }
     } catch (error) {
       console.error('Error searching Spotify:', error);
-      setSearchResults([]);
+      setAlbumSearchResults([]);
     }
   };
 
