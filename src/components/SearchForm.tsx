@@ -32,7 +32,7 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
     try {
       const query = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
       const response = await fetch(
-        `/api/spotify/search?q=${encodeURIComponent(query)}`,
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}`,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`
@@ -53,7 +53,7 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const response = await fetch(`/api/spotify/tracks?albumId=${albumId}`, {
+      const response = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
