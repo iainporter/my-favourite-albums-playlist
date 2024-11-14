@@ -155,7 +155,11 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
       <div className="space-y-4">
         {totalResults > 0 && (
           <div className="text-gray-300 text-sm">
-            Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalResults)} of {totalResults} results
+            {totalResults > 0 ? (
+              `Showing ${((currentPage - 1) * itemsPerPage) + 1}-${Math.min(currentPage * itemsPerPage, totalResults)} of ${totalResults} results`
+            ) : (
+              'No results found'
+            )}
           </div>
         )}
         {albumSearchResults.length === 0 ? (

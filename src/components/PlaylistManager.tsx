@@ -435,6 +435,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
           <div>
             <h2 className="text-2xl font-bold text-white">My Playlists</h2>
             <p className="text-sm text-gray-400 mt-1">
+
               Showing {playlists.length > 0 ? ((prevUrl ? Math.floor(totalPlaylists / 20) * 20 : 0) + 1) : 0}-
               {playlists.length > 0 ? ((prevUrl ? Math.floor(totalPlaylists / 20) * 20 : 0) + playlists.length) : 0} of {totalPlaylists} results
             </p>
