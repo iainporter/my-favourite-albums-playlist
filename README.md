@@ -76,8 +76,17 @@ yarn start
 1. Click the "Login with Spotify" button to authenticate
 2. Import your favourite albums from a csv file. There is a sample file you can use as the format
 3. Drag an album or individual tracks to your playlist
+4. You can also search spotify for albums and artists
 4. Use the playlist manager to create a new playlist or add tracks to an existing one
 5. Manage your playlists directly from the interface
+
+
+### Import Screen
+![Alt text](images/import.png?raw=true "Import albums")
+
+### Search Screen
+![Alt text](images/search.png?raw=true "Search albums and artists")
+
 
 ## Testing
 
