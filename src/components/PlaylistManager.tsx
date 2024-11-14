@@ -434,7 +434,7 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">My Playlists</h2>
-            <p className="text-sm text-gray-400 mt-1">Total: {totalPlaylists} playlists</p>
+            <p className="text-sm text-gray-400 mt-1">Showing 1-20 of {totalPlaylists} results</p>
           </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
