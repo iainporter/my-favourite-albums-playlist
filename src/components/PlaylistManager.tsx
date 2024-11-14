@@ -236,6 +236,8 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [totalPlaylists, setTotalPlaylists] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const handleRemoveTrack = async (playlistId: string, trackId: string) => {
     try {
@@ -435,8 +437,8 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
           <div>
             <h2 className="text-2xl font-bold text-white">My Playlists</h2>
             <p className="text-sm text-gray-400 mt-1">
-              Showing {playlists.length > 0 ? ((prevUrl ? Math.floor(totalPlaylists / 20) * 20 : 0) + 1) : 0}-
-              {playlists.length > 0 ? ((prevUrl ? Math.floor(totalPlaylists / 20) * 20 : 0) + playlists.length) : 0} of {totalPlaylists} results
+              Showing {playlists.length > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0}-
+              {playlists.length > 0 ? Math.min(currentPage * itemsPerPage, totalPlaylists) : 0} of {totalPlaylists} results
             </p>
           </div>
           <button
@@ -469,9 +471,14 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
       
       {/* Navigation buttons at the bottom */}
       <div className="sticky bottom-0 bg-gray-800/95 backdrop-blur-sm py-3 border-t border-gray-700">
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center items-center space-x-4">
           <button
-            onClick={() => prevUrl && fetchPlaylists(prevUrl)}
+            onClick={() => {
+              if (prevUrl) {
+                setCurrentPage(prev => prev - 1);
+                fetchPlaylists(prevUrl);
+              }
+            }}
             disabled={!prevUrl || isLoading}
             className={`px-4 py-2 rounded-full transition-colors duration-200 ${
               prevUrl && !isLoading
@@ -481,8 +488,14 @@ export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
           >
             Previous
           </button>
+          <span className="text-gray-300">Page {currentPage}</span>
           <button
-            onClick={() => nextUrl && fetchPlaylists(nextUrl)}
+            onClick={() => {
+              if (nextUrl) {
+                setCurrentPage(prev => prev + 1);
+                fetchPlaylists(nextUrl);
+              }
+            }}
             disabled={!nextUrl || isLoading}
             className={`px-4 py-2 rounded-full transition-colors duration-200 ${
               nextUrl && !isLoading
