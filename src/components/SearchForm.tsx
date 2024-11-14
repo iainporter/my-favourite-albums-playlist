@@ -23,7 +23,8 @@ interface SearchFormProps {
 export default function SearchForm({ accessToken }: SearchFormProps) {
   const [artist, setArtist] = useState('');
   const [album, setAlbum] = useState('');
-  const [searchResults, setSearchResults] = useState<SpotifyAlbum[]>([]);
+  const [albumSearchResults, setAlbumSearchResults] = useState<SpotifyAlbum[]>([]);
+  const [trackSearchResults, setTrackSearchResults] = useState<SpotifyTrack[]>([]);
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
 
@@ -65,9 +66,9 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
         }
         
         const fallbackData = await fallbackResponse.json();
-        setSearchResults(fallbackData.albums.items);
+        setAlbumSearchResults(fallbackData.albums.items);
       } else {
-        setSearchResults(data.albums.items);
+        setAlbumSearchResults(data.albums.items);
       }
     } catch (error) {
       console.error('Error searching Spotify:', error);
@@ -132,10 +133,10 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
       </form>
 
       <div className="space-y-4">
-        {searchResults.length === 0 ? (
+        {albumSearchResults.length === 0 ? (
           <div className="text-center text-gray-400 py-8">No Results Found</div>
         ) : (
-          searchResults.map((spotifyAlbum) => (
+          albumSearchResults.map((spotifyAlbum) => (
           <div key={spotifyAlbum.id} className="bg-gray-800 rounded-lg overflow-hidden">
             <div 
               className="flex items-center space-x-4 p-4 hover:bg-gray-700 cursor-pointer"
