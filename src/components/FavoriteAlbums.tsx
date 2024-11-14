@@ -124,6 +124,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
       const text = e.target?.result as string;
       // Split by newline but handle both \r\n and \n
       const rows = text.split(/\r?\n/);
+      setActiveTab('import');
 
       try {
         // Validate header row
