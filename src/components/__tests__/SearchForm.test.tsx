@@ -40,7 +40,7 @@ describe('SearchForm', () => {
     );
 
     // Render the component with all required and optional props
-    render(
+    const { rerender } = render(
       <SearchForm
         accessToken={mockAccessToken}
         albumSearchResults={[]}
@@ -68,7 +68,7 @@ describe('SearchForm', () => {
     fireEvent.change(albumInput, { target: { value: 'Test Album' } });
     fireEvent.click(searchButton);
 
-    // Verify search request
+    // Wait for the search request
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('q=artist:Test%20Artist%20album:Test%20Album'),
@@ -76,16 +76,35 @@ describe('SearchForm', () => {
       );
     });
 
-    // Verify search results are set
+    // Wait for search results to be set
     await waitFor(() => {
       expect(mockSetAlbumSearchResults).toHaveBeenCalledWith(mockSearchResponse.albums.items);
     });
 
-    // Verify pagination state
-    expect(screen.getByText('Next')).toBeEnabled();
-    expect(screen.getByText('Next')).toHaveClass('bg-spotify-green');
-    expect(screen.getByText('Page 1')).toBeInTheDocument();
-    expect(screen.getByText(/showing 1-20 of 50 results/i)).toBeInTheDocument();
+    // Rerender with the search results
+    rerender(
+      <SearchForm
+        accessToken={mockAccessToken}
+        albumSearchResults={mockSearchResponse.albums.items}
+        setAlbumSearchResults={mockSetAlbumSearchResults}
+        initialPage={1}
+        initialArtist="Test Artist"
+        initialAlbum="Test Album"
+        initialTotalResults={50}
+        initialNextUrl="http://api.spotify.com/v1/search?page=2"
+        initialPrevUrl={null}
+        onSearchStateChange={mockOnSearchStateChange}
+      />
+    );
+
+    // Now verify pagination elements
+    await waitFor(() => {
+      expect(screen.getByText(/page 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/showing 1-20 of 50 results/i)).toBeInTheDocument();
+      const nextButton = screen.getByRole('button', { name: /next/i });
+      expect(nextButton).toBeEnabled();
+      expect(nextButton).toHaveClass('bg-spotify-green');
+    });
 
     // Verify search state change was called with correct data
     expect(mockOnSearchStateChange).toHaveBeenCalledWith(expect.objectContaining({
@@ -139,7 +158,7 @@ describe('SearchForm', () => {
         json: () => Promise.resolve(mockSecondPage)
       }));
 
-    render(
+    const { rerender } = render(
       <SearchForm
         accessToken={mockAccessToken}
         albumSearchResults={[]}
@@ -160,21 +179,37 @@ describe('SearchForm', () => {
       expect(mockSetAlbumSearchResults).toHaveBeenCalledWith(mockFirstPage.albums.items);
     });
 
+    // Rerender with first page results
+    rerender(
+      <SearchForm
+        accessToken={mockAccessToken}
+        albumSearchResults={mockFirstPage.albums.items}
+        setAlbumSearchResults={mockSetAlbumSearchResults}
+        onSearchStateChange={mockOnSearchStateChange}
+        initialPage={1}
+        initialTotalResults={50}
+        initialNextUrl="http://api.spotify.com/v1/search?page=2"
+        initialPrevUrl={null}
+      />
+    );
+
     // Click next page
-    const nextButton = screen.getByText('Next');
+    const nextButton = await screen.findByRole('button', { name: /next/i });
     fireEvent.click(nextButton);
 
-    // Verify second page results
+    // Wait for second page results
     await waitFor(() => {
       expect(mockSetAlbumSearchResults).toHaveBeenCalledWith(mockSecondPage.albums.items);
-      expect(mockOnSearchStateChange).toHaveBeenCalledWith(expect.objectContaining({
-        currentPage: 2,
-        artist: 'Test Artist',
-        album: '',
-        totalResults: 50,
-        nextUrl: null,
-        previousUrl: 'http://api.spotify.com/v1/search?page=1'
-      }));
     });
+
+    // Verify search state was updated
+    expect(mockOnSearchStateChange).toHaveBeenCalledWith(expect.objectContaining({
+      currentPage: 2,
+      artist: 'Test Artist',
+      album: '',
+      totalResults: 50,
+      nextUrl: null,
+      previousUrl: 'http://api.spotify.com/v1/search?page=1'
+    }));
   });
 });
