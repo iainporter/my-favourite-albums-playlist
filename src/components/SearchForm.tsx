@@ -30,9 +30,10 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const query = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
+      // First attempt: search with both artist and album if both are provided
+      const fullQuery = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
       const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}`,
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=10`,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`
@@ -45,9 +46,32 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
       }
       
       const data = await response.json();
-      setSearchResults(data.albums.items);
+      
+      // If no results found and we have an artist, try searching with just the artist
+      if (data.albums.items.length === 0 && artist) {
+        console.log('No results found with album name, trying artist-only search');
+        const artistQuery = `artist:${artist}`;
+        const fallbackResponse = await fetch(
+          `https://api.spotify.com/v1/search?q=${encodeURIComponent(artistQuery)}&type=album&limit=10`,
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }
+        );
+        
+        if (!fallbackResponse.ok) {
+          throw new Error('Failed to perform fallback search');
+        }
+        
+        const fallbackData = await fallbackResponse.json();
+        setSearchResults(fallbackData.albums.items);
+      } else {
+        setSearchResults(data.albums.items);
+      }
     } catch (error) {
       console.error('Error searching Spotify:', error);
+      setSearchResults([]);
     }
   };
 
