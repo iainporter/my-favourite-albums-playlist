@@ -214,8 +214,8 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
               </div>
             )}
           </div>
-        ))}
-        )}
+          ))
+        )}}
       </div>
     </div>
   );
