@@ -77,7 +77,7 @@ export default function SearchForm({ accessToken }: SearchFormProps) {
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const response = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, {
+      const response = await fetch(`/api/spotify/tracks?albumId=${albumId}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
