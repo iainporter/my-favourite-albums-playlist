@@ -114,45 +114,53 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
   };
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSearch} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="artist" className="block text-sm font-medium text-gray-300">
-              Artist
-            </label>
-            <input
-              type="text"
-              id="artist"
-              value={artist}
-              onChange={(e) => setArtist(e.target.value)}
-              className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white focus:border-spotify-green focus:ring-spotify-green"
-              placeholder="Enter artist name"
-            />
+    <div className="flex flex-col h-full">
+      <div className="sticky top-0 bg-gray-800/95 backdrop-blur-sm z-10 space-y-4 pb-4">
+        <form onSubmit={handleSearch} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="artist" className="block text-sm font-medium text-gray-300">
+                Artist
+              </label>
+              <input
+                type="text"
+                id="artist"
+                value={artist}
+                onChange={(e) => setArtist(e.target.value)}
+                className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white focus:border-spotify-green focus:ring-spotify-green"
+                placeholder="Enter artist name"
+              />
+            </div>
+            <div>
+              <label htmlFor="album" className="block text-sm font-medium text-gray-300">
+                Album
+              </label>
+              <input
+                type="text"
+                id="album"
+                value={album}
+                onChange={(e) => setAlbum(e.target.value)}
+                className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white focus:border-spotify-green focus:ring-spotify-green"
+                placeholder="Enter album name"
+              />
+            </div>
           </div>
-          <div>
-            <label htmlFor="album" className="block text-sm font-medium text-gray-300">
-              Album
-            </label>
-            <input
-              type="text"
-              id="album"
-              value={album}
-              onChange={(e) => setAlbum(e.target.value)}
-              className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white focus:border-spotify-green focus:ring-spotify-green"
-              placeholder="Enter album name"
-            />
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="w-full px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200"
-        >
-          Search Spotify
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="w-full px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200"
+          >
+            Search Spotify
+          </button>
+        </form>
 
-      <div className="space-y-4">
+        {totalResults > 0 && (
+          <div className="text-gray-300 text-sm">
+            Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalResults)} of {totalResults} results
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto space-y-4">
         {totalResults > 0 && (
           <div className="text-gray-300 text-sm">
             Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalResults)} of {totalResults} results
@@ -280,6 +288,44 @@ export default function SearchForm({ accessToken, albumSearchResults, setAlbumSe
           </div>
         )}
       </div>
+
+      {(nextUrl || previousUrl) && (
+        <div className="sticky bottom-0 mt-4 flex justify-between items-center py-3 bg-gray-800/95 backdrop-blur-sm border-t border-gray-700">
+          <button
+            onClick={() => {
+              if (previousUrl) {
+                setCurrentPage(prev => prev - 1);
+                handleSearch(previousUrl);
+              }
+            }}
+            disabled={!previousUrl}
+            className={`px-4 py-2 rounded-full ${
+              !previousUrl
+                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                : 'bg-spotify-green text-white hover:bg-green-600'
+            } transition-colors duration-200`}
+          >
+            Previous
+          </button>
+          <span className="text-gray-300">Page {currentPage}</span>
+          <button
+            onClick={() => {
+              if (nextUrl) {
+                setCurrentPage(prev => prev + 1);
+                handleSearch(nextUrl);
+              }
+            }}
+            disabled={!nextUrl}
+            className={`px-4 py-2 rounded-full ${
+              !nextUrl
+                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                : 'bg-spotify-green text-white hover:bg-green-600'
+            } transition-colors duration-200`}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
