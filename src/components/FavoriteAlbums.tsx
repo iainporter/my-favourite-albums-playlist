@@ -49,8 +49,18 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
     album: ''
   });
 
+  // Preserve search results along with state
+  const [preservedSearchResults, setPreservedSearchResults] = useState<SpotifyAlbum[]>([]);
+
   // Preserve search state when switching tabs
   const handleTabChange = (tab: 'import' | 'search') => {
+    if (tab === 'import') {
+      // Save current search results before switching to import
+      setPreservedSearchResults(searchAlbumResults);
+    } else {
+      // Restore search results when switching back to search
+      setSearchAlbumResults(preservedSearchResults);
+    }
     setActiveTab(tab);
   };
 

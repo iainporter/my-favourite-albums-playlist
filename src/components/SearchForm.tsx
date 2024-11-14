@@ -42,7 +42,7 @@ export default function SearchForm({
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [currentPage, setCurrentPage] = useState(initialPage);
 
-  // Update state when initialArtist or initialAlbum changes
+  // Update state when initial values change
   useEffect(() => {
     setArtist(initialArtist);
   }, [initialArtist]);
@@ -50,6 +50,21 @@ export default function SearchForm({
   useEffect(() => {
     setAlbum(initialAlbum);
   }, [initialAlbum]);
+
+  useEffect(() => {
+    setCurrentPage(initialPage);
+  }, [initialPage]);
+
+  // Save search state whenever relevant values change
+  useEffect(() => {
+    if (onSearchStateChange) {
+      onSearchStateChange({
+        currentPage,
+        artist,
+        album
+      });
+    }
+  }, [currentPage, artist, album, onSearchStateChange]);
   const [totalResults, setTotalResults] = useState(0);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [previousUrl, setPreviousUrl] = useState<string | null>(null);
@@ -71,7 +86,15 @@ export default function SearchForm({
       e.preventDefault();
     }
     if (typeof e !== 'string' && e.type === 'submit') {
-      setCurrentPage(1); // Reset to first page on new search
+      const newPage = 1;
+      setCurrentPage(newPage); // Reset to first page on new search
+      if (onSearchStateChange) {
+        onSearchStateChange({
+          currentPage: newPage,
+          artist,
+          album
+        });
+      }
     }
     try {
       let searchUrl;
