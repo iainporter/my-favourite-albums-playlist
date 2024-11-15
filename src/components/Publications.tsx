@@ -39,11 +39,11 @@ export default function Publications() {
       <div className="p-4">
         <button 
           onClick={fetchPitchforkAlbums}
-          className="w-48 h-48 bg-black text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200"
+          className="w-40 h-16 bg-black text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200"
           disabled={loading}
         >
-          <span className="text-xl font-bold">
-            {loading ? 'Loading...' : 'Fetch Pitchfork Artists'}
+          <span className="text-sm font-bold">
+            {loading ? 'Loading...' : 'Pitchfork 8.0+ new Albums'}
           </span>
         </button>
       </div>
