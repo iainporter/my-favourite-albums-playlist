@@ -74,31 +74,23 @@ export default function SearchForm({
   // Save search state whenever relevant values change
   useEffect(() => {
     if (onSearchStateChange) {
-      onSearchStateChange({
-        currentPage,
-        artist,
-        album,
-        totalResults,
-        nextUrl,
-        previousUrl
-      });
+      const debounceTimer = setTimeout(() => {
+        onSearchStateChange({
+          currentPage,
+          artist,
+          album,
+          totalResults,
+          nextUrl,
+          previousUrl
+        });
+      }, 300);
+      
+      return () => clearTimeout(debounceTimer);
     }
-  }, [currentPage, artist, album, totalResults, nextUrl, previousUrl, onSearchStateChange]);
+  }, [currentPage, artist, album]);
   const itemsPerPage = 20;
 
-  // Save search state to parent component
-  const saveSearchState = () => {
-    if (onSearchStateChange) {
-      onSearchStateChange({
-        currentPage,
-        artist,
-        album,
-        totalResults,
-        nextUrl,
-        previousUrl
-      });
-    }
-  };
+
 
   const handleSearch = async (e: React.FormEvent | string) => {
     if (typeof e !== 'string' && e.preventDefault) {
@@ -166,7 +158,6 @@ export default function SearchForm({
       } else {
         setAlbumSearchResults(data.albums.items);
       }
-      saveSearchState();
     } catch (error) {
       console.error('Error searching Spotify:', error);
       setAlbumSearchResults([]);
