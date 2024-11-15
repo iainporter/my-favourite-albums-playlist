@@ -1,10 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { dev, isServer }) => {
-    // Disable cache in development
-    if (dev) {
-      config.cache = false;
-    }
+    // Configure webpack caching
+    config.cache = {
+      type: 'filesystem',
+      version: `${process.env.NODE_ENV}_${Date.now()}`,
+      cacheDirectory: '.next/cache',
+      store: 'pack',
+      buildDependencies: {
+        config: [__filename],
+      },
+    };
 
     if (!isServer) {
       config.resolve = {
