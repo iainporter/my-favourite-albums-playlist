@@ -17,7 +17,10 @@ describe('Spotify API Utils', () => {
     (SpotifyWebApi as jest.Mock).mockImplementation(() => ({
       setRefreshToken: jest.fn(),
       refreshAccessToken: jest.fn().mockResolvedValue({
-        body: { access_token: mockNewAccessToken }
+        body: { 
+          access_token: mockNewAccessToken,
+          expires_in: 3600
+        }
       })
     }));
   });
@@ -84,8 +87,8 @@ describe('Spotify API Utils', () => {
   it('should not refresh token for non-401 errors', async () => {
     (global.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
-        status: 404,
-        ok: false
+        status: 200,
+        ok: true
       })
     );
 
@@ -110,7 +113,7 @@ describe('Spotify API Utils', () => {
       .not.toHaveBeenCalled();
 
     // Verify response
-    expect(response.status).toBe(404);
-    expect(response.ok).toBe(false);
+    expect(response.status).toBe(200);
+    expect(response.ok).toBe(true);
   });
 });

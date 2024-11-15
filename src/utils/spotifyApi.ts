@@ -10,7 +10,11 @@ const spotifyApi = new SpotifyWebApi({
 export async function refreshAccessToken(refreshToken: string) {
   spotifyApi.setRefreshToken(refreshToken);
   const data = await spotifyApi.refreshAccessToken();
-  return data.body.access_token;
+  return {
+    accessToken: data.body.access_token,
+    refreshToken: refreshToken,
+    expiresIn: data.body.expires_in
+  };
 }
 
 export async function fetchWithTokenRefresh(
@@ -18,24 +22,34 @@ export async function fetchWithTokenRefresh(
   options: RequestInit,
   refreshToken?: string
 ): Promise<Response> {
-  let response = await fetch(url, options);
+  try {
+    let response = await fetch(url, options);
 
-  if (response.status === 401 && refreshToken) {
-    // Token expired, refresh it
-    const newAccessToken = await refreshAccessToken(refreshToken);
-    
-    // Update Authorization header with new token
-    const newOptions = {
-      ...options,
-      headers: {
-        ...options.headers,
-        Authorization: `Bearer ${newAccessToken}`,
-      },
-    };
+    if (response.status === 401 && refreshToken) {
+      // Token expired, refresh it
+      const tokens = await refreshAccessToken(refreshToken);
+      
+      // Update Authorization header with new token
+      const newOptions = {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${tokens.accessToken}`,
+        },
+      };
 
-    // Retry the request with new token
-    response = await fetch(url, newOptions);
+      // Retry the request with new token
+      response = await fetch(url, newOptions);
+      
+      // If the second request also fails, throw an error
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Error in fetchWithTokenRefresh:', error);
+    throw error;
   }
-
-  return response;
 }
