@@ -70,6 +70,7 @@ interface Playlist {
 
 interface PlaylistManagerProps {
   accessToken: string;
+  refreshToken: string;
 }
 
 function formatDuration(ms: number): string {
@@ -228,7 +229,7 @@ function NoPlaylists({ onRefresh }: { onRefresh: () => void }) {
   );
 }
 
-export default function PlaylistManager({ accessToken }: PlaylistManagerProps) {
+export default function PlaylistManager({ accessToken, refreshToken }: PlaylistManagerProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);

@@ -30,9 +30,10 @@ interface SpotifyTrack {
 
 interface FavoriteAlbumsProps {
   accessToken: string;
+  refreshToken: string;
 }
 
-export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
+export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAlbumsProps) {
   const [activeTab, setActiveTab] = useState<'import' | 'search' | 'publications'>('import');
   const [albums, setAlbums] = useState<Album[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -346,7 +347,9 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
       </div>
 
       {activeTab === 'publications' ? (
-        <Publications />
+        <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm overflow-hidden">
+             <Publications accessToken={accessToken} refreshToken={refreshToken} />
+        </div>
       ) : activeTab === 'search' ? (
         <div className="flex-1 overflow-y-auto px-6">
           <SearchForm 

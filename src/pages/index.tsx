@@ -76,13 +76,10 @@ export default function Home() {
           ) : (
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 h-[calc(100vh-12rem)]">
               <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm overflow-hidden">
-                <PlaylistManager accessToken={accessToken} />
+                <PlaylistManager accessToken={accessToken} refreshToken={refreshToken} />
               </div>
               <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm overflow-hidden">
-                <FavoriteAlbums accessToken={accessToken} />
-              </div>
-              <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm overflow-hidden">
-                <Publications accessToken={accessToken} refreshToken={refreshToken} />
+                <FavoriteAlbums accessToken={accessToken} refreshToken={refreshToken} />
               </div>
             </div>
           )}
