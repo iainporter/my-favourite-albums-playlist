@@ -48,7 +48,9 @@ export default function Publications({ accessToken, refreshToken }: Publications
     setExpandedAlbum(searchKey);
     if (!searchResults[searchKey]) {
       try {
-
+        if (!accessToken) {
+          throw new Error('No access token available');
+        }
         const data = await searchSpotify(artist, album, accessToken, refreshToken);
         setSearchResults(prev => ({
           ...prev,

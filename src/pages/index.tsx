@@ -6,12 +6,16 @@ import FavoriteAlbums from '../components/FavoriteAlbums';
 export default function Home() {
   const router = useRouter();
   const [accessToken, setAccessToken] = useState<string>('');
+  const [refreshToken, setRefreshToken] = useState<string>('');
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    const { access_token, error } = router.query;
+    const { access_token, refresh_token, error } = router.query;
     if (access_token) {
       setAccessToken(access_token as string);
+    }
+    if (refresh_token) {
+      setRefreshToken(refresh_token as string);
     }
     if (error) {
       setError(error as string);
@@ -75,6 +79,9 @@ export default function Home() {
               </div>
               <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm overflow-hidden">
                 <FavoriteAlbums accessToken={accessToken} />
+              </div>
+              <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm overflow-hidden">
+                <Publications accessToken={accessToken} refreshToken={refreshToken} />
               </div>
             </div>
           )}
