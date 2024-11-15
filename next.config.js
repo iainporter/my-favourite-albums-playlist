@@ -2,29 +2,46 @@
 const nextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Disable problematic Node.js modules in the browser
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
         child_process: false,
+        http: false,
+        https: false,
+        zlib: false,
+        path: false,
+        stream: false,
+        util: false,
+        url: false,
+        crypto: false,
       };
 
-      // Handle node: protocol
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'node:url': require.resolve('url/'),
-        'node:buffer': require.resolve('buffer/'),
-        'node:util': require.resolve('util/'),
-        'node:stream': require.resolve('stream-browserify'),
-        'node:http': require.resolve('stream-http'),
-        'node:https': require.resolve('https-browserify'),
-      };
+      // Remove all node: protocol aliases
+      const aliases = { ...config.resolve.alias };
+      Object.keys(aliases).forEach(key => {
+        if (key.startsWith('node:')) {
+          delete aliases[key];
+        }
+      });
+      config.resolve.alias = aliases;
+
+      // Add webpack ignores for node: protocol
+      config.module = config.module || {};
+      config.module.rules = config.module.rules || [];
+      config.module.rules.push({
+        test: /\.(js|mjs|jsx|ts|tsx)$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      });
     }
 
     return config;
   },
+  // Add transpilePackages to handle any problematic dependencies
+  transpilePackages: ['spotify-web-api-node'],
 };
 
 module.exports = nextConfig;
