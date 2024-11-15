@@ -2,24 +2,28 @@
 const nextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
+      // Polyfills for client-side
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
         child_process: false,
+        url: require.resolve('url/'),
       };
     }
+    
     // Handle node: protocol
     config.resolve.alias = {
       ...config.resolve.alias,
-      'node:url': 'url',
-      'node:buffer': 'buffer',
-      'node:util': 'util',
-      'node:stream': 'stream-browserify',
-      'node:http': 'stream-http',
-      'node:https': 'https-browserify',
+      'node:url': require.resolve('url/'),
+      'node:buffer': require.resolve('buffer/'),
+      'node:util': require.resolve('util/'),
+      'node:stream': require.resolve('stream-browserify'),
+      'node:http': require.resolve('stream-http'),
+      'node:https': require.resolve('https-browserify'),
     };
+
     return config;
   },
 };
