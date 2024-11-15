@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-
 interface PitchforkAlbum {
   artist: string;
   album: string;
@@ -12,8 +11,6 @@ export default function Publications() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-
-
   const fetchPitchforkAlbums = async () => {
     setLoading(true);
     setError(null);
@@ -23,8 +20,7 @@ export default function Publications() {
         throw new Error('Failed to fetch albums');
       }
       const data = await response.json();
-      const artistNames = data.map((album: { artist: string }) => album.artist);
-      setArtists(artistNames);
+      setAlbums(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -53,16 +49,18 @@ export default function Publications() {
       )}
 
       <div className="flex-1 overflow-auto p-4">
-        {artists.length > 0 && (
+        {albums.length > 0 && (
           <div className="bg-gray-800 rounded-lg shadow-lg p-4">
-            <h2 className="text-white text-xl font-bold mb-4">Artist Names</h2>
+            <h2 className="text-white text-xl font-bold mb-4">Pitchfork Albums</h2>
             <div className="max-h-96 overflow-y-auto">
-              {artists.map((artist, index) => (
+              {albums.map((album, index) => (
                 <div 
                   key={index} 
-                  className="text-white py-2 px-4 hover:bg-gray-700 rounded transition-colors duration-200"
+                  className="text-white py-2 px-4 hover:bg-gray-700 rounded transition-colors duration-200 mb-2"
                 >
-                  {artist}
+                  <div className="font-bold">{album.artist}</div>
+                  <div className="text-gray-300">{album.album}</div>
+                  <div className="text-sm text-gray-400">{album.publishDate}</div>
                 </div>
               ))}
             </div>
