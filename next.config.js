@@ -10,6 +10,16 @@ const nextConfig = {
         child_process: false,
       };
     }
+    // Handle node: protocol
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'node:url': 'url',
+      'node:buffer': 'buffer',
+      'node:util': 'util',
+      'node:stream': 'stream-browserify',
+      'node:http': 'stream-http',
+      'node:https': 'https-browserify',
+    };
     return config;
   },
 };
