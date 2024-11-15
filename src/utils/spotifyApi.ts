@@ -23,8 +23,11 @@ interface SpotifyTokenResponse {
 
 export async function refreshAccessToken(refreshToken: string, spotifyApiInstance = getSpotifyApi()) {
   try {
+    console.log('Refreshing token with:', { refreshToken });
     spotifyApiInstance.setRefreshToken(refreshToken);
+    console.log('Calling refreshAccessToken...');
     const data = await spotifyApiInstance.refreshAccessToken() as SpotifyTokenResponse;
+    console.log('Raw response from refreshAccessToken:', JSON.stringify(data, null, 2));
     
     // Debug logging
     console.log('Refresh token response:', JSON.stringify(data, null, 2));

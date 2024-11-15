@@ -19,11 +19,11 @@ describe('Spotify API Utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Create mock functions
+    // Create mock functions with proper response structure
     const mockRefreshTokenFn = jest.fn().mockResolvedValue({
       body: {
-        access_token: mockNewAccessToken,
-        refresh_token: mockRefreshToken,
+        access_token: 'mock-new-access-token',
+        refresh_token: 'mock-refresh-token',
         expires_in: 3600,
         token_type: 'Bearer',
         scope: 'playlist-modify-public playlist-modify-private'
@@ -43,9 +43,16 @@ describe('Spotify API Utils', () => {
 
     // Mock getSpotifyApi to return our mock instance
     (getSpotifyApi as jest.Mock).mockReturnValue(mockSpotifyInstance);
+
+    // Add debug logging to verify mock response
+    mockRefreshTokenFn().then(response => {
+      console.log('Mock refresh token response:', JSON.stringify(response, null, 2));
+    });
   });
 
   it('should refresh token and retry request when receiving 401', async () => {
+    const mockSpotifyInstance = getSpotifyApi();
+    
     // Mock first request to return 401
     (global.fetch as jest.Mock)
       .mockImplementationOnce(() => 
@@ -65,7 +72,7 @@ describe('Spotify API Utils', () => {
 
     const initialOptions = {
       headers: {
-        'Authorization': `Bearer ${mockInitialAccessToken}`,
+        'Authorization': `Bearer initial-access-token`,
         'Content-Type': 'application/json'
       }
     };
@@ -73,7 +80,7 @@ describe('Spotify API Utils', () => {
     const response = await fetchWithTokenRefresh(
       'https://api.spotify.com/v1/test',
       initialOptions,
-      mockRefreshToken
+      'mock-refresh-token'
     );
 
     // Verify the initial failed request
@@ -82,12 +89,9 @@ describe('Spotify API Utils', () => {
       initialOptions
     );
 
-    // Get the mock instance that was created
-    const mockSpotifyInstance = (SpotifyWebApi as jest.Mock).mock.results[0].value;
-    
     // Verify token refresh was attempted
     expect(mockSpotifyInstance.setRefreshToken)
-      .toHaveBeenCalledWith(mockRefreshToken);
+      .toHaveBeenCalledWith('mock-refresh-token');
     expect(mockSpotifyInstance.refreshAccessToken)
       .toHaveBeenCalled();
 
@@ -96,7 +100,7 @@ describe('Spotify API Utils', () => {
       'https://api.spotify.com/v1/test',
       expect.objectContaining({
         headers: expect.objectContaining({
-          'Authorization': `Bearer ${mockNewAccessToken}`,
+          'Authorization': `Bearer mock-new-access-token`,
           'Content-Type': 'application/json'
         })
       })
