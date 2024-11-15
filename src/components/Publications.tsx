@@ -62,7 +62,7 @@ export default function Publications() {
     } else {
       setExpandedAlbum(searchKey);
       if (!searchResults[searchKey]) {
-        await searchSpotify(artist, album);
+        await handleSpotifySearch(artist, album);
       }
     }
   };

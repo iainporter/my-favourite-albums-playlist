@@ -117,8 +117,9 @@ export default function SearchForm({
         searchUrl = e;
       } else {
         // Otherwise, construct the search URL
+        const fullQuery = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
         const offset = (currentPage - 1) * itemsPerPage;
-        searchUrl = `/api/spotify/search?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}&limit=${itemsPerPage}&offset=${offset}`;
+        searchUrl = `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=${itemsPerPage}&offset=${offset}`;
       }
 
       const response = await fetch(searchUrl, {
