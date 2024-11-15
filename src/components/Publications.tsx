@@ -9,7 +9,12 @@ interface PitchforkAlbum {
 
 type SpotifyAlbum = SpotifyApiAlbum;
 
-export default function Publications() {
+interface PublicationsProps {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export default function Publications({ accessToken, refreshToken }: PublicationsProps) {
   const [albums, setAlbums] = useState<PitchforkAlbum[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
