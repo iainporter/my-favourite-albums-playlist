@@ -15,8 +15,8 @@ describe('Spotify API Utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Mock the prototype methods
-    const mockRefreshResponse = {
+    // Create a mock instance
+    const mockRefreshTokenFn = jest.fn().mockResolvedValue({
       body: {
         access_token: mockNewAccessToken,
         refresh_token: mockRefreshToken,
@@ -24,19 +24,15 @@ describe('Spotify API Utils', () => {
         token_type: 'Bearer',
         scope: 'playlist-modify-public playlist-modify-private'
       }
-    };
-
-    // Create prototype methods
-    SpotifyWebApi.prototype.setRefreshToken = jest.fn();
-    SpotifyWebApi.prototype.refreshAccessToken = jest.fn().mockResolvedValue(mockRefreshResponse);
-
-    // Mock the constructor
-    (SpotifyWebApi as jest.Mock).mockImplementation(() => {
-      return {
-        setRefreshToken: SpotifyWebApi.prototype.setRefreshToken,
-        refreshAccessToken: SpotifyWebApi.prototype.refreshAccessToken
-      };
     });
+
+    const mockSetRefreshTokenFn = jest.fn();
+
+    // Mock the SpotifyWebApi constructor
+    (SpotifyWebApi as jest.Mock).mockImplementation(() => ({
+      setRefreshToken: mockSetRefreshTokenFn,
+      refreshAccessToken: mockRefreshTokenFn
+    }));
   });
 
   it('should refresh token and retry request when receiving 401', async () => {
@@ -76,10 +72,13 @@ describe('Spotify API Utils', () => {
       initialOptions
     );
 
+    // Get the mock instance that was created
+    const mockSpotifyInstance = (SpotifyWebApi as jest.Mock).mock.results[0].value;
+    
     // Verify token refresh was attempted
-    expect(SpotifyWebApi.prototype.setRefreshToken)
+    expect(mockSpotifyInstance.setRefreshToken)
       .toHaveBeenCalledWith(mockRefreshToken);
-    expect(SpotifyWebApi.prototype.refreshAccessToken)
+    expect(mockSpotifyInstance.refreshAccessToken)
       .toHaveBeenCalled();
 
     // Verify the retry request with new token
@@ -122,8 +121,11 @@ describe('Spotify API Utils', () => {
     // Verify only one request was made
     expect(fetch).toHaveBeenCalledTimes(1);
     
+    // Get the mock instance that was created
+    const mockSpotifyInstance = (SpotifyWebApi as jest.Mock).mock.results[0].value;
+    
     // Verify token refresh was not attempted
-    expect(SpotifyWebApi.prototype.refreshAccessToken)
+    expect(mockSpotifyInstance.refreshAccessToken)
       .not.toHaveBeenCalled();
 
     // Verify response
