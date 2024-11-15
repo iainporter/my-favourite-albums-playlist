@@ -98,8 +98,25 @@ describe('Spotify API Utils', () => {
   });
 
   it('should not refresh token for non-401 errors', async () => {
-    // Create a SpotifyWebApi instance first
-    const mockSpotifyInstance = new SpotifyWebApi();
+    // Create mock functions
+    const mockRefreshAccessToken = jest.fn().mockResolvedValue({
+      body: {
+        access_token: mockNewAccessToken,
+        refresh_token: mockRefreshToken,
+        expires_in: 3600,
+        token_type: 'Bearer',
+        scope: 'playlist-modify-public playlist-modify-private'
+      }
+    });
+
+    // Create a SpotifyWebApi instance with mocked refreshAccessToken
+    const mockSpotifyInstance = {
+      setRefreshToken: jest.fn(),
+      refreshAccessToken: mockRefreshAccessToken
+    };
+
+    // Mock the constructor to return our instance
+    (SpotifyWebApi as jest.Mock).mockImplementation(() => mockSpotifyInstance);
 
     (global.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
@@ -125,8 +142,7 @@ describe('Spotify API Utils', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
     
     // Verify token refresh was not attempted
-    expect(mockSpotifyInstance.refreshAccessToken)
-      .not.toHaveBeenCalled();
+    expect(mockRefreshAccessToken).not.toHaveBeenCalled();
 
     // Verify response
     expect(response.status).toBe(200);
