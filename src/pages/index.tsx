@@ -30,8 +30,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+        <div className="max-w-8xl mx-auto">
+          <h1 className="text-5xl md:text-2xl font-bold mb-4 text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
             Spotify Playlist Manager
           </h1>
           
@@ -52,6 +52,8 @@ export default function Home() {
                   <ol className="text-left text-gray-300 space-y-3 list-decimal list-inside">
                     <li>Connect your Spotify account using the button below</li>
                     <li>Import a list of your favourite albums</li>
+                    <li>Search for Artists or Albums</li>
+                    <li>Load albums from recommendations from publications</li>
                     <li>Create new playlists or add tracks to existing ones</li>
                     <li>Manage your playlists with an intuitive interface</li>
                   </ol>
