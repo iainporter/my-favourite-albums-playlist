@@ -6,10 +6,20 @@ interface PitchforkAlbum {
   publishDate: string;
 }
 
+interface SpotifyAlbum {
+  id: string;
+  name: string;
+  artists: Array<{ name: string }>;
+  images: Array<{ url: string }>;
+  external_urls: { spotify: string };
+}
+
 export default function Publications() {
   const [albums, setAlbums] = useState<PitchforkAlbum[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<{ [key: string]: SpotifyAlbum[] }>({});
+  const [expandedAlbum, setExpandedAlbum] = useState<string | null>(null);
 
   const fetchPitchforkAlbums = async () => {
     setLoading(true);
@@ -25,6 +35,35 @@ export default function Publications() {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const searchSpotify = async (artist: string, album: string) => {
+    const searchKey = `${artist}-${album}`;
+    try {
+      const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(`${artist} ${album}`)}`);
+      if (!response.ok) {
+        throw new Error('Failed to search Spotify');
+      }
+      const data = await response.json();
+      setSearchResults(prev => ({
+        ...prev,
+        [searchKey]: data.albums.items
+      }));
+    } catch (err) {
+      console.error('Search error:', err);
+    }
+  };
+
+  const handleAlbumClick = async (artist: string, album: string) => {
+    const searchKey = `${artist}-${album}`;
+    if (expandedAlbum === searchKey) {
+      setExpandedAlbum(null);
+    } else {
+      setExpandedAlbum(searchKey);
+      if (!searchResults[searchKey]) {
+        await searchSpotify(artist, album);
+      }
     }
   };
 
@@ -54,13 +93,42 @@ export default function Publications() {
             <h2 className="text-white text-xl font-bold mb-4">Pitchfork Albums</h2>
             <div className="max-h-96 overflow-y-auto">
               {albums.map((album, index) => (
-                <div 
-                  key={index} 
-                  className="text-white py-2 px-4 hover:bg-gray-700 rounded transition-colors duration-200 mb-2"
-                >
-                  <div className="font-bold">{album.artist}</div>
-                  <div className="text-gray-300">{album.album}</div>
-                  <div className="text-sm text-gray-400">{album.publishDate}</div>
+                <div key={index}>
+                  <div 
+                    onClick={() => handleAlbumClick(album.artist, album.album)}
+                    className="text-white py-2 px-4 hover:bg-gray-700 rounded transition-colors duration-200 mb-2 cursor-pointer"
+                  >
+                    <div className="font-bold">{album.artist}</div>
+                    <div className="text-gray-300">{album.album}</div>
+                    <div className="text-sm text-gray-400">{album.publishDate}</div>
+                  </div>
+                  {expandedAlbum === `${album.artist}-${album.album}` && (
+                    <div className="ml-4 mb-4 p-4 bg-gray-700 rounded">
+                      {searchResults[`${album.artist}-${album.album}`]?.map((spotifyAlbum) => (
+                        <a
+                          key={spotifyAlbum.id}
+                          href={spotifyAlbum.external_urls.spotify}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center p-2 hover:bg-gray-600 rounded mb-2"
+                        >
+                          {spotifyAlbum.images[2] && (
+                            <img
+                              src={spotifyAlbum.images[2].url}
+                              alt={spotifyAlbum.name}
+                              className="w-12 h-12 mr-4"
+                            />
+                          )}
+                          <div>
+                            <div className="text-white font-semibold">{spotifyAlbum.name}</div>
+                            <div className="text-gray-300 text-sm">
+                              {spotifyAlbum.artists.map(a => a.name).join(', ')}
+                            </div>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
