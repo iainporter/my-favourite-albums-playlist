@@ -1,11 +1,13 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   webpack: (config, { dev, isServer }) => {
     // Configure webpack caching
     config.cache = {
       type: 'filesystem',
       version: `${process.env.NODE_ENV}_${Date.now()}`,
-      cacheDirectory: '.next/cache',
+      cacheDirectory: path.resolve(__dirname, 'node_modules/.cache/webpack'),
       store: 'pack',
       buildDependencies: {
         config: [__filename],
