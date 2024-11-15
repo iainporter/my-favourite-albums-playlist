@@ -38,10 +38,10 @@ export default function Publications() {
     }
   };
 
-  const searchSpotify = async (artist: string, album: string) => {
+  const handleSpotifySearch = async (artist: string, album: string) => {
     const searchKey = `${artist}-${album}`;
     try {
-      const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(`${artist} ${album}`)}`);
+      const response = await fetch(`/api/spotify/search?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}`);
       if (!response.ok) {
         throw new Error('Failed to search Spotify');
       }
