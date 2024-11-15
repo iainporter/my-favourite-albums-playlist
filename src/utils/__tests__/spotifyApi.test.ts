@@ -15,22 +15,28 @@ describe('Spotify API Utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Create a mock instance with the correct response structure
-    const mockSpotifyApi = {
-      setRefreshToken: jest.fn(),
-      refreshAccessToken: jest.fn().mockResolvedValue({
-        body: {
-          access_token: mockNewAccessToken,
-          refresh_token: mockRefreshToken,
-          expires_in: 3600,
-          token_type: 'Bearer',
-          scope: 'playlist-modify-public playlist-modify-private'
-        }
-      })
+    // Mock the prototype methods
+    const mockRefreshResponse = {
+      body: {
+        access_token: mockNewAccessToken,
+        refresh_token: mockRefreshToken,
+        expires_in: 3600,
+        token_type: 'Bearer',
+        scope: 'playlist-modify-public playlist-modify-private'
+      }
     };
 
-    // Mock the constructor to return our mock instance
-    (SpotifyWebApi as jest.Mock).mockImplementation(() => mockSpotifyApi);
+    // Create prototype methods
+    SpotifyWebApi.prototype.setRefreshToken = jest.fn();
+    SpotifyWebApi.prototype.refreshAccessToken = jest.fn().mockResolvedValue(mockRefreshResponse);
+
+    // Mock the constructor
+    (SpotifyWebApi as jest.Mock).mockImplementation(() => {
+      return {
+        setRefreshToken: SpotifyWebApi.prototype.setRefreshToken,
+        refreshAccessToken: SpotifyWebApi.prototype.refreshAccessToken
+      };
+    });
   });
 
   it('should refresh token and retry request when receiving 401', async () => {

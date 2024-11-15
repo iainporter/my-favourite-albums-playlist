@@ -22,7 +22,11 @@ export async function refreshAccessToken(refreshToken: string) {
     spotifyApi.setRefreshToken(refreshToken);
     const data = await spotifyApi.refreshAccessToken() as SpotifyTokenResponse;
     
+    // Debug logging
+    console.log('Refresh token response:', JSON.stringify(data, null, 2));
+    
     if (!data?.body?.access_token) {
+      console.error('Invalid response structure:', data);
       throw new Error('Invalid response from Spotify refresh token request');
     }
 
