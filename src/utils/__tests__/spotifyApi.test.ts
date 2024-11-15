@@ -98,6 +98,9 @@ describe('Spotify API Utils', () => {
   });
 
   it('should not refresh token for non-401 errors', async () => {
+    // Create a SpotifyWebApi instance first
+    const mockSpotifyInstance = new SpotifyWebApi();
+
     (global.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
         status: 200,
@@ -120,9 +123,6 @@ describe('Spotify API Utils', () => {
 
     // Verify only one request was made
     expect(fetch).toHaveBeenCalledTimes(1);
-    
-    // Get the mock instance that was created
-    const mockSpotifyInstance = (SpotifyWebApi as jest.Mock).mock.results[0].value;
     
     // Verify token refresh was not attempted
     expect(mockSpotifyInstance.refreshAccessToken)
