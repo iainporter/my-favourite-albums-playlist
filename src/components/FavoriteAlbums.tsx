@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import SearchForm from './SearchForm';
 import { Analytics } from "@vercel/analytics/react"
 import { Album } from '../types/album';
+import Publications from './Publications';
 
 type SortField = 'artist' | 'album' | 'year' | 'rating';
 type SortDirection = 'asc' | 'desc';
@@ -32,7 +33,7 @@ interface FavoriteAlbumsProps {
 }
 
 export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
-  const [activeTab, setActiveTab] = useState<'import' | 'search'>('import');
+  const [activeTab, setActiveTab] = useState<'import' | 'search' | 'publications'>('import');
   const [albums, setAlbums] = useState<Album[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
@@ -58,7 +59,7 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
   const [preservedPrevUrl, setPreservedPrevUrl] = useState<string | null>(null);
 
   // Preserve search state when switching tabs
-  const handleTabChange = (tab: 'import' | 'search') => {
+  const handleTabChange = (tab: 'import' | 'search' | 'publications') => {
     if (tab === 'import') {
       // Save current search results and pagination state before switching to import
       setPreservedSearchResults(searchAlbumResults);
@@ -288,6 +289,16 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
             >
               Search
             </button>
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                activeTab === 'publications'
+                  ? 'text-spotify-green border-b-2 border-spotify-green'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              onClick={() => handleTabChange('publications')}
+            >
+              Publications
+            </button>
           </div>
         </div>
         <div className="flex items-center space-x-3">
@@ -334,7 +345,9 @@ export default function FavoriteAlbums({ accessToken }: FavoriteAlbumsProps) {
         </div>
       </div>
 
-      {activeTab === 'search' ? (
+      {activeTab === 'publications' ? (
+        <Publications />
+      ) : activeTab === 'search' ? (
         <div className="flex-1 overflow-y-auto px-6">
           <SearchForm 
             accessToken={accessToken}
