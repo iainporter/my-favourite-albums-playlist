@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 
 
-interface Album {
+interface PitchforkAlbum {
   artist: string;
   album: string;
-  releaseDate: string;
-  rating: string;
+  publishDate: string;
 }
 
 export default function Publications() {
-  const [albums, setAlbums] = useState<Album[]>([]);
-  const [artists, setArtists] = useState<string[]>([]);
+  const [albums, setAlbums] = useState<PitchforkAlbum[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +18,7 @@ export default function Publications() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://pitchfork.com/reviews/best/high-scoring-albums/');
+      const response = await fetch('/api/spotify/pitchfork');
       if (!response.ok) {
         throw new Error('Failed to fetch albums');
       }
