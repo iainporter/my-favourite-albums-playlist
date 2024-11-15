@@ -33,31 +33,6 @@ export default function Publications() {
     }
   };
 
-  const handleSpotifySearch = async (artist: string, album: string) => {
-    const searchKey = `${artist}-${album}`;
-    try {
-      const response = await fetch('/api/spotify/search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ artist, album, limit: 25, offset: 0 }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to search Spotify');
-      }
-      
-      const data = await response.json();
-      setSearchResults(prev => ({
-        ...prev,
-        [searchKey]: data.albums.items
-      }));
-    } catch (err) {
-      console.error('Search error:', err);
-    }
-  };
-
   const handleAlbumClick = async (artist: string, album: string) => {
     const searchKey = `${artist}-${album}`;
     if (expandedAlbum === searchKey) {
@@ -65,7 +40,28 @@ export default function Publications() {
     } else {
       setExpandedAlbum(searchKey);
       if (!searchResults[searchKey]) {
-        await handleSpotifySearch(artist, album);
+        try {
+          const response = await fetch('/api/spotify/search', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ artist, album, limit: 25, offset: 0 }),
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to search Spotify');
+          }
+          
+          const data = await response.json();
+          setSearchResults(prev => ({
+            ...prev,
+            [searchKey]: data.albums.items
+          }));
+        } catch (err) {
+          console.error('Search error:', err);
+          setError(err instanceof Error ? err.message : 'Failed to search Spotify');
+        }
       }
     }
   };
