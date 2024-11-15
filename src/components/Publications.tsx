@@ -20,7 +20,7 @@ export default function Publications() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/spotify/pitchfork');
+      const response = await fetch('https://pitchfork.com/reviews/best/high-scoring-albums/');
       if (!response.ok) {
         throw new Error('Failed to fetch albums');
       }

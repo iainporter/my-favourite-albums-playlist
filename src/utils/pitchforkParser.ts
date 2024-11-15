@@ -52,7 +52,7 @@ export const convertToAlbum = (pitchforkAlbum: PitchforkAlbum): Album => {
   return {
     artist: pitchforkAlbum.artist,
     album: pitchforkAlbum.album,
-    year,
+    year: pitchforkAlbum.publishDate,
     rating: '8.0+' // Since these are high-scoring albums
   };
 };
