@@ -48,8 +48,6 @@ export default function Publications({ accessToken, refreshToken }: Publications
     setExpandedAlbum(searchKey);
     if (!searchResults[searchKey]) {
       try {
-        const accessToken = 'YOUR_ACCESS_TOKEN'; // Replace with your actual access token
-        const refreshToken = 'YOUR_REFRESH_TOKEN'; // Replace with your actual refresh token
 
         const data = await searchSpotify(artist, album, accessToken, refreshToken);
         setSearchResults(prev => ({
