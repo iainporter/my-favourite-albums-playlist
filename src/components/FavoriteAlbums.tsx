@@ -37,7 +37,7 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
   const [activeTab, setActiveTab] = useState<'import' | 'search' | 'publications'>('import');
   const [albums, setAlbums] = useState<Album[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(25);
+  const [itemsPerPage] = useState(40);
   const [sortState, setSortState] = useState<SortState>({ field: 'artist', direction: 'asc' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -266,9 +266,9 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
-        <div className="flex flex-col space-y-4">
-          <h2 className="text-2xl font-bold text-white">My Favourite Albums</h2>
+      <div className="flex items-center justify-between mb-2 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-1">
+        <div className="flex flex-col space-y-2">
+          <h2 className="text-xl font-bold text-white">My Favourite Albums</h2>
           <div className="flex space-x-4 border-b border-gray-700">
             <button
               className={`px-4 py-2 text-sm font-medium ${
@@ -394,7 +394,7 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
                     <th
                       key={field}
                       onClick={() => handleSort(field as SortField)}
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray-700 transition-colors duration-200"
+                      className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray-700 transition-colors duration-200"
                     >
                       <div className="flex items-center space-x-1">
                         <span>{label}</span>
@@ -435,21 +435,21 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
                       onClick={() => handleAlbumClick(album)}
                       title="Click to view Spotify matches"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap w-12">
+                      <td className="px-3 py-2 whitespace-nowrap w-8">
                         <button
                           onClick={(e) => handleDelete(album.id, e)}
                           className="text-gray-400 hover:text-red-500 transition-colors duration-200"
                           title="Delete album"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">{album.artist}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{album.album}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{album.year}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{album.rating}</td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm">{album.artist}</td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm">{album.album}</td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm">{album.year}</td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm">{album.rating}</td>
                     </tr>
                     {expandedRow === album.id && searchResults[album.id] && (
                       <tr>
@@ -457,7 +457,7 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
                           {searchResults[album.id].map((spotifyAlbum) => (
                             <div key={spotifyAlbum.id}>
                               <div 
-                                className="flex items-center space-x-4 p-2 hover:bg-gray-700 rounded-lg cursor-pointer"
+                                className="flex items-center space-x-2 p-1 hover:bg-gray-700 rounded-lg cursor-pointer text-sm"
                                 onClick={() => {
                                   if (expandedTracks === spotifyAlbum.id) {
                                     setExpandedTracks(null);
@@ -490,7 +490,7 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
                                 <img
                                   src={spotifyAlbum.images[0]?.url}
                                   alt={spotifyAlbum.name}
-                                  className="w-16 h-16 rounded-md object-cover"
+                                  className="w-12 h-12 rounded-md object-cover"
                                 />
                                 <div className="flex-1">
                                   <h3 className="text-white">{spotifyAlbum.name}</h3>
@@ -556,7 +556,7 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
           </div>
 
           {albums.length > 0 && (
-            <div className="sticky bottom-0 mt-4 flex items-center justify-between px-6 py-3 bg-gray-800/95 backdrop-blur-sm border-t border-gray-700">
+            <div className="sticky bottom-0 mt-2 flex items-center justify-between px-3 py-2 bg-gray-800/95 backdrop-blur-sm border-t border-gray-700">
               <div className="flex items-center text-sm text-gray-400">
                 Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, albums.length)} of {albums.length} albums
               </div>
