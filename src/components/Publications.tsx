@@ -39,23 +39,14 @@ export default function Publications() {
       setExpandedAlbum(null);
       return;
     }
-    
+
     setExpandedAlbum(searchKey);
     if (!searchResults[searchKey]) {
       try {
-        const response = await fetch('/api/spotify/search', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ artist, album, limit: 25, offset: 0 }),
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to search Spotify');
-        }
-        
-        const data = await response.json();
+        const accessToken = 'YOUR_ACCESS_TOKEN'; // Replace with your actual access token
+        const refreshToken = 'YOUR_REFRESH_TOKEN'; // Replace with your actual refresh token
+
+        const data = await searchSpotify(artist, album, accessToken, refreshToken);
         setSearchResults(prev => ({
           ...prev,
           [searchKey]: data.albums.items
@@ -70,7 +61,7 @@ export default function Publications() {
   return (
     <div className="flex-1 flex flex-col h-full">
       <div className="p-4">
-        <button 
+        <button
           onClick={fetchPitchforkAlbums}
           className="w-40 h-16 bg-black text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200"
           disabled={loading}
@@ -80,7 +71,7 @@ export default function Publications() {
           </span>
         </button>
       </div>
-      
+
       {error && (
         <div className="text-red-500 p-4">
           {error}
@@ -94,7 +85,7 @@ export default function Publications() {
             <div className="max-h-96 overflow-y-auto">
               {albums.map((album, index) => (
                 <div key={index}>
-                  <div 
+                  <div
                     onClick={() => handleAlbumClick(album.artist, album.album)}
                     className="text-white py-2 px-4 hover:bg-gray-700 rounded transition-colors duration-200 mb-2 cursor-pointer"
                   >
