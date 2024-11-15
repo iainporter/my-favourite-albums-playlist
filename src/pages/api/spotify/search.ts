@@ -3,15 +3,14 @@ import { getSession } from 'next-auth/react';
 import { searchSpotify } from '../../../utils/spotifyApi';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { artist = '', album = '', q, offset = '0', limit = '20' } = req.query;
+  const { artist = '', album = '', offset = 0, limit = 20 } = req.body;
 
-  // Support both new artist/album params and legacy q param
-  if (!artist && !album && !q) {
-    return res.status(400).json({ error: 'Either artist/album or q parameter is required' });
+  if (!artist && !album) {
+    return res.status(400).json({ error: 'Either artist or album parameter is required' });
   }
 
   try {
@@ -20,28 +19,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    let searchArtist = artist as string;
-    let searchAlbum = album as string;
-
-    // Handle legacy q parameter
-    if (q && !artist && !album) {
-      const qStr = String(q);
-      // Simple heuristic: if q contains "artist:" or "album:", parse it
-      if (qStr.includes('artist:') || qStr.includes('album:')) {
-        const artistMatch = qStr.match(/artist:([^ ]+)/);
-        const albumMatch = qStr.match(/album:([^ ]+)/);
-        searchArtist = artistMatch ? artistMatch[1] : '';
-        searchAlbum = albumMatch ? albumMatch[1] : '';
-      } else {
-        // If no specific format, use the whole query as a general search
-        searchArtist = qStr;
-        searchAlbum = '';
-      }
-    }
-
     const data = await searchSpotify(
-      searchArtist,
-      searchAlbum,
+      artist,
+      album,
       session.accessToken,
       session.refreshToken,
       Number(offset),

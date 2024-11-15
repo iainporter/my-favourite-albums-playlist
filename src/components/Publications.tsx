@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { searchSpotify, SpotifyAlbum as SpotifyApiAlbum } from '../utils/spotifyApi';
 
 interface PitchforkAlbum {
   artist: string;
@@ -6,13 +7,7 @@ interface PitchforkAlbum {
   publishDate: string;
 }
 
-interface SpotifyAlbum {
-  id: string;
-  name: string;
-  artists: Array<{ name: string }>;
-  images: Array<{ url: string }>;
-  external_urls: { spotify: string };
-}
+type SpotifyAlbum = SpotifyApiAlbum;
 
 export default function Publications() {
   const [albums, setAlbums] = useState<PitchforkAlbum[]>([]);
@@ -41,10 +36,18 @@ export default function Publications() {
   const handleSpotifySearch = async (artist: string, album: string) => {
     const searchKey = `${artist}-${album}`;
     try {
-      const response = await fetch(`/api/spotify/search?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}&limit=25&offset=0`);
+      const response = await fetch('/api/spotify/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ artist, album, limit: 25, offset: 0 }),
+      });
+      
       if (!response.ok) {
         throw new Error('Failed to search Spotify');
       }
+      
       const data = await response.json();
       setSearchResults(prev => ({
         ...prev,
