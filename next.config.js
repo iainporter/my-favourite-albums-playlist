@@ -9,19 +9,21 @@ const nextConfig = {
         net: false,
         tls: false,
         child_process: false,
-        url: require.resolve('url/'),
       };
     }
     
     // Handle node: protocol
     config.resolve.alias = {
       ...config.resolve.alias,
+      url: require.resolve('url/'),
       'node:url': require.resolve('url/'),
       'node:buffer': require.resolve('buffer/'),
       'node:util': require.resolve('util/'),
       'node:stream': require.resolve('stream-browserify'),
       'node:http': require.resolve('stream-http'),
       'node:https': require.resolve('https-browserify'),
+      buffer: require.resolve('buffer/'),
+      stream: require.resolve('stream-browserify'),
     };
 
     return config;
