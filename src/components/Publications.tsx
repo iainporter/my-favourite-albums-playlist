@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { JSDOM } from 'jsdom';
+
 
 interface Album {
   artist: string;
@@ -14,23 +14,18 @@ export default function Publications() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const parseArtistNames = (html: string): string[] => {
-    const dom = new JSDOM(html);
-    const doc = dom.window.document;
-    const artistElements = doc.querySelectorAll('.SummaryItemSubHedBase-gMyBBg.bijetA.summary-item__sub-hed');
-    return Array.from(artistElements).map(element => element.textContent?.trim() || '');
-  };
+
 
   const fetchPitchforkAlbums = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://pitchfork.com/reviews/best/high-scoring-albums/');
+      const response = await fetch('/api/spotify/pitchfork');
       if (!response.ok) {
         throw new Error('Failed to fetch albums');
       }
-      const data = await response.text();
-      const artistNames = parseArtistNames(data);
+      const data = await response.json();
+      const artistNames = data.map((album: { artist: string }) => album.artist);
       setArtists(artistNames);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

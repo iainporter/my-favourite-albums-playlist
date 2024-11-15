@@ -2,6 +2,7 @@
 const nextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
+      // Fallback for Node.js built-in modules
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -14,7 +15,7 @@ const nextConfig = {
         path: false,
         stream: false,
         util: false,
-        url: false,
+        url: require.resolve('url'),
         crypto: false,
       };
 
@@ -38,10 +39,16 @@ const nextConfig = {
       });
     }
 
+    // Add a custom plugin to handle node: protocol
+    config.plugins.push(new (require('webpack')).NormalModuleReplacementPlugin(
+      /^node:/,
+      (resource) => {
+        resource.request = resource.request.replace(/^node:/, '');
+      }
+    ));
+
     return config;
   },
-  // Add transpilePackages to handle any problematic dependencies
-  transpilePackages: ['spotify-web-api-node'],
 };
 
 module.exports = nextConfig;

@@ -19,6 +19,7 @@
     "jsdom": "^25.0.1",
     "next": "^15.0.3",
     "next-auth": "^4.24.10",
+    "next-transpile-modules": "^10.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "spotify-web-api-node": "^5.0.2",
