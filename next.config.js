@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
+  webpack: (config, { dev, isServer }) => {
+    // Disable cache in development
+    if (dev) {
+      config.cache = false;
+    }
+
     if (!isServer) {
       config.resolve = {
         ...config.resolve,
@@ -21,7 +26,6 @@ const nextConfig = {
         },
       };
 
-      // Handle node: protocol
       config.resolve.alias = {
         ...config.resolve.alias,
         url: false,
@@ -38,6 +42,8 @@ const nextConfig = {
 
     return config;
   },
+  // Disable React Strict Mode as it can cause issues with some dependencies
+  reactStrictMode: false,
 };
 
 module.exports = nextConfig;
