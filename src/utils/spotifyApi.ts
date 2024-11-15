@@ -7,16 +7,28 @@ const spotifyApi = new SpotifyWebApi({
   redirectUri: SPOTIFY_CONFIG.REDIRECT_URI,
 });
 
+interface SpotifyTokenResponse {
+  body: {
+    access_token: string;
+    refresh_token?: string;
+    expires_in: number;
+    token_type: string;
+    scope: string;
+  };
+}
+
 export async function refreshAccessToken(refreshToken: string) {
   try {
     spotifyApi.setRefreshToken(refreshToken);
-    const data = await spotifyApi.refreshAccessToken();
-    if (!data || !data.body) {
+    const data = await spotifyApi.refreshAccessToken() as SpotifyTokenResponse;
+    
+    if (!data?.body?.access_token) {
       throw new Error('Invalid response from Spotify refresh token request');
     }
+
     return {
       accessToken: data.body.access_token,
-      refreshToken: refreshToken,
+      refreshToken: refreshToken, // Use the original refresh token as the new one is optional
       expiresIn: data.body.expires_in
     };
   } catch (error) {

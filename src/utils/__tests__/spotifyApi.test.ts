@@ -15,13 +15,16 @@ describe('Spotify API Utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Create a mock instance
+    // Create a mock instance with the correct response structure
     const mockSpotifyApi = {
       setRefreshToken: jest.fn(),
       refreshAccessToken: jest.fn().mockResolvedValue({
         body: {
           access_token: mockNewAccessToken,
-          expires_in: 3600
+          refresh_token: mockRefreshToken,
+          expires_in: 3600,
+          token_type: 'Bearer',
+          scope: 'playlist-modify-public playlist-modify-private'
         }
       })
     };
