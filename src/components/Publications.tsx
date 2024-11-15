@@ -41,15 +41,7 @@ export default function Publications() {
   const handleSpotifySearch = async (artist: string, album: string) => {
     const searchKey = `${artist}-${album}`;
     try {
-        const fullQuery = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
-        const itemsPerPage = 25;
-        const offset = 25;
-        const searchUrl = `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=${itemsPerPage}&offset=${offset}`;
-        const response = await fetch(searchUrl, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
+      const response = await fetch(`/api/spotify/search?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}&limit=25&offset=0`);
       if (!response.ok) {
         throw new Error('Failed to search Spotify');
       }
