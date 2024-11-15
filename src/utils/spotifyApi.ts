@@ -1,11 +1,15 @@
 import { SPOTIFY_CONFIG } from '../config/spotify';
 import SpotifyWebApi from 'spotify-web-api-node';
 
-const spotifyApi = new SpotifyWebApi({
+// Create default instance
+const defaultSpotifyApi = new SpotifyWebApi({
   clientId: SPOTIFY_CONFIG.CLIENT_ID,
   clientSecret: SPOTIFY_CONFIG.CLIENT_SECRET,
   redirectUri: SPOTIFY_CONFIG.REDIRECT_URI,
 });
+
+// Export for testing purposes
+export const getSpotifyApi = () => defaultSpotifyApi;
 
 interface SpotifyTokenResponse {
   body: {
@@ -17,10 +21,10 @@ interface SpotifyTokenResponse {
   };
 }
 
-export async function refreshAccessToken(refreshToken: string) {
+export async function refreshAccessToken(refreshToken: string, spotifyApiInstance = getSpotifyApi()) {
   try {
-    spotifyApi.setRefreshToken(refreshToken);
-    const data = await spotifyApi.refreshAccessToken() as SpotifyTokenResponse;
+    spotifyApiInstance.setRefreshToken(refreshToken);
+    const data = await spotifyApiInstance.refreshAccessToken() as SpotifyTokenResponse;
     
     // Debug logging
     console.log('Refresh token response:', JSON.stringify(data, null, 2));

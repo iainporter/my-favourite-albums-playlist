@@ -1,8 +1,12 @@
-import { fetchWithTokenRefresh, refreshAccessToken } from '../spotifyApi';
+import { fetchWithTokenRefresh, refreshAccessToken, getSpotifyApi } from '../spotifyApi';
 import SpotifyWebApi from 'spotify-web-api-node';
 
-// Mock SpotifyWebApi
+// Mock SpotifyWebApi and getSpotifyApi
 jest.mock('spotify-web-api-node');
+jest.mock('../spotifyApi', () => ({
+  ...jest.requireActual('../spotifyApi'),
+  getSpotifyApi: jest.fn()
+}));
 
 // Mock global fetch
 global.fetch = jest.fn();
@@ -15,7 +19,7 @@ describe('Spotify API Utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Create a mock instance
+    // Create mock functions
     const mockRefreshTokenFn = jest.fn().mockResolvedValue({
       body: {
         access_token: mockNewAccessToken,
@@ -28,11 +32,17 @@ describe('Spotify API Utils', () => {
 
     const mockSetRefreshTokenFn = jest.fn();
 
-    // Mock the SpotifyWebApi constructor
-    (SpotifyWebApi as jest.Mock).mockImplementation(() => ({
+    // Create mock instance
+    const mockSpotifyInstance = {
       setRefreshToken: mockSetRefreshTokenFn,
       refreshAccessToken: mockRefreshTokenFn
-    }));
+    };
+
+    // Mock the SpotifyWebApi constructor
+    (SpotifyWebApi as jest.Mock).mockImplementation(() => mockSpotifyInstance);
+
+    // Mock getSpotifyApi to return our mock instance
+    (getSpotifyApi as jest.Mock).mockReturnValue(mockSpotifyInstance);
   });
 
   it('should refresh token and retry request when receiving 401', async () => {
@@ -98,25 +108,8 @@ describe('Spotify API Utils', () => {
   });
 
   it('should not refresh token for non-401 errors', async () => {
-    // Create mock functions
-    const mockRefreshAccessToken = jest.fn().mockResolvedValue({
-      body: {
-        access_token: mockNewAccessToken,
-        refresh_token: mockRefreshToken,
-        expires_in: 3600,
-        token_type: 'Bearer',
-        scope: 'playlist-modify-public playlist-modify-private'
-      }
-    });
-
-    // Create a SpotifyWebApi instance with mocked refreshAccessToken
-    const mockSpotifyInstance = {
-      setRefreshToken: jest.fn(),
-      refreshAccessToken: mockRefreshAccessToken
-    };
-
-    // Mock the constructor to return our instance
-    (SpotifyWebApi as jest.Mock).mockImplementation(() => mockSpotifyInstance);
+    // Get the mock instance that was set up in beforeEach
+    const mockSpotifyInstance = getSpotifyApi();
 
     (global.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
