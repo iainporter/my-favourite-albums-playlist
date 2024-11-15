@@ -14,15 +14,20 @@ describe('Spotify API Utils', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (SpotifyWebApi as jest.Mock).mockImplementation(() => ({
+    
+    // Create a mock instance
+    const mockSpotifyApi = {
       setRefreshToken: jest.fn(),
       refreshAccessToken: jest.fn().mockResolvedValue({
-        body: { 
+        body: {
           access_token: mockNewAccessToken,
           expires_in: 3600
         }
       })
-    }));
+    };
+
+    // Mock the constructor to return our mock instance
+    (SpotifyWebApi as jest.Mock).mockImplementation(() => mockSpotifyApi);
   });
 
   it('should refresh token and retry request when receiving 401', async () => {
