@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { JSDOM } from 'jsdom';
 
 interface Album {
   artist: string;
@@ -9,19 +10,28 @@ interface Album {
 
 export default function Publications() {
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [artists, setArtists] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const parseArtistNames = (html: string): string[] => {
+    const dom = new JSDOM(html);
+    const doc = dom.window.document;
+    const artistElements = doc.querySelectorAll('.SummaryItemSubHedBase-gMyBBg.bijetA.summary-item__sub-hed');
+    return Array.from(artistElements).map(element => element.textContent?.trim() || '');
+  };
 
   const fetchPitchforkAlbums = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://pitchfork.com/reviews/best/high-scoring-albums/');
+      const response = await fetch('/api/spotify/pitchfork');
       if (!response.ok) {
         throw new Error('Failed to fetch albums');
       }
-      const data = await response.json();
-      setAlbums(data);
+      const data = await response.text();
+      const artistNames = parseArtistNames(data);
+      setArtists(artistNames);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -38,7 +48,7 @@ export default function Publications() {
           disabled={loading}
         >
           <span className="text-xl font-bold">
-            {loading ? 'Loading...' : 'Pitchfork 8.0+ Albums'}
+            {loading ? 'Loading...' : 'Fetch Pitchfork Artists'}
           </span>
         </button>
       </div>
@@ -50,23 +60,19 @@ export default function Publications() {
       )}
 
       <div className="flex-1 overflow-auto p-4">
-        {albums.length > 0 && (
-          <div className="grid gap-4">
-            {albums.map((album, index) => (
-              <div 
-                key={index} 
-                className="bg-gray-800 p-4 rounded-lg shadow-lg"
-              >
-                <div className="text-white font-bold">{album.artist}</div>
-                <div className="text-gray-300">{album.album}</div>
-                <div className="text-gray-400 text-sm">
-                  Released: {album.releaseDate}
+        {artists.length > 0 && (
+          <div className="bg-gray-800 rounded-lg shadow-lg p-4">
+            <h2 className="text-white text-xl font-bold mb-4">Artist Names</h2>
+            <div className="max-h-96 overflow-y-auto">
+              {artists.map((artist, index) => (
+                <div 
+                  key={index} 
+                  className="text-white py-2 px-4 hover:bg-gray-700 rounded transition-colors duration-200"
+                >
+                  {artist}
                 </div>
-                <div className="text-spotify-green font-bold">
-                  Rating: {album.rating}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
