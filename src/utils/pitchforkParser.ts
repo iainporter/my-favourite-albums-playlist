@@ -1,4 +1,5 @@
 import { Album } from '../types/album';
+import { JSDOM } from 'jsdom';
 
 export interface PitchforkAlbum {
   artist: string;
@@ -9,9 +10,9 @@ export interface PitchforkAlbum {
 export const parsePitchforkHtml = (html: string): PitchforkAlbum[] => {
   const albums: PitchforkAlbum[] = [];
   
-  // Create a temporary DOM element to parse the HTML
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
+  // Create a temporary DOM element to parse the HTML using jsdom
+  const dom = new JSDOM(html);
+  const doc = dom.window.document;
   
   // Find all summary items
   const summaryItems = doc.querySelectorAll('.summary-item');

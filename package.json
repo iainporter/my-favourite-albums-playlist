@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@types/jsdom": "^21.1.7",
     "@types/spotify-web-api-node": "^5.0.11",
     "@vercel/analytics": "^1.4.0",
+    "jsdom": "^25.0.1",
     "next": "^15.0.3",
     "next-auth": "^4.24.10",
     "react": "18.2.0",
