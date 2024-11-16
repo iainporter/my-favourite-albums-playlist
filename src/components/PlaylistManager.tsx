@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
+import { spotifyApi } from '../utils/spotifyApi';
 
 interface CreatePlaylistModalProps {
   isOpen: boolean;
@@ -242,21 +243,10 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
 
   const handleRemoveTrack = async (playlistId: string, trackId: string) => {
     try {
-      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${playlistId}&action=remove_track`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ trackId }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to remove track from playlist');
-      }
+      await spotifyApi.removeItemFromPlaylist(accessToken, refreshToken, playlistId, `spotify:track:${trackId}`);
 
       // Update the playlist in the UI
-      const tracksResponse = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${playlistId}`);
-      const tracksData = await tracksResponse.json();
+      const tracksData = await spotifyApi.getPlaylistItems(accessToken, refreshToken, playlistId);
       
       setPlaylists(currentPlaylists => currentPlaylists.map(p =>
         p.id === playlistId
@@ -280,27 +270,14 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
       // Check if it's a track or album based on the URI
       const isTrack = item.uri?.startsWith('spotify:track:');
       
-      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${targetPlaylistId}&action=${isTrack ? 'add_track' : 'add_album'}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ uri: item.uri }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to add ${isTrack ? 'track' : 'album'} to playlist`);
-      }
-
-      const result = await response.json();
+      await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, item.uri);
       
       // Refresh the playlists
       await fetchPlaylists();
       
       // Fetch and expand the target playlist to show new tracks
       try {
-        const tracksResponse = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${targetPlaylistId}`);
-        const tracksData = await tracksResponse.json();
+        const tracksData = await spotifyApi.getPlaylistItems(accessToken, refreshToken, targetPlaylistId);
         
         setPlaylists(currentPlaylists => currentPlaylists.map(p =>
           p.id === targetPlaylistId
@@ -322,8 +299,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
     setIsLoading(true);
     try {
       console.log('Fetching playlists with token:', accessToken);
-      const response = await fetch(url || `/api/spotify/playlists?access_token=${accessToken}`);
-      const data = await response.json();
+      const data = await spotifyApi.getUserPlaylists(accessToken, refreshToken, 'me', currentPage - 1, itemsPerPage);
       console.log('Received playlist data:', data);
 
       if (data && data.items && Array.isArray(data.items)) {
@@ -362,8 +338,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
     // Expand and load tracks if not loaded
     setLoadingTracks(playlistId);
     try {
-      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}&playlist_id=${playlistId}`);
-      const data = await response.json();
+      const data = await spotifyApi.getPlaylistItems(accessToken, refreshToken, playlistId);
 
       setPlaylists(playlists.map(p =>
         p.id === playlistId
@@ -411,18 +386,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
 
   const handleCreatePlaylist = async (name: string) => {
     try {
-      const response = await fetch(`/api/spotify/playlists?access_token=${accessToken}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create playlist');
-      }
-
+      await spotifyApi.createPlaylist(accessToken, refreshToken, 'me', name);
       setIsCreateModalOpen(false);
       await fetchPlaylists();
     } catch (error) {
