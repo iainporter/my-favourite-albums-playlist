@@ -160,13 +160,31 @@ export default function Publications({ accessToken, refreshToken }: Publications
                               setTimeout(() => document.body.removeChild(dragIcon), 0);
                             }}
                           >
-                            {spotifyAlbum.images[2] && (
-                              <img
-                                src={spotifyAlbum.images[2].url}
-                                alt={spotifyAlbum.name}
-                                className="w-12 h-12"
-                              />
-                            )}
+                            <div className="flex items-center">
+                              {spotifyAlbum.images[2] && (
+                                <img
+                                  src={spotifyAlbum.images[2].url}
+                                  alt={spotifyAlbum.name}
+                                  className="w-12 h-12"
+                                />
+                              )}
+                              <div 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(spotifyAlbum.external_urls.spotify, '_blank');
+                                }}
+                                className="ml-2 p-2 hover:bg-gray-600 rounded-full cursor-pointer"
+                                title="Play on Spotify"
+                              >
+                                <svg 
+                                  className="w-6 h-6 text-green-500" 
+                                  fill="currentColor" 
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.707 16.707L11 11V5h2v5.172l5 5.121-1.293 1.414z"/>
+                                </svg>
+                              </div>
+                            </div>
                             <div className="flex-1">
                               <div className="text-white font-semibold">{spotifyAlbum.name}</div>
                               <div className="text-gray-300 text-sm">
