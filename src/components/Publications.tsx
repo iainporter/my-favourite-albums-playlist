@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { searchSpotify, SpotifyAlbum as SpotifyApiAlbum } from '../utils/spotifyApi';
+import { spotifyApi, SpotifyAlbum as SpotifyApiAlbum } from '../utils/spotifyApi';
 
 interface SpotifyTrack {
   id: string;
@@ -78,7 +78,7 @@ export default function Publications({ accessToken, refreshToken }: Publications
         if (!accessToken) {
           throw new Error('No access token available');
         }
-        const data = await searchSpotify(artist, album, accessToken, refreshToken);
+        const data = await spotifyApi.searchSpotify(artist, album, accessToken, refreshToken);
         setSearchResults(prev => ({
           ...prev,
           [searchKey]: data.albums.items
