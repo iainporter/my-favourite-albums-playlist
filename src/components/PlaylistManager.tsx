@@ -279,29 +279,31 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
       setAddingToPlaylist(targetPlaylistId);
       const item = JSON.parse(data);
       
-      // Check if it's a track or album based on the URI
-      const isTrack = item.uri?.startsWith('spotify:track:');
-      
+      // Add the item to the playlist
       await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, item.uri);
       
-      // Refresh the playlists
-      await fetchPlaylists();
+      // Fetch the updated tracks for the target playlist
+      const tracksData = await spotifyApi.getPlaylistItems(accessToken, refreshToken, targetPlaylistId);
       
-      // Fetch and expand the target playlist to show new tracks
-      try {
-        const tracksData = await spotifyApi.getPlaylistItems(accessToken, refreshToken, targetPlaylistId);
-        
-        setPlaylists(currentPlaylists => currentPlaylists.map(p =>
-          p.id === targetPlaylistId
-            ? { ...p, tracks: tracksData.items, isExpanded: true }
-            : { ...p, isExpanded: false }
-        ));
-      } catch (error) {
-        console.error('Error loading updated tracks:', error);
-      }
+      // Transform the tracks data to match the expected Track format
+      const transformedTracks = tracksData.items.map((item: any) => ({
+        id: item.track.id,
+        name: item.track.name,
+        artist: item.track.artists.map((a: any) => a.name).join(', '),
+        album: item.track.album.name,
+        duration_ms: item.track.duration_ms,
+        uri: item.track.uri
+      }));
+
+      // Update the playlists state with the new tracks
+      setPlaylists(currentPlaylists => currentPlaylists.map(p =>
+        p.id === targetPlaylistId
+          ? { ...p, tracks: transformedTracks, isExpanded: true }
+          : { ...p, isExpanded: false }
+      ));
     } catch (error) {
       console.error('Error handling drop:', error);
-      alert('Failed to add album to playlist. Please try again.');
+      alert('Failed to add item to playlist. Please try again.');
     } finally {
       setAddingToPlaylist(null);
     }
