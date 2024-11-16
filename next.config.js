@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
+  reactStrictMode: true,
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Fallback for Node.js built-in modules
