@@ -30,17 +30,22 @@ export default function Publications({ accessToken, refreshToken }: Publications
   const [expandedAlbum, setExpandedAlbum] = useState<string | null>(null);
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
+  const [currentList, setCurrentList] = useState<'high-rated' | 'best-new' | null>(null);
 
-  const fetchPitchforkAlbums = async () => {
+  const fetchPitchforkAlbums = async (type: 'high-rated' | 'best-new') => {
+    if (loading) return;
+    
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/spotify/pitchfork');
+      const url = type === 'best-new' ? '/api/spotify/pitchfork?type=best-new' : '/api/spotify/pitchfork';
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch albums');
       }
       const data = await response.json();
       setAlbums(data);
+      setCurrentList(type);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -94,32 +99,21 @@ export default function Publications({ accessToken, refreshToken }: Publications
     <div className="flex-1 flex flex-col h-full">
       <div className="p-4 flex gap-4">
         <button
-          onClick={fetchPitchforkAlbums}
-          className="w-40 h-16 bg-black text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200"
+          onClick={() => fetchPitchforkAlbums('high-rated')}
+          className={`w-40 h-16 ${currentList === 'high-rated' ? 'bg-gray-700' : 'bg-black'} text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200`}
           disabled={loading}
         >
           <span className="text-sm font-bold">
-            {loading ? 'Loading...' : 'Pitchfork 8.0+ new Albums'}
+            {loading && currentList === 'high-rated' ? 'Loading...' : 'Pitchfork 8.0+ Albums'}
           </span>
         </button>
         <button
-          onClick={() => {
-            setLoading(true);
-            setError(null);
-            fetch('/api/spotify/pitchfork?type=best-new')
-              .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch albums');
-                return response.json();
-              })
-              .then(data => setAlbums(data))
-              .catch(err => setError(err instanceof Error ? err.message : 'An error occurred'))
-              .finally(() => setLoading(false));
-          }}
-          className="w-40 h-16 bg-black text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200"
+          onClick={() => fetchPitchforkAlbums('best-new')}
+          className={`w-40 h-16 ${currentList === 'best-new' ? 'bg-gray-700' : 'bg-black'} text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200`}
           disabled={loading}
         >
           <span className="text-sm font-bold">
-            {loading ? 'Loading...' : 'Pitchfork Best New Albums'}
+            {loading && currentList === 'best-new' ? 'Loading...' : 'Pitchfork Best New Albums'}
           </span>
         </button>
       </div>
@@ -133,7 +127,9 @@ export default function Publications({ accessToken, refreshToken }: Publications
       <div className="flex-1 overflow-auto p-4">
         {albums.length > 0 && (
           <div className="bg-gray-800 rounded-lg shadow-lg p-4">
-            <h2 className="text-white text-xl font-bold mb-4">Pitchfork Albums</h2>
+            <h2 className="text-white text-xl font-bold mb-4">
+              {currentList === 'best-new' ? 'Pitchfork Best New Albums' : 'Pitchfork 8.0+ Albums'}
+            </h2>
             <div className="max-h-96 overflow-y-auto">
               {albums.map((album, index) => (
                 <div key={index}>
