@@ -250,9 +250,19 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
       // Update the playlist in the UI
       const tracksData = await spotifyApi.getPlaylistItems(accessToken, refreshToken, playlistId);
       
+      // Transform the tracks data to match the expected Track format
+      const transformedTracks = tracksData.items.map((item: any) => ({
+        id: item.track.id,
+        name: item.track.name,
+        artist: item.track.artists.map((a: any) => a.name).join(', '),
+        album: item.track.album.name,
+        duration_ms: item.track.duration_ms,
+        uri: item.track.uri
+      }));
+
       setPlaylists(currentPlaylists => currentPlaylists.map(p =>
         p.id === playlistId
-          ? { ...p, tracks: tracksData.items }
+          ? { ...p, tracks: transformedTracks }
           : p
       ));
     } catch (error) {
