@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { searchSpotify, SpotifyAlbum as SpotifyApiAlbum } from '../utils/spotifyApi';
 
+interface SpotifyTrack {
+  id: string;
+  name: string;
+  duration_ms: number;
+  track_number: number;
+  artists: { name: string }[];
+}
+
 interface PitchforkAlbum {
   artist: string;
   album: string;
@@ -20,6 +28,8 @@ export default function Publications({ accessToken, refreshToken }: Publications
   const [error, setError] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<{ [key: string]: SpotifyAlbum[] }>({});
   const [expandedAlbum, setExpandedAlbum] = useState<string | null>(null);
+  const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
+  const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
 
   const fetchPitchforkAlbums = async () => {
     setLoading(true);
@@ -35,6 +45,23 @@ export default function Publications({ accessToken, refreshToken }: Publications
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAlbumTracks = async (albumId: string) => {
+    try {
+      const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch tracks');
+      }
+      const data = await response.json();
+      setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
+    } catch (error) {
+      console.error('Error fetching tracks:', error);
     }
   };
 
@@ -101,27 +128,64 @@ export default function Publications({ accessToken, refreshToken }: Publications
                   {expandedAlbum === `${album.artist}-${album.album}` && (
                     <div className="ml-4 mb-4 p-4 bg-gray-700 rounded">
                       {searchResults[`${album.artist}-${album.album}`]?.map((spotifyAlbum) => (
-                        <a
-                          key={spotifyAlbum.id}
-                          href={spotifyAlbum.external_urls.spotify}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center p-2 hover:bg-gray-600 rounded mb-2"
-                        >
-                          {spotifyAlbum.images[2] && (
-                            <img
-                              src={spotifyAlbum.images[2].url}
-                              alt={spotifyAlbum.name}
-                              className="w-12 h-12 mr-4"
-                            />
-                          )}
-                          <div>
-                            <div className="text-white font-semibold">{spotifyAlbum.name}</div>
-                            <div className="text-gray-300 text-sm">
-                              {spotifyAlbum.artists.map(a => a.name).join(', ')}
+                        <div key={spotifyAlbum.id}>
+                          <div 
+                            className="flex items-center space-x-2 p-2 hover:bg-gray-600 rounded cursor-pointer"
+                            onClick={() => {
+                              if (expandedTracks === spotifyAlbum.id) {
+                                setExpandedTracks(null);
+                              } else {
+                                setExpandedTracks(spotifyAlbum.id);
+                                if (!albumTracks[spotifyAlbum.id]) {
+                                  fetchAlbumTracks(spotifyAlbum.id);
+                                }
+                              }
+                            }}
+                          >
+                            {spotifyAlbum.images[2] && (
+                              <img
+                                src={spotifyAlbum.images[2].url}
+                                alt={spotifyAlbum.name}
+                                className="w-12 h-12"
+                              />
+                            )}
+                            <div className="flex-1">
+                              <div className="text-white font-semibold">{spotifyAlbum.name}</div>
+                              <div className="text-gray-300 text-sm">
+                                {spotifyAlbum.artists.map(a => a.name).join(', ')}
+                              </div>
                             </div>
+                            <svg 
+                              className={`w-6 h-6 text-gray-400 transform transition-transform ${expandedTracks === spotifyAlbum.id ? 'rotate-180' : ''}`}
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
                           </div>
-                        </a>
+                          {expandedTracks === spotifyAlbum.id && (
+                            <div className="mt-2 ml-14 space-y-1">
+                              {albumTracks[spotifyAlbum.id] ? (
+                                albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
+                                  <div 
+                                    key={track.id}
+                                    className="flex items-center text-sm text-gray-300 p-2 hover:bg-gray-600 rounded"
+                                  >
+                                    <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
+                                    <span className="ml-4">{track.name}</span>
+                                    <span className="ml-auto text-gray-500">
+                                      {Math.floor(track.duration_ms / 60000)}:
+                                      {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
+                                    </span>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="text-gray-400 text-sm p-2">Loading tracks...</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}
