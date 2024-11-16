@@ -295,36 +295,35 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
     }
   };
 
-  const fetchPlaylists = async (url?: string) => {
+  const fetchPlaylists = async () => {
     setIsLoading(true);
     try {
-      console.log('Fetching playlists with token:', accessToken);
-      // Calculate the correct offset based on the current page
-      const offset = currentPage === 1 ? 0 : (currentPage - 1) * itemsPerPage;
-      console.log('Using offset:', offset);
-      
+      const offset = (currentPage - 1) * itemsPerPage;
       const data = await spotifyApi.getUserPlaylists(accessToken, refreshToken, offset, itemsPerPage);
-      console.log('Received playlist data:', data);
 
       if (data && data.items && Array.isArray(data.items)) {
-        console.log('Setting playlists:', data.items);
         setPlaylists(data.items);
-        // Only set next URL if there are more items
-        setNextUrl(offset + data.items.length < data.total ? 'next' : null);
-        // Only set prev URL if we're not on the first page
-        setPrevUrl(offset > 0 ? 'prev' : null);
         setTotalPlaylists(data.total);
+        
+        // Calculate if there should be next/previous pages
+        const hasNextPage = offset + data.items.length < data.total;
+        const hasPrevPage = currentPage > 1;
+        
+        setNextUrl(hasNextPage ? 'next' : null);
+        setPrevUrl(hasPrevPage ? 'prev' : null);
       } else {
         console.error('Invalid playlist data format:', data);
         setPlaylists([]);
         setNextUrl(null);
         setPrevUrl(null);
+        setTotalPlaylists(0);
       }
     } catch (error) {
       console.error('Error fetching playlists:', error);
       setPlaylists([]);
       setNextUrl(null);
       setPrevUrl(null);
+      setTotalPlaylists(0);
     }
     setIsLoading(false);
   };
@@ -359,13 +358,9 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
 
   useEffect(() => {
     if (accessToken && accessToken.length > 0) {
-      console.log('Access token available, fetching playlists...');
-      setCurrentPage(1); // Reset to first page when token changes
       fetchPlaylists();
-    } else {
-      console.log('No access token available');
     }
-  }, [accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [accessToken, currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const renderContent = () => {
     if (!Array.isArray(playlists) || playlists.length === 0) {
@@ -446,31 +441,25 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
         <div className="flex justify-center items-center space-x-4">
           <button
             onClick={() => {
-              if (prevUrl) {
-                setCurrentPage(prev => prev - 1);
-                fetchPlaylists();
-              }
+              setCurrentPage(prev => Math.max(1, prev - 1));
             }}
-            disabled={!prevUrl || isLoading}
+            disabled={currentPage <= 1 || isLoading}
             className={`px-4 py-2 rounded-full transition-colors duration-200 ${
-              prevUrl && !isLoading
+              currentPage > 1 && !isLoading
                 ? 'bg-spotify-green text-white hover:bg-green-600'
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
           >
             Previous
           </button>
-          <span className="text-gray-300">Page {currentPage}</span>
+          <span className="text-gray-300">Page {currentPage} of {Math.ceil(totalPlaylists / itemsPerPage)}</span>
           <button
             onClick={() => {
-              if (nextUrl) {
-                setCurrentPage(prev => prev + 1);
-                fetchPlaylists();
-              }
+              setCurrentPage(prev => Math.min(Math.ceil(totalPlaylists / itemsPerPage), prev + 1));
             }}
-            disabled={!nextUrl || isLoading}
+            disabled={currentPage >= Math.ceil(totalPlaylists / itemsPerPage) || isLoading}
             className={`px-4 py-2 rounded-full transition-colors duration-200 ${
-              nextUrl && !isLoading
+              currentPage < Math.ceil(totalPlaylists / itemsPerPage) && !isLoading
                 ? 'bg-spotify-green text-white hover:bg-green-600'
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
