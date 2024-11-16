@@ -58,7 +58,8 @@ interface Track {
   name: string;
   artist: string;
   album: string;
-  duration: number;
+  duration_ms: number;
+  uri: string;
 }
 
 interface Playlist {
@@ -74,7 +75,8 @@ interface PlaylistManagerProps {
   refreshToken: string;
 }
 
-function formatDuration(ms: number): string {
+function formatDuration(ms: number | undefined): string {
+  if (!ms) return '0:00';
   const minutes = Math.floor(ms / 60000);
   const seconds = Math.floor((ms % 60000) / 1000);
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -108,7 +110,7 @@ function TrackList({ tracks, playlistId, onRemoveTrack }: { tracks: Track[], pla
               <td className="px-4 py-3 whitespace-nowrap text-sm text-white">{track.artist}</td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.name}</td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration)}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration_ms)}</td>
             </tr>
           ))}
         </tbody>
@@ -344,10 +346,20 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
     setLoadingTracks(playlistId);
     try {
       const data = await spotifyApi.getPlaylistItems(accessToken, refreshToken, playlistId);
+      
+      // Transform the Spotify API response into our Track format
+      const transformedTracks = data.items.map((item: any) => ({
+        id: item.track.id,
+        name: item.track.name,
+        artist: item.track.artists.map((a: any) => a.name).join(', '),
+        album: item.track.album.name,
+        duration_ms: item.track.duration_ms,
+        uri: item.track.uri
+      }));
 
       setPlaylists(playlists.map(p =>
         p.id === playlistId
-          ? { ...p, tracks: data.items, isExpanded: true }
+          ? { ...p, tracks: transformedTracks, isExpanded: true }
           : { ...p, isExpanded: false }
       ));
     } catch (error) {
