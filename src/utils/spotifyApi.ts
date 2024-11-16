@@ -1,11 +1,4 @@
 import { SPOTIFY_CONFIG } from '../config/spotify';
-import SpotifyWebApi from 'spotify-web-api-node';
-
-const spotifyWebApi = new SpotifyWebApi({
-  clientId: SPOTIFY_CONFIG.CLIENT_ID,
-  clientSecret: SPOTIFY_CONFIG.CLIENT_SECRET,
-  redirectUri: SPOTIFY_CONFIG.REDIRECT_URI,
-});
 
 export interface SpotifyAlbum {
   id: string;
@@ -28,9 +21,31 @@ export interface SpotifySearchResponse {
 
 class SpotifyApi {
   private async refreshAccessToken(refreshToken: string): Promise<string> {
-    spotifyWebApi.setRefreshToken(refreshToken);
-    const data = await spotifyWebApi.refreshAccessToken();
-    return data.body.access_token;
+    try {
+      const response = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic ' + Buffer.from(
+            SPOTIFY_CONFIG.CLIENT_ID + ':' + SPOTIFY_CONFIG.CLIENT_SECRET
+          ).toString('base64'),
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+        }).toString(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh token');
+      }
+
+      const data = await response.json();
+      return data.access_token;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      throw error;
+    }
   }
 
   private async fetchWithTokenRefresh(
