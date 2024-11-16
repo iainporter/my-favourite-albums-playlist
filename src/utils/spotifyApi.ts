@@ -1,7 +1,7 @@
 import { SPOTIFY_CONFIG } from '../config/spotify';
 import SpotifyWebApi from 'spotify-web-api-node';
 
-const spotifyApi = new SpotifyWebApi({
+const spotifyWebApi = new SpotifyWebApi({
   clientId: SPOTIFY_CONFIG.CLIENT_ID,
   clientSecret: SPOTIFY_CONFIG.CLIENT_SECRET,
   redirectUri: SPOTIFY_CONFIG.REDIRECT_URI,
@@ -28,8 +28,8 @@ export interface SpotifySearchResponse {
 
 class SpotifyApi {
   private async refreshAccessToken(refreshToken: string): Promise<string> {
-    spotifyApi.setRefreshToken(refreshToken);
-    const data = await spotifyApi.refreshAccessToken();
+    spotifyWebApi.setRefreshToken(refreshToken);
+    const data = await spotifyWebApi.refreshAccessToken();
     return data.body.access_token;
   }
 
