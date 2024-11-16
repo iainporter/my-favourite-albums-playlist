@@ -101,8 +101,8 @@ class SpotifyApi {
     return response.json();
   }
 
-  async getUserPlaylists(accessToken: string, refreshToken: string, userId: string, offset: number = 0, limit: number = 20) {
-    const url = `https://api.spotify.com/v1/users/${userId}/playlists?offset=${offset}&limit=${limit}`;
+  async getUserPlaylists(accessToken: string, refreshToken: string, offset: number = 0, limit: number = 20) {
+    const url = `https://api.spotify.com/v1/me/playlists?offset=${offset}&limit=${limit}`;
     const response = await this.fetchWithTokenRefresh(
       url,
       {

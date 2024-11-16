@@ -299,7 +299,8 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
     setIsLoading(true);
     try {
       console.log('Fetching playlists with token:', accessToken);
-      const data = await spotifyApi.getUserPlaylists(accessToken, refreshToken, 'me', currentPage - 1, itemsPerPage);
+      const offset = (currentPage - 1) * itemsPerPage;
+      const data = await spotifyApi.getUserPlaylists(accessToken, refreshToken, offset, itemsPerPage);
       console.log('Received playlist data:', data);
 
       if (data && data.items && Array.isArray(data.items)) {
@@ -354,6 +355,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
   useEffect(() => {
     if (accessToken && accessToken.length > 0) {
       console.log('Access token available, fetching playlists...');
+      setCurrentPage(1); // Reset to first page when token changes
       fetchPlaylists();
     } else {
       console.log('No access token available');
@@ -439,14 +441,14 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
         <div className="flex justify-center items-center space-x-4">
           <button
             onClick={() => {
-              if (prevUrl) {
+              if (currentPage > 1) {
                 setCurrentPage(prev => prev - 1);
-                fetchPlaylists(prevUrl);
+                fetchPlaylists();
               }
             }}
-            disabled={!prevUrl || isLoading}
+            disabled={currentPage <= 1 || isLoading}
             className={`px-4 py-2 rounded-full transition-colors duration-200 ${
-              prevUrl && !isLoading
+              currentPage > 1 && !isLoading
                 ? 'bg-spotify-green text-white hover:bg-green-600'
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
@@ -456,14 +458,15 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
           <span className="text-gray-300">Page {currentPage}</span>
           <button
             onClick={() => {
-              if (nextUrl) {
+              const maxPage = Math.ceil(totalPlaylists / itemsPerPage);
+              if (currentPage < maxPage) {
                 setCurrentPage(prev => prev + 1);
-                fetchPlaylists(nextUrl);
+                fetchPlaylists();
               }
             }}
-            disabled={!nextUrl || isLoading}
+            disabled={currentPage >= Math.ceil(totalPlaylists / itemsPerPage) || isLoading}
             className={`px-4 py-2 rounded-full transition-colors duration-200 ${
-              nextUrl && !isLoading
+              currentPage < Math.ceil(totalPlaylists / itemsPerPage) && !isLoading
                 ? 'bg-spotify-green text-white hover:bg-green-600'
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
