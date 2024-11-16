@@ -84,8 +84,8 @@ class SpotifyApi {
     }
   }
 
-  async createPlaylist(accessToken: string, refreshToken: string, userId: string, name: string) {
-    const url = `https://api.spotify.com/v1/users/${userId}/playlists`;
+  async createPlaylist(accessToken: string, refreshToken: string, userId: string, name: string, isPrivate: boolean = false) {
+    const url = `https://api.spotify.com/v1/me/playlists`;
     const response = await this.fetchWithTokenRefresh(
       url,
       {
@@ -94,7 +94,10 @@ class SpotifyApi {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ 
+          name,
+          public: !isPrivate 
+        }),
       },
       refreshToken
     );

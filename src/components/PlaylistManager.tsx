@@ -5,18 +5,20 @@ import { spotifyApi } from '../utils/spotifyApi';
 interface CreatePlaylistModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string) => void;
+  onSubmit: (name: string, isPrivate: boolean) => void;
 }
 
 function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalProps) {
   const [playlistName, setPlaylistName] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(playlistName);
+    onSubmit(playlistName, isPrivate);
     setPlaylistName('');
+    setIsPrivate(false);
   };
 
   return (
@@ -32,6 +34,18 @@ function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalP
             className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-spotify-green focus:outline-none mb-4"
             required
           />
+          <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              id="private-playlist"
+              checked={isPrivate}
+              onChange={(e) => setIsPrivate(e.target.checked)}
+              className="w-4 h-4 text-spotify-green bg-gray-700 border-gray-600 rounded focus:ring-spotify-green focus:ring-2"
+            />
+            <label htmlFor="private-playlist" className="ml-2 text-sm text-gray-300">
+              Make playlist private
+            </label>
+          </div>
           <div className="flex justify-end space-x-3">
             <button
               type="button"
@@ -410,9 +424,9 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const handleCreatePlaylist = async (name: string) => {
+  const handleCreatePlaylist = async (name: string, isPrivate: boolean) => {
     try {
-      await spotifyApi.createPlaylist(accessToken, refreshToken, 'me', name);
+      await spotifyApi.createPlaylist(accessToken, refreshToken, 'me', name, isPrivate);
       setIsCreateModalOpen(false);
       await fetchPlaylists();
     } catch (error) {
