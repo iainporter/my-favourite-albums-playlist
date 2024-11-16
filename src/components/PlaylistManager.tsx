@@ -299,15 +299,20 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
     setIsLoading(true);
     try {
       console.log('Fetching playlists with token:', accessToken);
-      const offset = (currentPage - 1) * itemsPerPage;
+      // Calculate the correct offset based on the current page
+      const offset = currentPage === 1 ? 0 : (currentPage - 1) * itemsPerPage;
+      console.log('Using offset:', offset);
+      
       const data = await spotifyApi.getUserPlaylists(accessToken, refreshToken, offset, itemsPerPage);
       console.log('Received playlist data:', data);
 
       if (data && data.items && Array.isArray(data.items)) {
         console.log('Setting playlists:', data.items);
         setPlaylists(data.items);
-        setNextUrl(data.next);
-        setPrevUrl(data.previous);
+        // Only set next URL if there are more items
+        setNextUrl(offset + data.items.length < data.total ? 'next' : null);
+        // Only set prev URL if we're not on the first page
+        setPrevUrl(offset > 0 ? 'prev' : null);
         setTotalPlaylists(data.total);
       } else {
         console.error('Invalid playlist data format:', data);
@@ -441,14 +446,14 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
         <div className="flex justify-center items-center space-x-4">
           <button
             onClick={() => {
-              if (currentPage > 1) {
+              if (prevUrl) {
                 setCurrentPage(prev => prev - 1);
                 fetchPlaylists();
               }
             }}
-            disabled={currentPage <= 1 || isLoading}
+            disabled={!prevUrl || isLoading}
             className={`px-4 py-2 rounded-full transition-colors duration-200 ${
-              currentPage > 1 && !isLoading
+              prevUrl && !isLoading
                 ? 'bg-spotify-green text-white hover:bg-green-600'
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
@@ -458,15 +463,14 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
           <span className="text-gray-300">Page {currentPage}</span>
           <button
             onClick={() => {
-              const maxPage = Math.ceil(totalPlaylists / itemsPerPage);
-              if (currentPage < maxPage) {
+              if (nextUrl) {
                 setCurrentPage(prev => prev + 1);
                 fetchPlaylists();
               }
             }}
-            disabled={currentPage >= Math.ceil(totalPlaylists / itemsPerPage) || isLoading}
+            disabled={!nextUrl || isLoading}
             className={`px-4 py-2 rounded-full transition-colors duration-200 ${
-              currentPage < Math.ceil(totalPlaylists / itemsPerPage) && !isLoading
+              nextUrl && !isLoading
                 ? 'bg-spotify-green text-white hover:bg-green-600'
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
