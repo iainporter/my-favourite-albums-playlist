@@ -92,7 +92,7 @@ export default function Publications({ accessToken, refreshToken }: Publications
 
   return (
     <div className="flex-1 flex flex-col h-full">
-      <div className="p-4">
+      <div className="p-4 flex gap-4">
         <button
           onClick={fetchPitchforkAlbums}
           className="w-40 h-16 bg-black text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200"
@@ -100,6 +100,26 @@ export default function Publications({ accessToken, refreshToken }: Publications
         >
           <span className="text-sm font-bold">
             {loading ? 'Loading...' : 'Pitchfork 8.0+ new Albums'}
+          </span>
+        </button>
+        <button
+          onClick={() => {
+            setLoading(true);
+            setError(null);
+            fetch('/api/spotify/pitchfork?type=best-new')
+              .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch albums');
+                return response.json();
+              })
+              .then(data => setAlbums(data))
+              .catch(err => setError(err instanceof Error ? err.message : 'An error occurred'))
+              .finally(() => setLoading(false));
+          }}
+          className="w-40 h-16 bg-black text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200"
+          disabled={loading}
+        >
+          <span className="text-sm font-bold">
+            {loading ? 'Loading...' : 'Pitchfork Best New Albums'}
           </span>
         </button>
       </div>

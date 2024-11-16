@@ -10,7 +10,12 @@ export default async function handler(
   }
 
   try {
-    const response = await fetch('https://pitchfork.com/reviews/best/high-scoring-albums/');
+    const type = req.query.type as string;
+    const url = type === 'best-new' 
+      ? 'https://pitchfork.com/reviews/best/albums/'
+      : 'https://pitchfork.com/reviews/best/high-scoring-albums/';
+
+    const response = await fetch(url);
     const html = await response.text();
 
     const pitchforkAlbums = parsePitchforkHtml(html);
