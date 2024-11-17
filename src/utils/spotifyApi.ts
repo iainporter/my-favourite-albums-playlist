@@ -344,7 +344,6 @@ class SpotifyApi {
       refreshToken
     );
   }
-}
 
   async searchByUrl(
     accessToken: string,
