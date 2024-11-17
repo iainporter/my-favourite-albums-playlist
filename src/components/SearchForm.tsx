@@ -216,7 +216,7 @@ export default function SearchForm({
           <button
             type="submit"
             disabled={isSearching || !isAuthenticated}
-            className={`w-full px-4 py-2 rounded-full transition-colors duration-200 flex items-center justify-center ${
+            className={`w-1/2 mx-auto px-4 py-2 rounded-full transition-colors duration-200 flex items-center justify-center ${
               isSearching || !isAuthenticated
                 ? 'bg-gray-600 cursor-not-allowed'
                 : 'bg-spotify-green hover:bg-green-600'

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Analytics } from "@vercel/analytics/react";
 import { spotifyApi } from '../utils/spotifyApi';
-import SearchForm from './SearchForm';
 
 interface CreatePlaylistModalProps {
   isOpen: boolean;
@@ -250,7 +249,6 @@ function NoPlaylists({ onRefresh }: { onRefresh: () => void }) {
 export default function PlaylistManager({ accessToken, refreshToken }: PlaylistManagerProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [albumSearchResults, setAlbumSearchResults] = useState<any[]>([]);
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
   const [addingToPlaylist, setAddingToPlaylist] = useState<string | null>(null);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
@@ -462,13 +460,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
   return (
     <div className="h-full flex flex-col">
       <div className="sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-2">
-        <SearchForm
-          accessToken={accessToken}
-          refreshToken={refreshToken}
-          albumSearchResults={albumSearchResults}
-          setAlbumSearchResults={setAlbumSearchResults}
-        />
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">My Playlists</h2>
             <p className="text-sm text-gray-400 mt-1">

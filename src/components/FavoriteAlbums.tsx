@@ -329,6 +329,7 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
         <div className="flex-1 overflow-y-auto px-6">
           <SearchForm 
             accessToken={accessToken}
+            refreshToken={refreshToken}
             albumSearchResults={searchAlbumResults}
             setAlbumSearchResults={setSearchAlbumResults}
             initialPage={searchState.currentPage}
