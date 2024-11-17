@@ -201,15 +201,7 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch tracks');
-      }
-      const data = await response.json();
+      const data = await spotifyApi.getAlbumTracks(accessToken, refreshToken, albumId);
       setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
     } catch (error) {
       console.error('Error fetching tracks:', error);
