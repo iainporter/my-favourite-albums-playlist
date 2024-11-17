@@ -302,12 +302,18 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
       setAddingToPlaylist(targetPlaylistId);
       const item = JSON.parse(data);
       
-      // Get all tracks from the album
-      const albumTracks = await spotifyApi.getAlbumTracks(accessToken, refreshToken, item.id);
-      
-      // Add each track to the playlist
-      for (const track of albumTracks.items) {
-        await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, track.uri);
+      // Check if the item is a track or an album
+      if (item.type === 'track') {
+        // If it's a track, add it directly to the playlist
+        await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, item.uri);
+      } else {
+        // If it's an album, get all tracks from the album
+        const albumTracks = await spotifyApi.getAlbumTracks(accessToken, refreshToken, item.id);
+        
+        // Add each track to the playlist
+        for (const track of albumTracks.items) {
+          await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, track.uri);
+        }
       }
       
       // Fetch the updated tracks for the target playlist
