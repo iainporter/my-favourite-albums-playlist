@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import { searchSpotify } from '../../../utils/spotifyApi';
+import { spotifyApi } from '../../../utils/spotifyApi';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const data = await searchSpotify(
+    const data = await spotifyApi.searchSpotify(
       artist,
       album,
       session.accessToken,
