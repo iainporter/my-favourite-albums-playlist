@@ -24,11 +24,11 @@ class SpotifyApi {
     try {
       // Validate environment variables
       if (!SPOTIFY_CONFIG.CLIENT_ID || !SPOTIFY_CONFIG.CLIENT_SECRET) {
-        throw new Error('Missing Spotify client credentials');
+        throw new Error('Missing Spotify client credentials. Please check your .env file and ensure SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are set.');
       }
 
       if (!refreshToken) {
-        throw new Error('No refresh token provided');
+        throw new Error('No refresh token provided. Please ensure you are properly authenticated with Spotify.');
       }
 
       const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -79,6 +79,10 @@ class SpotifyApi {
       if (response.status === 401) {
         console.log('Access token expired, attempting to refresh...');
         try {
+          if (!SPOTIFY_CONFIG.CLIENT_ID || !SPOTIFY_CONFIG.CLIENT_SECRET) {
+            throw new Error('Missing Spotify client credentials. Please check your .env file and ensure SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are set.');
+          }
+          
           // Token expired, refresh it
           const newAccessToken = await this.refreshAccessToken(refreshToken);
           
@@ -95,6 +99,9 @@ class SpotifyApi {
           response = await fetch(url, newOptions);
         } catch (refreshError) {
           console.error('Token refresh failed:', refreshError);
+          if (refreshError.message.includes('Missing Spotify client credentials')) {
+            throw refreshError;
+          }
           throw new Error(`Token refresh failed: ${refreshError.message}`);
         }
       }

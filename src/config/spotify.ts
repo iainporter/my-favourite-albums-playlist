@@ -1,3 +1,7 @@
+if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
+  console.error('Missing required Spotify environment variables. Please check your .env file.');
+}
+
 export const SPOTIFY_CONFIG = {
   CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || '',
   CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || '',
