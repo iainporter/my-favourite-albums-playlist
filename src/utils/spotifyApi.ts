@@ -238,8 +238,6 @@ class SpotifyApi {
       refreshToken
     );
   }
-}
-
   async getAlbumTracks(accessToken: string, refreshToken: string, albumId: string) {
     const url = `https://api.spotify.com/v1/albums/${albumId}/tracks`;
     return await this.fetchWithTokenRefresh(
