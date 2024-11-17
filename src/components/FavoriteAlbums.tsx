@@ -17,7 +17,7 @@ interface SortState {
 interface SpotifyAlbum {
   id: string;
   name: string;
-  release_date: string;
+  release_date?: string;
   images: { url: string; height: number; width: number; }[];
   uri: string;
 }
