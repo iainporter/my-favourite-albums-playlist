@@ -17,6 +17,8 @@ interface PitchforkAlbum {
 
 type SpotifyAlbum = SpotifyApiAlbum;
 
+type PublicationType = 'high-rated' | 'best-new' | 'diy';
+
 interface PublicationsProps {
   accessToken: string;
   refreshToken: string;
@@ -30,15 +32,25 @@ export default function Publications({ accessToken, refreshToken }: Publications
   const [expandedAlbum, setExpandedAlbum] = useState<string | null>(null);
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
-  const [currentList, setCurrentList] = useState<'high-rated' | 'best-new' | null>(null);
+  const [currentList, setCurrentList] = useState<PublicationType | null>(null);
 
-  const fetchPitchforkAlbums = async (type: 'high-rated' | 'best-new') => {
+  const fetchAlbums = async (type: PublicationType) => {
     if (loading) return;
     
     setLoading(true);
     setError(null);
     try {
-      const url = type === 'best-new' ? '/api/spotify/pitchfork?type=best-new' : '/api/spotify/pitchfork';
+      let url;
+      switch (type) {
+        case 'best-new':
+          url = '/api/spotify/pitchfork?type=best-new';
+          break;
+        case 'diy':
+          url = '/api/spotify/diy';
+          break;
+        default:
+          url = '/api/spotify/pitchfork';
+      }
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch albums');
@@ -99,7 +111,7 @@ export default function Publications({ accessToken, refreshToken }: Publications
     <div className="flex-1 flex flex-col h-full">
       <div className="p-4 flex gap-4">
         <button
-          onClick={() => fetchPitchforkAlbums('high-rated')}
+          onClick={() => fetchAlbums('high-rated')}
           className={`w-40 h-16 ${currentList === 'high-rated' ? 'bg-gray-700' : 'bg-black'} text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200`}
           disabled={loading}
         >
@@ -108,12 +120,21 @@ export default function Publications({ accessToken, refreshToken }: Publications
           </span>
         </button>
         <button
-          onClick={() => fetchPitchforkAlbums('best-new')}
+          onClick={() => fetchAlbums('best-new')}
           className={`w-40 h-16 ${currentList === 'best-new' ? 'bg-gray-700' : 'bg-black'} text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200`}
           disabled={loading}
         >
           <span className="text-sm font-bold">
             {loading && currentList === 'best-new' ? 'Loading...' : 'Pitchfork Best New Albums'}
+          </span>
+        </button>
+        <button
+          onClick={() => fetchAlbums('diy')}
+          className={`w-40 h-16 ${currentList === 'diy' ? 'bg-gray-700' : 'bg-black'} text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200`}
+          disabled={loading}
+        >
+          <span className="text-sm font-bold">
+            {loading && currentList === 'diy' ? 'Loading...' : 'DIY New Albums'}
           </span>
         </button>
       </div>
@@ -128,7 +149,11 @@ export default function Publications({ accessToken, refreshToken }: Publications
         {albums.length > 0 && (
           <div className="bg-gray-800 rounded-lg shadow-lg p-4">
             <h2 className="text-white text-xl font-bold mb-4">
-              {currentList === 'best-new' ? 'Pitchfork Best New Albums' : 'Pitchfork 8.0+ Albums'}
+              {currentList === 'best-new' 
+                ? 'Pitchfork Best New Albums' 
+                : currentList === 'diy'
+                ? 'DIY New Albums'
+                : 'Pitchfork 8.0+ Albums'}
             </h2>
             <div className="max-h-96 overflow-y-auto">
               {albums.map((album, index) => (
