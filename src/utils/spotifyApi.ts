@@ -252,6 +252,47 @@ class SpotifyApi {
       refreshToken
     );
   }
+
+  async searchByArtistAndAlbum(
+    accessToken: string,
+    refreshToken: string,
+    artist: string,
+    album: string,
+    limit: number = 10
+  ): Promise<SpotifySearchResponse> {
+    const query = `artist:${artist} album:${album}`;
+    const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=${limit}`;
+    
+    return await this.fetchWithTokenRefresh(
+      url,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      },
+      refreshToken
+    );
+  }
+
+  async searchByArtist(
+    accessToken: string,
+    refreshToken: string,
+    artist: string,
+    limit: number = 10
+  ): Promise<SpotifySearchResponse> {
+    const query = `artist:${artist}`;
+    const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=${limit}`;
+    
+    return await this.fetchWithTokenRefresh(
+      url,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      },
+      refreshToken
+    );
+  }
   async getAlbumTracks(accessToken: string, refreshToken: string, albumId: string) {
     const url = `https://api.spotify.com/v1/albums/${albumId}/tracks`;
     return await this.fetchWithTokenRefresh(

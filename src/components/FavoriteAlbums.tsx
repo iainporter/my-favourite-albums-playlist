@@ -211,40 +211,21 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
   const handleAlbumClick = async (album: Album) => {
     try {
       // First attempt: search with both artist and album
-      const fullQuery = `artist:${album.artist} album:${album.album}`;
-      const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=10`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        }
+      const data = await spotifyApi.searchByArtistAndAlbum(
+        accessToken,
+        refreshToken,
+        album.artist,
+        album.album
       );
-      
-      if (!response.ok) {
-        throw new Error('Failed to search Spotify');
-      }
-      
-      const data = await response.json();
       
       // If no results found, try searching with just the artist
       if (data.albums.items.length === 0) {
         console.log('No results found with album name, trying artist-only search');
-        const artistQuery = `artist:${album.artist}`;
-        const fallbackResponse = await fetch(
-          `https://api.spotify.com/v1/search?q=${encodeURIComponent(artistQuery)}&type=album&limit=10`,
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          }
+        const fallbackData = await spotifyApi.searchByArtist(
+          accessToken,
+          refreshToken,
+          album.artist
         );
-        
-        if (!fallbackResponse.ok) {
-          throw new Error('Failed to perform fallback search');
-        }
-        
-        const fallbackData = await fallbackResponse.json();
         setSearchResults({ [album.id]: fallbackData.albums.items });
       } else {
         setSearchResults({ [album.id || 'temp']: data.albums.items });
