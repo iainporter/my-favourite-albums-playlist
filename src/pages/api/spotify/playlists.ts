@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { SPOTIFY_CONFIG } from '../../../config/spotify';
-import { spotifyApi } from '../../../utils/spotifyApi';
+import { spotifyApi as spotifyApiClient } from '../../../utils/spotifyApi';
 
 const spotifyApi = new SpotifyWebApi({
   clientId: SPOTIFY_CONFIG.CLIENT_ID,
@@ -41,14 +41,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // First get the current user's ID
-      const userData = await spotifyApi.getCurrentUser(
+      const userData = await spotifyApiClient.getCurrentUser(
         access_token as string,
         req.headers['x-refresh-token'] as string
       );
       const userId = userData.id;
 
       // Create the playlist
-      const response = await spotifyApi.createPlaylist(
+      const response = await spotifyApiClient.createPlaylist(
         access_token as string,
         req.headers['x-refresh-token'] as string,
         name,
@@ -73,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Add single track to playlist
-      const response = await spotifyApi.addToPlaylist(
+      const response = await spotifyApiClient.addToPlaylist(
         access_token as string,
         req.headers['x-refresh-token'] as string,
         playlist_id as string,
@@ -104,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const albumId = uri.split(':')[2];
 
       // First, fetch all tracks from the album
-      const albumTracksResponse = await spotifyApi.getAlbumTracks(
+      const albumTracksResponse = await spotifyApiClient.getAlbumTracks(
         access_token as string,
         req.headers['x-refresh-token'] as string,
         albumId
@@ -155,7 +155,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Get the track URI
-      const trackResponse = await spotifyApi.getTrack(
+      const trackResponse = await spotifyApiClient.getTrack(
         access_token as string,
         req.headers['x-refresh-token'] as string,
         trackId
@@ -170,7 +170,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const trackUri = trackData.uri;
 
       // Remove the track from the playlist
-      const response = await spotifyApi.removeItemFromPlaylist(
+      const response = await spotifyApiClient.removeItemFromPlaylist(
         access_token as string,
         req.headers['x-refresh-token'] as string,
         playlist_id as string,
