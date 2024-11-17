@@ -120,6 +120,9 @@ Integration with popular music publications and review sites:
 ### Search Screen
 ![Alt text](images/search.png?raw=true "Search albums and artists")
 
+### Publications Screen
+
+![Alt text](images/publications.png?raw=true "Music Publications")
 
 ## Testing
 
