@@ -232,7 +232,11 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-2 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-1">
         <div className="flex flex-col space-y-2">
-          <h2 className="text-xl font-bold text-white">My Favourite Albums</h2>
+          <h2 className="text-xl font-bold text-white">
+            {activeTab === 'search' ? 'Search' : 
+             activeTab === 'publications' ? 'Music Publications' : 
+             'Favourite Albums'}
+          </h2>
           <div className="flex space-x-4 border-b border-gray-700">
             <button
               className={`px-4 py-2 text-sm font-medium ${
