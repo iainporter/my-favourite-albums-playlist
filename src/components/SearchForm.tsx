@@ -111,28 +111,16 @@ export default function SearchForm({
       }
     }
     try {
-      let searchUrl;
+      let data;
       if (typeof e === 'string') {
         // If a URL is provided, use it directly
-        searchUrl = e;
+        data = await spotifyApi.searchByUrl(accessToken, accessToken, e);
       } else {
-        // Otherwise, construct the search URL
-        const fullQuery = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
+        // Otherwise, use the search function
         const offset = (currentPage - 1) * itemsPerPage;
-        searchUrl = `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=${itemsPerPage}&offset=${offset}`;
+        data = await spotifyApi.searchSpotify(artist, album, accessToken, accessToken, offset, itemsPerPage);
       }
 
-      const response = await fetch(searchUrl, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to search Spotify');
-      }
-      
-      const data = await response.json();
       setTotalResults(data.albums.total);
       setNextUrl(data.albums.next);
       setPreviousUrl(data.albums.previous);
@@ -140,21 +128,7 @@ export default function SearchForm({
       // If no results found and we have an artist, try searching with just the artist
       if (data.albums.items.length === 0 && artist) {
         console.log('No results found with album name, trying artist-only search');
-        const artistQuery = `artist:${artist}`;
-        const fallbackResponse = await fetch(
-          `https://api.spotify.com/v1/search?q=${encodeURIComponent(artistQuery)}&type=album&limit=10`,
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          }
-        );
-        
-        if (!fallbackResponse.ok) {
-          throw new Error('Failed to perform fallback search');
-        }
-        
-        const fallbackData = await fallbackResponse.json();
+        const fallbackData = await spotifyApi.searchByArtist(accessToken, accessToken, artist, 10);
         setAlbumSearchResults(fallbackData.albums.items);
       } else {
         setAlbumSearchResults(data.albums.items);
@@ -167,15 +141,7 @@ export default function SearchForm({
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch tracks');
-      }
-      const data = await response.json();
+      const data = await spotifyApi.getAlbumTracks(accessToken, accessToken, albumId);
       setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
     } catch (error) {
       console.error('Error fetching tracks:', error);

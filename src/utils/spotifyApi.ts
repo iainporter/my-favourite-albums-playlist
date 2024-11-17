@@ -346,4 +346,21 @@ class SpotifyApi {
   }
 }
 
+  async searchByUrl(
+    accessToken: string,
+    refreshToken: string,
+    searchUrl: string
+  ): Promise<SpotifySearchResponse> {
+    return await this.fetchWithTokenRefresh(
+      searchUrl,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      },
+      refreshToken
+    );
+  }
+}
+
 export const spotifyApi = new SpotifyApi();
