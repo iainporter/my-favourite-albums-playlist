@@ -20,9 +20,22 @@ export interface SpotifySearchResponse {
 }
 
 class SpotifyApi {
+  constructor() {
+    // Debug logging for SPOTIFY_CONFIG when SpotifyApi is instantiated
+    console.log('SpotifyApi initialized with config:', {
+      clientIdPresent: !!SPOTIFY_CONFIG.CLIENT_ID,
+      clientSecretPresent: !!SPOTIFY_CONFIG.CLIENT_SECRET,
+      redirectUri: SPOTIFY_CONFIG.REDIRECT_URI
+    });
+  }
+
   private async refreshAccessToken(refreshToken: string): Promise<string> {
     try {
-      // Validate environment variables
+      // Debug logging during token refresh
+      console.log('Attempting token refresh with config:', {
+        clientIdPresent: !!SPOTIFY_CONFIG.CLIENT_ID,
+        clientSecretPresent: !!SPOTIFY_CONFIG.CLIENT_SECRET
+      });
       if (!SPOTIFY_CONFIG.CLIENT_ID || !SPOTIFY_CONFIG.CLIENT_SECRET) {
         throw new Error('Missing Spotify client credentials. Please check your .env file and ensure SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are set.');
       }
