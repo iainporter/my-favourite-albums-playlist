@@ -159,7 +159,7 @@ class SpotifyApi {
 
   async getPlaylist(accessToken: string, refreshToken: string, playlistId: string) {
     const url = `https://api.spotify.com/v1/playlists/${playlistId}`;
-    const response = await this.fetchWithTokenRefresh(
+    return await this.fetchWithTokenRefresh(
       url,
       {
         headers: {
@@ -168,7 +168,6 @@ class SpotifyApi {
       },
       refreshToken
     );
-    return response.json();
   }
 
   async addToPlaylist(accessToken: string, refreshToken: string, playlistId: string, uriString: string) {
@@ -189,7 +188,7 @@ class SpotifyApi {
 
   async getPlaylistItems(accessToken: string, refreshToken: string, playlistId: string) {
     const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
-    const response = await this.fetchWithTokenRefresh(
+    return await this.fetchWithTokenRefresh(
       url,
       {
         headers: {
@@ -198,7 +197,6 @@ class SpotifyApi {
       },
       refreshToken
     );
-    return response.json;
   }
 
   async removeItemFromPlaylist(accessToken: string, refreshToken: string, playlistId: string, uriString: string) {
