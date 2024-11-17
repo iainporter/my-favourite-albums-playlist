@@ -302,8 +302,13 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
       setAddingToPlaylist(targetPlaylistId);
       const item = JSON.parse(data);
       
-      // Add the item to the playlist
-      await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, item.uri);
+      // Get all tracks from the album
+      const albumTracks = await spotifyApi.getAlbumTracks(accessToken, refreshToken, item.id);
+      
+      // Add each track to the playlist
+      for (const track of albumTracks.items) {
+        await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, track.uri);
+      }
       
       // Fetch the updated tracks for the target playlist
       const tracksData = await spotifyApi.getPlaylistItems(accessToken, refreshToken, targetPlaylistId);
@@ -326,7 +331,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
       ));
     } catch (error) {
       console.error('Error handling drop:', error);
-      alert('Failed to add item to playlist. Please try again.');
+      alert('Failed to add album tracks to playlist. Please try again.');
     } finally {
       setAddingToPlaylist(null);
     }
@@ -435,7 +440,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
 
   const handleCreatePlaylist = async (name: string, isPrivate: boolean) => {
     try {
-      await spotifyApi.createPlaylist(accessToken, refreshToken, 'me', name, isPrivate);
+      await spotifyApi.createPlaylist(accessToken, refreshToken, name, isPrivate);
       setIsCreateModalOpen(false);
       await fetchPlaylists();
     } catch (error) {
