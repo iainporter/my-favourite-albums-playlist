@@ -13,10 +13,12 @@ export default function Home() {
   useEffect(() => {
     const { access_token, refresh_token, error } = router.query;
     if (access_token) {
-      setAccessToken(access_token as string);
+      // Decode the URL-encoded token
+      setAccessToken(decodeURIComponent(access_token as string));
     }
     if (refresh_token) {
-      setRefreshToken(refresh_token as string);
+      // Decode the URL-encoded refresh token
+      setRefreshToken(decodeURIComponent(refresh_token as string));
     }
     if (error) {
       setError(error as string);
