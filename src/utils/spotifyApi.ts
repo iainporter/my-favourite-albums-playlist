@@ -250,6 +250,19 @@ class SpotifyApi {
       refreshToken
     );
   }
+
+  async getUserSavedAlbums(accessToken: string, refreshToken: string) {
+    const url = 'https://api.spotify.com/v1/me/albums';
+    return await this.fetchWithTokenRefresh(
+      url,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      },
+      refreshToken
+    );
+  }
 }
 
 export const spotifyApi = new SpotifyApi();

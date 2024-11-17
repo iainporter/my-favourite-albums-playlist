@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import { fetchWithTokenRefresh } from '../../../utils/spotifyApi';
+import { spotifyApi } from '../../../utils/spotifyApi';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -13,21 +13,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const response = await fetchWithTokenRefresh(
-      'https://api.spotify.com/v1/me/albums',
-      {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      },
+    const data = await spotifyApi.getUserSavedAlbums(
+      session.accessToken,
       session.refreshToken
     );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch from Spotify API');
-    }
-
-    const data = await response.json();
     
     // Transform the Spotify response into our Album format
     const albums = data.items.map((item: any) => ({
