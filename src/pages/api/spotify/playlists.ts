@@ -119,19 +119,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const trackUris = albumTracks.items.map((track: any) => track.uri);
 
       // Then add all tracks to the playlist
-      const response = await fetchWithTokenRefresh(
-        `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            uris: trackUris
-          })
-        },
-        req.headers['x-refresh-token'] as string
+      const response = await spotifyApiClient.addToPlaylist(
+        access_token as string,
+        req.headers['x-refresh-token'] as string,
+        playlist_id as string,
+        trackUris.join(',')
       );
 
       if (!response.ok) {

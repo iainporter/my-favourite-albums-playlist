@@ -172,6 +172,7 @@ class SpotifyApi {
 
   async addToPlaylist(accessToken: string, refreshToken: string, playlistId: string, uriString: string) {
     const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
+    const uris = uriString.includes(',') ? uriString.split(',') : [uriString];
     return await this.fetchWithTokenRefresh(
       url,
       {
@@ -180,7 +181,7 @@ class SpotifyApi {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ uris: [uriString] }),
+        body: JSON.stringify({ uris }),
       },
       refreshToken
     );
