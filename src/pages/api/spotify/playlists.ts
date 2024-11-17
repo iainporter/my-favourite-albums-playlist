@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { SPOTIFY_CONFIG } from '../../../config/spotify';
-import { fetchWithTokenRefresh } from '../../../utils/spotifyApi';
+import { spotifyApi } from '../../../utils/spotifyApi';
 
 const spotifyApi = new SpotifyWebApi({
   clientId: SPOTIFY_CONFIG.CLIENT_ID,
@@ -41,40 +41,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // First get the current user's ID
-      const userResponse = await fetchWithTokenRefresh(
-        'https://api.spotify.com/v1/me',
-        {
-          headers: {
-            'Authorization': `Bearer ${access_token}`,
-          }
-        },
+      const userData = await spotifyApi.getCurrentUser(
+        access_token as string,
         req.headers['x-refresh-token'] as string
       );
-
-      if (!userResponse.ok) {
-        const error = await userResponse.json();
-        throw new Error(error.error?.message || 'Failed to fetch user data');
-      }
-
-      const userData = await userResponse.json();
       const userId = userData.id;
 
       // Create the playlist
-      const response = await fetchWithTokenRefresh(
-        `https://api.spotify.com/v1/users/${userId}/playlists`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name,
-            public: false,
-            description: 'Created from My Favourite Albums app'
-          })
-        },
-        req.headers['x-refresh-token'] as string
+      const response = await spotifyApi.createPlaylist(
+        access_token as string,
+        req.headers['x-refresh-token'] as string,
+        name,
+        true // make it private
       );
 
       if (!response.ok) {
@@ -94,20 +72,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Missing required parameters' });
       }
 
-      // Add single track to playlist using the direct endpoint
-      const response = await fetchWithTokenRefresh(
-        `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            uris: [uri]
-          })
-        },
-        req.headers['x-refresh-token'] as string
+      // Add single track to playlist
+      const response = await spotifyApi.addToPlaylist(
+        access_token as string,
+        req.headers['x-refresh-token'] as string,
+        playlist_id as string,
+        uri
       );
 
       if (!response.ok) {
@@ -134,14 +104,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const albumId = uri.split(':')[2];
 
       // First, fetch all tracks from the album
-      const albumTracksResponse = await fetchWithTokenRefresh(
-        `https://api.spotify.com/v1/albums/${albumId}/tracks`,
-        {
-          headers: {
-            'Authorization': `Bearer ${access_token}`,
-          }
-        },
-        req.headers['x-refresh-token'] as string
+      const albumTracksResponse = await spotifyApi.getAlbumTracks(
+        access_token as string,
+        req.headers['x-refresh-token'] as string,
+        albumId
       );
 
       if (!albumTracksResponse.ok) {
@@ -189,14 +155,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Get the track URI
-      const trackResponse = await fetchWithTokenRefresh(
-        `https://api.spotify.com/v1/tracks/${trackId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${access_token}`,
-          }
-        },
-        req.headers['x-refresh-token'] as string
+      const trackResponse = await spotifyApi.getTrack(
+        access_token as string,
+        req.headers['x-refresh-token'] as string,
+        trackId
       );
 
       if (!trackResponse.ok) {
@@ -208,19 +170,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const trackUri = trackData.uri;
 
       // Remove the track from the playlist
-      const response = await fetchWithTokenRefresh(
-        `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            tracks: [{ uri: trackUri }]
-          })
-        },
-        req.headers['x-refresh-token'] as string
+      const response = await spotifyApi.removeItemFromPlaylist(
+        access_token as string,
+        req.headers['x-refresh-token'] as string,
+        playlist_id as string,
+        trackUri
       );
 
       if (!response.ok) {

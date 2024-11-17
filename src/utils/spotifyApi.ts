@@ -263,6 +263,32 @@ class SpotifyApi {
       refreshToken
     );
   }
+
+  async getCurrentUser(accessToken: string, refreshToken: string) {
+    const url = 'https://api.spotify.com/v1/me';
+    return await this.fetchWithTokenRefresh(
+      url,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      },
+      refreshToken
+    );
+  }
+
+  async getTrack(accessToken: string, refreshToken: string, trackId: string) {
+    const url = `https://api.spotify.com/v1/tracks/${trackId}`;
+    return await this.fetchWithTokenRefresh(
+      url,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      },
+      refreshToken
+    );
+  }
 }
 
 export const spotifyApi = new SpotifyApi();
