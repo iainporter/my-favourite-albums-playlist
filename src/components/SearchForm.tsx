@@ -51,6 +51,8 @@ export default function SearchForm({
   initialPrevUrl = null,
   onSearchStateChange
 }: SearchFormProps) {
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [artist, setArtist] = useState(initialArtist);
   const [album, setAlbum] = useState(initialAlbum);
   const [trackSearchResults, setTrackSearchResults] = useState<SpotifyTrack[]>([]);
@@ -73,6 +75,16 @@ export default function SearchForm({
   useEffect(() => {
     setCurrentPage(initialPage);
   }, [initialPage]);
+
+  // Add effect to validate tokens
+  useEffect(() => {
+    if (!accessToken || !refreshToken) {
+      console.warn('Missing required tokens:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken
+      });
+    }
+  }, [accessToken, refreshToken]);
 
   // Save search state whenever relevant values change
   useEffect(() => {
@@ -114,11 +126,17 @@ export default function SearchForm({
       }
     }
     
-    if (!refreshToken) {
-      console.error('No refresh token available. Please log in again.');
+    if (!accessToken || !refreshToken) {
+      console.error('Missing required tokens:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken
+      });
+      alert('Authentication error. Please try logging in again.');
       return;
     }
 
+    setSearchError(null);
+    setIsSearching(true);
     try {
       let data;
       if (typeof e === 'string') {
@@ -151,8 +169,9 @@ export default function SearchForm({
     } catch (error) {
       console.error('Error searching Spotify:', error);
       setAlbumSearchResults([]);
-      // Show user-friendly error message
-      alert('Error searching Spotify. Please try logging in again if the problem persists.');
+      setSearchError('Error searching Spotify. Please try logging in again if the problem persists.');
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -199,11 +218,29 @@ export default function SearchForm({
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors duration-200"
+            disabled={isSearching || !accessToken || !refreshToken}
+            className={`w-full px-4 py-2 rounded-full transition-colors duration-200 flex items-center justify-center ${
+              isSearching || !accessToken || !refreshToken
+                ? 'bg-gray-600 cursor-not-allowed'
+                : 'bg-spotify-green hover:bg-green-600'
+            } text-white`}
           >
-            Search Spotify
+            {isSearching ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
+                Searching...
+              </>
+            ) : (
+              'Search Spotify'
+            )}
           </button>
         </form>
+        
+        {searchError && (
+          <div className="mt-4 p-3 bg-red-900/50 border border-red-500 text-red-200 rounded-lg">
+            {searchError}
+          </div>
+        )}
 
         {totalResults > 0 && (
           <div className="text-gray-300 text-sm">
