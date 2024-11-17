@@ -19,9 +19,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data = await spotifyApi.authorizationCodeGrant(code as string);
     
     // Store tokens in cookies or handle them securely
-    res.redirect(
-      `/?access_token=${data.body.access_token}&refresh_token=${data.body.refresh_token}`
-    );
+    const params = new URLSearchParams({
+      access_token: data.body.access_token,
+      refresh_token: data.body.refresh_token
+    });
+    res.redirect(`/?${params.toString()}`);
   } catch (error) {
     console.error('Error getting tokens:', error);
     res.redirect('/?error=auth_failed');
