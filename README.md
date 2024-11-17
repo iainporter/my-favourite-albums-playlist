@@ -80,6 +80,39 @@ yarn start
 4. Use the playlist manager to create a new playlist or add tracks to an existing one
 5. Manage your playlists directly from the interface
 
+## Key Features
+
+### Playlists
+The application provides a powerful playlist management system that allows you to:
+- Create new Spotify playlists directly from the interface
+- Add entire albums or individual tracks to your playlists
+- Drag and drop functionality for easy playlist organization
+- View and manage your existing Spotify playlists
+- Real-time synchronization with your Spotify account
+
+### Import Albums
+Easily import your favorite albums using our CSV import feature:
+- Upload a CSV file containing your album selections
+- Flexible CSV format supporting album names and artists
+- Bulk import multiple albums at once
+- Preview imported albums before adding to playlists
+- Sample CSV template provided for easy formatting
+
+### Search Spotify
+Comprehensive search functionality powered by the Spotify API:
+- Search for albums, artists, and tracks
+- Real-time search results as you type
+- Rich album metadata including cover art and track listings
+- Preview tracks directly in the application
+- Filter and sort search results
+
+### Music Publications
+Integration with popular music publications and review sites:
+- Import album recommendations from Pitchfork reviews
+- Access DIY Magazine's album selections
+- Stay updated with latest album releases and reviews
+- Discover new music through curated lists
+- Easy import of critically acclaimed albums to your playlists
 
 ### Import Screen
 ![Alt text](images/import.png?raw=true "Import albums")
