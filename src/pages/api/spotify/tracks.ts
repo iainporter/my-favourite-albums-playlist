@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { fetchWithTokenRefresh } from '../../../utils/spotifyApi';
+import { spotifyApi } from '../../../utils/spotifyApi';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { albumId } = req.query;
@@ -16,21 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const response = await fetchWithTokenRefresh(
-      `https://api.spotify.com/v1/albums/${albumId}/tracks`,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      },
-      refreshToken
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch tracks');
-    }
-
-    const data = await response.json();
+    const data = await spotifyApi.getAlbumTracks(accessToken, refreshToken, albumId as string);
     res.status(200).json(data);
   } catch (error) {
     console.error('Error fetching tracks:', error);
