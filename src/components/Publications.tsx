@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { spotifyApi, SpotifyAlbum as SpotifyApiAlbum } from '../utils/spotifyApi';
+import { spotifyApi } from '../utils/spotifyApi';
+import { SpotifyAlbum as SpotifyApiAlbum } from '../types/spotify';
 
 interface SpotifyTrack {
   id: string;
