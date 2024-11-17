@@ -1,14 +1,6 @@
 import { SPOTIFY_CONFIG } from '../config/spotify';
 
-export interface SpotifyAlbum {
-  id: string;
-  name: string;
-  artists: Array<{ name: string }>;
-  images: Array<{ url: string; height: number; width: number }>;
-  external_urls: { spotify: string };
-  uri: string;
-  release_date?: string;
-}
+import { SpotifyAlbum } from '../types/spotify';
 
 export interface SpotifySearchResponse {
   albums: {
