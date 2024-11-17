@@ -62,6 +62,7 @@ export default function SearchForm({
   const [totalResults, setTotalResults] = useState(initialTotalResults);
   const [nextUrl, setNextUrl] = useState<string | null>(initialNextUrl);
   const [previousUrl, setPreviousUrl] = useState<string | null>(initialPrevUrl);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Update state when initial values change
   useEffect(() => {
@@ -78,13 +79,12 @@ export default function SearchForm({
 
   // Add effect to validate tokens
   useEffect(() => {
-    if (!accessToken || !refreshToken) {
-      console.warn('Missing required tokens:', {
-        hasAccessToken: !!accessToken,
-        hasRefreshToken: !!refreshToken
-      });
+    if (accessToken && accessToken.length > 0) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
     }
-  }, [accessToken, refreshToken]);
+  }, [accessToken]);
 
   // Save search state whenever relevant values change
   useEffect(() => {
@@ -126,11 +126,8 @@ export default function SearchForm({
       }
     }
     
-    if (!accessToken || !refreshToken) {
-      console.error('Missing required tokens:', {
-        hasAccessToken: !!accessToken,
-        hasRefreshToken: !!refreshToken
-      });
+    if (!isAuthenticated) {
+      console.error('Not authenticated');
       alert('Authentication error. Please try logging in again.');
       return;
     }
@@ -218,9 +215,9 @@ export default function SearchForm({
           </div>
           <button
             type="submit"
-            disabled={isSearching || !accessToken || !refreshToken}
+            disabled={isSearching || !isAuthenticated}
             className={`w-full px-4 py-2 rounded-full transition-colors duration-200 flex items-center justify-center ${
-              isSearching || !accessToken || !refreshToken
+              isSearching || !isAuthenticated
                 ? 'bg-gray-600 cursor-not-allowed'
                 : 'bg-spotify-green hover:bg-green-600'
             } text-white`}
