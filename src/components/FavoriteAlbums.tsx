@@ -44,6 +44,9 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<{ [key: string]: SpotifyAlbum[] }>({});
+  const updateSearchResults = (newResults: { [key: string]: SpotifyAlbum[] }) => {
+    setSearchResults(newResults);
+  };
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [searchAlbumResults, setSearchAlbumResults] = useState<SpotifyAlbum[]>([]);
@@ -228,9 +231,9 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
           refreshToken,
           album.artist
         );
-        setSearchResults({ [album.id]: fallbackData.albums.items });
+        updateSearchResults({ [album.id]: fallbackData.albums.items });
       } else {
-        setSearchResults({ [album.id || 'temp']: data.albums.items });
+        updateSearchResults({ [album.id || 'temp']: data.albums.items });
       }
       
       setExpandedRow(album.id || 'temp');
