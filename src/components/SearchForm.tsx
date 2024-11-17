@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { spotifyApi } from '../utils/spotifyApi';
 
 interface SpotifyAlbum {
   id: string;
@@ -18,6 +19,7 @@ interface SpotifyTrack {
 
 interface SearchFormProps {
   accessToken: string;
+  refreshToken: string;
   albumSearchResults: SpotifyAlbum[];
   setAlbumSearchResults: (albums: SpotifyAlbum[]) => void;
   initialPage?: number;
@@ -37,7 +39,8 @@ interface SearchFormProps {
 }
 
 export default function SearchForm({ 
-  accessToken, 
+  accessToken,
+  refreshToken,
   albumSearchResults, 
   setAlbumSearchResults,
   initialPage = 1,
@@ -110,15 +113,25 @@ export default function SearchForm({
         });
       }
     }
+    
+    if (!refreshToken) {
+      console.error('No refresh token available. Please log in again.');
+      return;
+    }
+
     try {
       let data;
       if (typeof e === 'string') {
         // If a URL is provided, use it directly
-        data = await spotifyApi.searchByUrl(accessToken, accessToken, e);
+        data = await spotifyApi.searchByUrl(accessToken, refreshToken, e);
       } else {
         // Otherwise, use the search function
         const offset = (currentPage - 1) * itemsPerPage;
-        data = await spotifyApi.searchSpotify(artist, album, accessToken, accessToken, offset, itemsPerPage);
+        data = await spotifyApi.searchSpotify(artist, album, accessToken, refreshToken, offset, itemsPerPage);
+      }
+
+      if (!data || !data.albums) {
+        throw new Error('Invalid response from Spotify API');
       }
 
       setTotalResults(data.albums.total);
@@ -128,20 +141,24 @@ export default function SearchForm({
       // If no results found and we have an artist, try searching with just the artist
       if (data.albums.items.length === 0 && artist) {
         console.log('No results found with album name, trying artist-only search');
-        const fallbackData = await spotifyApi.searchByArtist(accessToken, accessToken, artist, 10);
-        setAlbumSearchResults(fallbackData.albums.items);
+        const fallbackData = await spotifyApi.searchByArtist(accessToken, refreshToken, artist, 10);
+        if (fallbackData && fallbackData.albums) {
+          setAlbumSearchResults(fallbackData.albums.items);
+        }
       } else {
         setAlbumSearchResults(data.albums.items);
       }
     } catch (error) {
       console.error('Error searching Spotify:', error);
       setAlbumSearchResults([]);
+      // Show user-friendly error message
+      alert('Error searching Spotify. Please try logging in again if the problem persists.');
     }
   };
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const data = await spotifyApi.getAlbumTracks(accessToken, accessToken, albumId);
+      const data = await spotifyApi.getAlbumTracks(accessToken, refreshToken, albumId);
       setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
     } catch (error) {
       console.error('Error fetching tracks:', error);
