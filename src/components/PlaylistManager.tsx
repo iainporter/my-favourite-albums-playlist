@@ -303,7 +303,9 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
       const item = JSON.parse(data);
       
       // Check if the item is a track or an album
-      if (item.type === 'track') {
+      const isTrack = item.uri?.startsWith('spotify:track:');
+
+      if (isTrack) {
         // If it's a track, add it directly to the playlist
         await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, item.uri);
       } else {
