@@ -67,7 +67,7 @@ class SpotifyApi {
     url: string,
     options: RequestInit,
     refreshToken: string
-  ): Promise<Response> {
+  ): Promise<any> {
     try {
       if (!refreshToken) {
         throw new Error('No refresh token provided');
@@ -118,7 +118,7 @@ class SpotifyApi {
         throw new Error(errorMessage);
       }
 
-      return response;
+      return responseData;
     } catch (error) {
       console.error('Error in fetchWithTokenRefresh:', error);
       throw error;
@@ -127,7 +127,7 @@ class SpotifyApi {
 
   async createPlaylist(accessToken: string, refreshToken: string, name: string, isPrivate: boolean = false) {
     const url = `https://api.spotify.com/v1/me/playlists`;
-    const response = await this.fetchWithTokenRefresh(
+    return await this.fetchWithTokenRefresh(
       url,
       {
         method: 'POST',
@@ -142,12 +142,11 @@ class SpotifyApi {
       },
       refreshToken
     );
-    return response.json();
   }
 
   async getUserPlaylists(accessToken: string, refreshToken: string, offset: number = 0, limit: number = 20) {
     const url = `https://api.spotify.com/v1/me/playlists?offset=${offset}&limit=${limit}`;
-    const response = await this.fetchWithTokenRefresh(
+    return await this.fetchWithTokenRefresh(
       url,
       {
         headers: {
@@ -156,7 +155,6 @@ class SpotifyApi {
       },
       refreshToken
     );
-    return response.json();
   }
 
   async getPlaylist(accessToken: string, refreshToken: string, playlistId: string) {
@@ -175,7 +173,7 @@ class SpotifyApi {
 
   async addToPlaylist(accessToken: string, refreshToken: string, playlistId: string, uriString: string) {
     const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
-    const response = await this.fetchWithTokenRefresh(
+    return await this.fetchWithTokenRefresh(
       url,
       {
         method: 'POST',
@@ -187,7 +185,6 @@ class SpotifyApi {
       },
       refreshToken
     );
-    return response.json();
   }
 
   async getPlaylistItems(accessToken: string, refreshToken: string, playlistId: string) {
@@ -206,7 +203,7 @@ class SpotifyApi {
 
   async removeItemFromPlaylist(accessToken: string, refreshToken: string, playlistId: string, uriString: string) {
     const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
-    const response = await this.fetchWithTokenRefresh(
+    return await this.fetchWithTokenRefresh(
       url,
       {
         method: 'DELETE',
@@ -220,7 +217,6 @@ class SpotifyApi {
       },
       refreshToken
     );
-    return response.json();
   }
 
   async searchSpotify(
@@ -234,7 +230,7 @@ class SpotifyApi {
     const fullQuery = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
     const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=${limit}&offset=${offset}`;
     
-    const response = await this.fetchWithTokenRefresh(
+    return await this.fetchWithTokenRefresh(
       url,
       {
         headers: {
@@ -243,8 +239,6 @@ class SpotifyApi {
       },
       refreshToken
     );
-
-    return response.json();
   }
 }
 
