@@ -198,7 +198,7 @@ class SpotifyApi {
       },
       refreshToken
     );
-    return response.json();
+    return response.json;
   }
 
   async removeItemFromPlaylist(accessToken: string, refreshToken: string, playlistId: string, uriString: string) {

@@ -264,15 +264,26 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
       // Update the playlist in the UI
       const tracksData = await spotifyApi.getPlaylistItems(accessToken, refreshToken, playlistId);
       
+      if (!tracksData || !tracksData.items) {
+        console.error('Invalid tracks data received:', tracksData);
+        throw new Error('Failed to fetch updated playlist tracks');
+      }
+      
       // Transform the tracks data to match the expected Track format
-      const transformedTracks = tracksData.items.map((item: any) => ({
-        id: item.track.id,
-        name: item.track.name,
-        artist: item.track.artists.map((a: any) => a.name).join(', '),
-        album: item.track.album.name,
-        duration_ms: item.track.duration_ms,
-        uri: item.track.uri
-      }));
+      const transformedTracks = tracksData.items.map((item: any) => {
+        if (!item || !item.track) {
+          console.warn('Invalid track item:', item);
+          return null;
+        }
+        return {
+          id: item.track.id,
+          name: item.track.name,
+          artist: item.track.artists.map((a: any) => a.name).join(', '),
+          album: item.track.album.name,
+          duration_ms: item.track.duration_ms,
+          uri: item.track.uri
+        };
+      }).filter(track => track !== null);
 
       setPlaylists(currentPlaylists => currentPlaylists.map(p =>
         p.id === playlistId
