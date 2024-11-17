@@ -43,8 +43,8 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
   const [sortState, setSortState] = useState<SortState>({ field: 'artist', direction: 'asc' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [searchResults, setSearchResults] = useState<{ [key: string]: SpotifyAlbum[] }>({});
-  const updateSearchResults = (newResults: { [key: string]: SpotifyAlbum[] }) => {
+  const [searchResults, setSearchResults] = useState<Record<string, SpotifyAlbum[]>>({});
+  const updateSearchResults = (newResults: Record<string, SpotifyAlbum[]>) => {
     setSearchResults(newResults);
   };
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
