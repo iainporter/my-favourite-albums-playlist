@@ -22,6 +22,15 @@ export interface SpotifySearchResponse {
 class SpotifyApi {
   private async refreshAccessToken(refreshToken: string): Promise<string> {
     try {
+      // Validate environment variables
+      if (!SPOTIFY_CONFIG.CLIENT_ID || !SPOTIFY_CONFIG.CLIENT_SECRET) {
+        throw new Error('Missing Spotify client credentials');
+      }
+
+      if (!refreshToken) {
+        throw new Error('No refresh token provided');
+      }
+
       const response = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
@@ -36,11 +45,17 @@ class SpotifyApi {
         }).toString(),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to refresh token');
+        console.error('Token refresh failed:', data);
+        throw new Error(`Failed to refresh token: ${data.error_description || data.error || 'Unknown error'}`);
       }
 
-      const data = await response.json();
+      if (!data.access_token) {
+        throw new Error('No access token returned from Spotify');
+      }
+
       return data.access_token;
     } catch (error) {
       console.error('Error refreshing token:', error);
@@ -54,27 +69,46 @@ class SpotifyApi {
     refreshToken: string
   ): Promise<Response> {
     try {
+      if (!refreshToken) {
+        throw new Error('No refresh token provided');
+      }
+
       let response = await fetch(url, options);
+      let responseData;
 
       if (response.status === 401) {
-        // Token expired, refresh it
-        const newAccessToken = await this.refreshAccessToken(refreshToken);
-        
-        // Update Authorization header with new token
-        const newOptions = {
-          ...options,
-          headers: {
-            ...(options.headers || {}),
-            Authorization: `Bearer ${newAccessToken}`,
-          },
-        };
+        console.log('Access token expired, attempting to refresh...');
+        try {
+          // Token expired, refresh it
+          const newAccessToken = await this.refreshAccessToken(refreshToken);
+          
+          // Update Authorization header with new token
+          const newOptions = {
+            ...options,
+            headers: {
+              ...(options.headers || {}),
+              Authorization: `Bearer ${newAccessToken}`,
+            },
+          };
 
-        // Retry the request with new token
-        response = await fetch(url, newOptions);
+          // Retry the request with new token
+          response = await fetch(url, newOptions);
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          throw new Error(`Token refresh failed: ${refreshError.message}`);
+        }
+      }
+
+      try {
+        responseData = await response.json();
+      } catch (e) {
+        // Response might not be JSON
+        responseData = null;
       }
 
       if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
+        const errorMessage = responseData?.error?.message || responseData?.error || `Request failed with status ${response.status}`;
+        throw new Error(errorMessage);
       }
 
       return response;
@@ -84,7 +118,7 @@ class SpotifyApi {
     }
   }
 
-  async createPlaylist(accessToken: string, refreshToken: string, userId: string, name: string, isPrivate: boolean = false) {
+  async createPlaylist(accessToken: string, refreshToken: string, name: string, isPrivate: boolean = false) {
     const url = `https://api.spotify.com/v1/me/playlists`;
     const response = await this.fetchWithTokenRefresh(
       url,
