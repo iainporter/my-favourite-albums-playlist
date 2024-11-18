@@ -197,6 +197,12 @@ export default function FavoriteAlbums() {
   };
 
   const handleAlbumClick = async (album: Album) => {
+    // If the row is already expanded, collapse it
+    if (expandedRow === album.id) {
+      setExpandedRow(null);
+      return;
+    }
+
     try {
       // First attempt: search with both artist and album
       const data = await typedSpotifyApi.searchByArtistAndAlbum(
