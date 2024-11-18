@@ -2,13 +2,15 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { SPOTIFY_CONFIG } from '../../../config/spotify';
 import { generateCodeVerifier, generateCodeChallenge } from '../../../utils/pkce';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Generate PKCE verifier and challenge
   const codeVerifier = generateCodeVerifier();
-  const codeChallenge = generateCodeChallenge(codeVerifier);
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
   
   // Generate state for CSRF protection
-  const state = crypto.randomBytes(16).toString('hex');
+  const state = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 
   // Store code verifier in session/cookie (you should implement this securely)
   res.setHeader('Set-Cookie', [
