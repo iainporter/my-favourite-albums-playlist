@@ -48,6 +48,24 @@ export default function SearchForm({
   const [previousUrl, setPreviousUrl] = useState<string | null>(initialPrevUrl);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Check authentication status on mount and when localStorage changes
+  useEffect(() => {
+    const checkAuth = () => {
+      const accessToken = localStorage.getItem('accessToken');
+      setIsAuthenticated(!!accessToken);
+    };
+
+    // Check initial auth state
+    checkAuth();
+
+    // Listen for storage changes (in case token is updated in another tab)
+    window.addEventListener('storage', checkAuth);
+
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, []);
+
   // Update state when initial values change
   useEffect(() => {
     setArtist(initialArtist);
