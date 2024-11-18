@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { spotifyApi } from '../utils/spotifyApi';
+import { SpotifyApi } from '../types/spotify';
+
+const typedSpotifyApi = spotifyApi as SpotifyApi;
 import { SpotifyAlbum as SpotifyApiAlbum } from '../types/spotify';
 
 interface SpotifyTrack {
@@ -64,7 +67,7 @@ export default function Publications() {
 
     const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const data = await spotifyApi.getAlbumTracks(albumId);
+      const data = await typedSpotifyApi.getAlbumTracks(albumId);
       setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
     } catch (error) {
       console.error('Error fetching tracks:', error);
@@ -81,7 +84,7 @@ export default function Publications() {
     setExpandedAlbum(searchKey);
     if (!searchResults[searchKey]) {
       try {
-        const data = await spotifyApi.searchSpotify(artist, album);
+        const data = await typedSpotifyApi.searchSpotify(artist, album);
         setSearchResults(prev => ({
           ...prev,
           [searchKey]: data.albums.items

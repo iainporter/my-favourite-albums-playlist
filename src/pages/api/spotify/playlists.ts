@@ -2,10 +2,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { spotifyApi as spotifyApiClient } from '../../../utils/spotifyApi';
 
-const spotifyApi = new SpotifyWebApi({
-  clientId: SPOTIFY_CONFIG.CLIENT_ID,
-  clientSecret: SPOTIFY_CONFIG.CLIENT_SECRET,
-});
+import { SpotifyApi } from '../../../types/spotify';
+
+const typedSpotifyApi = spotifyApiClient as SpotifyApi;
 
 async function searchAlbumTracks(spotifyApi: SpotifyWebApi, artist: string, album: string) {
   const query = `artist:${artist} album:${album}`;
@@ -33,11 +32,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // First get the current user's ID
-      const userData = await spotifyApiClient.getCurrentUser();
+      const userData = await typedSpotifyApi.getCurrentUser();
       const userId = userData.id;
 
       // Create the playlist
-      const response = await spotifyApiClient.createPlaylist(
+      const response = await typedSpotifyApi.createPlaylist(
         name,
         true // make it private
       );
@@ -60,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Add single track to playlist
-      const response = await spotifyApiClient.addToPlaylist(
+      const response = await typedSpotifyApi.addToPlaylist(
         playlist_id as string,
         uri
       );
@@ -89,7 +88,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const albumId = uri.split(':')[2];
 
       // First, fetch all tracks from the album
-      const albumTracksResponse = await spotifyApiClient.getAlbumTracks(
+      const albumTracksResponse = await typedSpotifyApi.getAlbumTracks(
         albumId
       );
 
@@ -102,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const trackUris = albumTracks.items.map((track: any) => track.uri);
 
       // Then add all tracks to the playlist
-      const response = await spotifyApiClient.addToPlaylist(
+      const response = await typedSpotifyApi.addToPlaylist(
         playlist_id as string,
         trackUris.join(',')
       );
@@ -128,7 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Get the track URI
-      const trackResponse = await spotifyApiClient.getTrack(
+      const trackResponse = await typedSpotifyApi.getTrack(
         trackId
       );
 
@@ -141,7 +140,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const trackUri = trackData.uri;
 
       // Remove the track from the playlist
-      const response = await spotifyApiClient.removeItemFromPlaylist(
+      const response = await typedSpotifyApi.removeItemFromPlaylist(
         playlist_id as string,
         trackUri
       );
@@ -164,7 +163,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (playlist_id) {
         // Fetch tracks for a specific playlist
         console.log('Fetching tracks for playlist:', playlist_id);
-        const data = await spotifyApi.getPlaylistTracks(playlist_id as string);
+        const data = await typedSpotifyApi.getPlaylistItems(playlist_id as string);
         
         const formattedTracks = data.body.items.map(item => ({
           id: item.track.id,
@@ -182,7 +181,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const limit = 20; // Number of playlists per page
       const offset = parseInt(req.query.offset as string) || 0;
       
-      const data = await spotifyApi.getUserPlaylists({ limit, offset });
+      const data = await typedSpotifyApi.getUserPlaylists(limit, offset );
       console.log('Playlists fetched:', data.body);
       
       // Ensure we're returning the expected format with pagination info
@@ -193,8 +192,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           name: playlist.name,
           images: playlist.images || []
         })),
-        next: data.body.next ? `/api/spotify/playlists?access_token=${access_token}&offset=${offset + limit}` : null,
-        previous: offset > 0 ? `/api/spotify/playlists?access_token=${access_token}&offset=${Math.max(0, offset - limit)}` : null,
+        next: data.body.next ? `/api/spotify/playlists?access_token=${accessToken}&offset=${offset + limit}` : null,
+        previous: offset > 0 ? `/api/spotify/playlists?access_token=${accessToken}&offset=${Math.max(0, offset - limit)}` : null,
         total: data.body.total
       };
       

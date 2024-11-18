@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import { spotifyApi } from '../../../utils/spotifyApi';
+import { SpotifyApi } from '../../../types/spotify';
+
+const typedSpotifyApi = spotifyApi as SpotifyApi;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -8,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const data = await spotifyApi.getUserSavedAlbums();
+    const data = await typedSpotifyApi.getUserSavedAlbums();
     
     // Transform the Spotify response into our Album format
     const albums = data.items.map((item: any) => ({

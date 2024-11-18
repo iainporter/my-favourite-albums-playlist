@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { spotifyApi } from '../utils/spotifyApi';
+import { SpotifyApi } from '../types/spotify';
+const typedSpotifyApi = spotifyApi as SpotifyApi;
 
 import { SpotifyAlbum, SpotifyTrack } from '../types/spotify';
 
@@ -111,11 +113,11 @@ export default function SearchForm({
       let data;
       if (typeof e === 'string') {
         // If a URL is provided, use it directly
-        data = await spotifyApi.searchByUrl(e);
+        data = await typedSpotifyApi.searchByUrl(e);
       } else {
         // Otherwise, use the search function
         const offset = (currentPage - 1) * itemsPerPage;
-        data = await spotifyApi.searchSpotify(artist, album, offset, itemsPerPage);
+        data = await typedSpotifyApi.searchSpotify(artist, album, offset, itemsPerPage);
       }
 
       if (!data || !data.albums) {
@@ -129,7 +131,7 @@ export default function SearchForm({
       // If no results found and we have an artist, try searching with just the artist
       if (data.albums.items.length === 0 && artist) {
         console.log('No results found with album name, trying artist-only search');
-        const fallbackData = await spotifyApi.searchByArtist(artist, 10);
+        const fallbackData = await typedSpotifyApi.searchByArtist(artist, 10);
         if (fallbackData && fallbackData.albums) {
           setAlbumSearchResults(fallbackData.albums.items);
         }
@@ -147,7 +149,7 @@ export default function SearchForm({
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const data = await spotifyApi.getAlbumTracks(albumId);
+      const data = await typedSpotifyApi.getAlbumTracks(albumId);
       setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
     } catch (error) {
       console.error('Error fetching tracks:', error);

@@ -21,25 +21,25 @@ class SpotifyApi implements ISpotifyApi {
     });
   }
 
-  async function refreshAccessToken(refreshToken) {
-  const response = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-      client_id: SPOTIFY_CONFIG.CLIENT_ID
-    }),
-  });
+  private async refreshAccessToken(refreshToken: string) {
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        client_id: SPOTIFY_CONFIG.CLIENT_ID
+      }),
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to refresh access token');
+    if (!response.ok) {
+      throw new Error('Failed to refresh access token');
+    }
+
+    return response.json();
   }
-
-  return response.json();
-}
 
 
   private async fetchWithTokenRefresh(
@@ -60,7 +60,7 @@ class SpotifyApi implements ISpotifyApi {
 
           // Token expired, refresh it
           const refreshToken = localStorage.getItem('refreshToken');
-          const newTokens = await refreshAccessToken(refreshToken);
+          const newTokens = await this.refreshAccessToken(refreshToken);
           const newAccessToken = newTokens.access_token;
           localStorage.setItem('accessToken', newAccessToken);
 //           localStorage.setItem('refreshToken', newTokens.refresh_token);

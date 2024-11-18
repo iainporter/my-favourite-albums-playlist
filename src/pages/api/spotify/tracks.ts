@@ -1,5 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { spotifyApi } from '../../../utils/spotifyApi';
+import { SpotifyApi } from '../../../types/spotify';
+
+const typedSpotifyApi = spotifyApi as SpotifyApi;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { albumId } = req.query;
@@ -9,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const data = await spotifyApi.getAlbumTracks(albumId as string);
+    const data = await typedSpotifyApi.getAlbumTracks(albumId as string);
     res.status(200).json(data);
   } catch (error) {
     console.error('Error fetching tracks:', error);

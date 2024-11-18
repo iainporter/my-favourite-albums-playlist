@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import { spotifyApi } from '../../../utils/spotifyApi';
+import { SpotifyApi } from '../../../types/spotify';
+
+const typedSpotifyApi = spotifyApi as SpotifyApi;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -14,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const data = await spotifyApi.searchSpotify(
+    const data = await typedSpotifyApi.searchSpotify(
       artist,
       album,
       Number(offset),

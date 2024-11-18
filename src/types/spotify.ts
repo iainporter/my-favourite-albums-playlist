@@ -27,7 +27,6 @@ export interface SpotifyApi {
   searchSpotify(artist: string, album: string, offset?: number, limit?: number): Promise<any>;
   searchByArtistAndAlbum(artist: string, album: string, limit?: number): Promise<any>;
   searchByArtist(artist: string, limit?: number): Promise<any>;
-  getAlbumTracks(albumId: string): Promise<any>;
   getUserSavedAlbums(): Promise<any>;
   getCurrentUser(): Promise<any>;
   getTrack(trackId: string): Promise<any>;
