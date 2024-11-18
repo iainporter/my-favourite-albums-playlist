@@ -12,14 +12,30 @@ export default function Home() {
 
   useEffect(() => {
     const { access_token, refresh_token, error } = router.query;
-    if (access_token) {
-      // Decode the URL-encoded token
-      setAccessToken(decodeURIComponent(access_token as string));
+    
+    if (access_token && refresh_token) {
+      // Store tokens in localStorage
+      localStorage.setItem('accessToken', access_token as string);
+      localStorage.setItem('refreshToken', refresh_token as string);
+      
+      // Set tokens in state
+      setAccessToken(access_token as string);
+      setRefreshToken(refresh_token as string);
+      
+      // Remove tokens from URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    } else {
+      // Check localStorage for existing tokens
+      const storedAccessToken = localStorage.getItem('accessToken');
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+      
+      if (storedAccessToken && storedRefreshToken) {
+        setAccessToken(storedAccessToken);
+        setRefreshToken(storedRefreshToken);
+      }
     }
-    if (refresh_token) {
-      // Decode the URL-encoded refresh token
-      setRefreshToken(decodeURIComponent(refresh_token as string));
-    }
+    
     if (error) {
       setError(error as string);
     }

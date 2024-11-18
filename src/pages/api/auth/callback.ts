@@ -47,10 +47,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'auth_state=; HttpOnly; Path=/; Max-Age=0'
     ]);
 
-    // Encode the tokens to make them URL-safe
+    // Pass tokens to the client side where they will be stored in localStorage
     const encodedParams = new URLSearchParams({
-      access_token: encodeURIComponent(data.access_token),
-      refresh_token: encodeURIComponent(data.refresh_token)
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_in: data.expires_in.toString()
     });
     
     res.redirect(`/?${encodedParams.toString()}`);
