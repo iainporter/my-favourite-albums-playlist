@@ -14,16 +14,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const session = await getSession({ req });
-    if (!session || !session.accessToken) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     const data = await spotifyApi.searchSpotify(
       artist,
       album,
-      session.accessToken,
-      session.refreshToken,
       Number(offset),
       Number(limit)
     );

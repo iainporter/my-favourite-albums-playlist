@@ -84,10 +84,6 @@ interface Playlist {
   isExpanded?: boolean;
 }
 
-interface PlaylistManagerProps {
-  accessToken: string;
-  refreshToken: string;
-}
 
 function formatDuration(ms: number | undefined): string {
   if (!ms) return '0:00';
@@ -246,7 +242,7 @@ function NoPlaylists({ onRefresh }: { onRefresh: () => void }) {
   );
 }
 
-export default function PlaylistManager({ accessToken, refreshToken }: PlaylistManagerProps) {
+export default function PlaylistManager() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTracks, setLoadingTracks] = useState<string | null>(null);
@@ -259,10 +255,10 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
 
   const handleRemoveTrack = async (playlistId: string, trackId: string) => {
     try {
-      await spotifyApi.removeItemFromPlaylist(accessToken, refreshToken, playlistId, `spotify:track:${trackId}`);
+      await spotifyApi.removeItemFromPlaylist(playlistId, `spotify:track:${trackId}`);
 
       // Update the playlist in the UI
-      const tracksData = await spotifyApi.getPlaylistItems(accessToken, refreshToken, playlistId);
+      const tracksData = await spotifyApi.getPlaylistItems(playlistId);
       
       if (!tracksData) {
         console.error('No tracks data received');
@@ -307,19 +303,19 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
 
       if (isTrack) {
         // If it's a track, add it directly to the playlist
-        await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, item.uri);
+        await spotifyApi.addToPlaylist(targetPlaylistId, item.uri);
       } else {
         // If it's an album, get all tracks from the album
-        const albumTracks = await spotifyApi.getAlbumTracks(accessToken, refreshToken, item.id);
+        const albumTracks = await spotifyApi.getAlbumTracks(item.id);
         
         // Add each track to the playlist
         for (const track of albumTracks.items) {
-          await spotifyApi.addToPlaylist(accessToken, refreshToken, targetPlaylistId, track.uri);
+          await spotifyApi.addToPlaylist(targetPlaylistId, track.uri);
         }
       }
       
       // Fetch the updated tracks for the target playlist
-      const tracksData = await spotifyApi.getPlaylistItems(accessToken, refreshToken, targetPlaylistId);
+      const tracksData = await spotifyApi.getPlaylistItems(targetPlaylistId);
       
       // Transform the tracks data to match the expected Track format
       const transformedTracks = tracksData.items.map((item: any) => ({
@@ -349,7 +345,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
     setIsLoading(true);
     try {
       const offset = (currentPage - 1) * itemsPerPage;
-      const data = await spotifyApi.getUserPlaylists(accessToken, refreshToken, offset, itemsPerPage);
+      const data = await spotifyApi.getUserPlaylists(offset, itemsPerPage);
 
       if (data && data.items && Array.isArray(data.items)) {
         setPlaylists(data.items);
@@ -393,7 +389,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
     // Expand and load tracks if not loaded
     setLoadingTracks(playlistId);
     try {
-      const data = await spotifyApi.getPlaylistItems(accessToken, refreshToken, playlistId);
+      const data = await spotifyApi.getPlaylistItems(playlistId);
       
       // Transform the Spotify API response into our Track format
       const transformedTracks = data.items.map((item: any) => ({
@@ -417,10 +413,8 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
   };
 
   useEffect(() => {
-    if (accessToken && accessToken.length > 0) {
       fetchPlaylists();
-    }
-  }, [accessToken, currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const renderContent = () => {
     if (!Array.isArray(playlists) || playlists.length === 0) {
@@ -448,7 +442,7 @@ export default function PlaylistManager({ accessToken, refreshToken }: PlaylistM
 
   const handleCreatePlaylist = async (name: string, isPrivate: boolean) => {
     try {
-      await spotifyApi.createPlaylist(accessToken, refreshToken, name, isPrivate);
+      await spotifyApi.createPlaylist(name, isPrivate);
       setIsCreateModalOpen(false);
       await fetchPlaylists();
     } catch (error) {

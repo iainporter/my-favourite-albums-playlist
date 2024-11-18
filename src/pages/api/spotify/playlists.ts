@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import SpotifyWebApi from 'spotify-web-api-node';
-import { SPOTIFY_CONFIG } from '../../../config/spotify';
 import { spotifyApi as spotifyApiClient } from '../../../utils/spotifyApi';
 
 const spotifyApi = new SpotifyWebApi({
@@ -23,13 +22,6 @@ async function analyzeAlbumForPlaylist(tracks: any[], playlistName: string) {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { access_token } = req.query;
-
-  if (!access_token) {
-    return res.status(401).json({ error: 'No access token provided' });
-  }
-
-  spotifyApi.setAccessToken(access_token as string);
 
   try {
     if (req.method === 'POST' && !req.query.action) {
@@ -41,16 +33,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // First get the current user's ID
-      const userData = await spotifyApiClient.getCurrentUser(
-        access_token as string,
-        req.headers['x-refresh-token'] as string
-      );
+      const userData = await spotifyApiClient.getCurrentUser();
       const userId = userData.id;
 
       // Create the playlist
       const response = await spotifyApiClient.createPlaylist(
-        access_token as string,
-        req.headers['x-refresh-token'] as string,
         name,
         true // make it private
       );
@@ -74,8 +61,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Add single track to playlist
       const response = await spotifyApiClient.addToPlaylist(
-        access_token as string,
-        req.headers['x-refresh-token'] as string,
         playlist_id as string,
         uri
       );
@@ -105,8 +90,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // First, fetch all tracks from the album
       const albumTracksResponse = await spotifyApiClient.getAlbumTracks(
-        access_token as string,
-        req.headers['x-refresh-token'] as string,
         albumId
       );
 
@@ -120,8 +103,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Then add all tracks to the playlist
       const response = await spotifyApiClient.addToPlaylist(
-        access_token as string,
-        req.headers['x-refresh-token'] as string,
         playlist_id as string,
         trackUris.join(',')
       );
@@ -148,8 +129,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Get the track URI
       const trackResponse = await spotifyApiClient.getTrack(
-        access_token as string,
-        req.headers['x-refresh-token'] as string,
         trackId
       );
 
@@ -163,8 +142,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Remove the track from the playlist
       const response = await spotifyApiClient.removeItemFromPlaylist(
-        access_token as string,
-        req.headers['x-refresh-token'] as string,
         playlist_id as string,
         trackUri
       );
@@ -209,6 +186,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('Playlists fetched:', data.body);
       
       // Ensure we're returning the expected format with pagination info
+      const accessToken = localStorage.getItem('accessToken');
       const formattedData = {
         items: data.body.items.map(playlist => ({
           id: playlist.id,

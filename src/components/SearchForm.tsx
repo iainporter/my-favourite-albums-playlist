@@ -4,8 +4,6 @@ import { spotifyApi } from '../utils/spotifyApi';
 import { SpotifyAlbum, SpotifyTrack } from '../types/spotify';
 
 interface SearchFormProps {
-  accessToken: string;
-  refreshToken: string;
   albumSearchResults: SpotifyAlbum[];
   setAlbumSearchResults: (albums: SpotifyAlbum[]) => void;
   initialPage?: number;
@@ -24,9 +22,7 @@ interface SearchFormProps {
   }) => void;
 }
 
-export default function SearchForm({ 
-  accessToken,
-  refreshToken,
+export default function SearchForm({
   albumSearchResults, 
   setAlbumSearchResults,
   initialPage = 1,
@@ -62,15 +58,6 @@ export default function SearchForm({
   useEffect(() => {
     setCurrentPage(initialPage);
   }, [initialPage]);
-
-  // Add effect to validate tokens
-  useEffect(() => {
-    if (accessToken && accessToken.length > 0) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-    }
-  }, [accessToken]);
 
   // Save search state whenever relevant values change
   useEffect(() => {
@@ -124,11 +111,11 @@ export default function SearchForm({
       let data;
       if (typeof e === 'string') {
         // If a URL is provided, use it directly
-        data = await spotifyApi.searchByUrl(accessToken, refreshToken, e);
+        data = await spotifyApi.searchByUrl(e);
       } else {
         // Otherwise, use the search function
         const offset = (currentPage - 1) * itemsPerPage;
-        data = await spotifyApi.searchSpotify(artist, album, accessToken, refreshToken, offset, itemsPerPage);
+        data = await spotifyApi.searchSpotify(artist, album, offset, itemsPerPage);
       }
 
       if (!data || !data.albums) {
@@ -142,7 +129,7 @@ export default function SearchForm({
       // If no results found and we have an artist, try searching with just the artist
       if (data.albums.items.length === 0 && artist) {
         console.log('No results found with album name, trying artist-only search');
-        const fallbackData = await spotifyApi.searchByArtist(accessToken, refreshToken, artist, 10);
+        const fallbackData = await spotifyApi.searchByArtist(artist, 10);
         if (fallbackData && fallbackData.albums) {
           setAlbumSearchResults(fallbackData.albums.items);
         }
@@ -160,7 +147,7 @@ export default function SearchForm({
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const data = await spotifyApi.getAlbumTracks(accessToken, refreshToken, albumId);
+      const data = await spotifyApi.getAlbumTracks(albumId);
       setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
     } catch (error) {
       console.error('Error fetching tracks:', error);

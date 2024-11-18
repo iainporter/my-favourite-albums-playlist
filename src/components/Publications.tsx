@@ -20,12 +20,8 @@ type SpotifyAlbum = SpotifyApiAlbum;
 
 type PublicationType = 'high-rated' | 'best-new' | 'diy';
 
-interface PublicationsProps {
-  accessToken: string;
-  refreshToken: string;
-}
 
-export default function Publications({ accessToken, refreshToken }: PublicationsProps) {
+export default function Publications() {
   const [albums, setAlbums] = useState<PitchforkAlbum[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +64,7 @@ export default function Publications({ accessToken, refreshToken }: Publications
 
     const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const data = await spotifyApi.getAlbumTracks(accessToken, refreshToken, albumId);
+      const data = await spotifyApi.getAlbumTracks(albumId);
       setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
     } catch (error) {
       console.error('Error fetching tracks:', error);
@@ -85,10 +81,7 @@ export default function Publications({ accessToken, refreshToken }: Publications
     setExpandedAlbum(searchKey);
     if (!searchResults[searchKey]) {
       try {
-        if (!accessToken) {
-          throw new Error('No access token available');
-        }
-        const data = await spotifyApi.searchSpotify(artist, album, accessToken, refreshToken);
+        const data = await spotifyApi.searchSpotify(artist, album);
         setSearchResults(prev => ({
           ...prev,
           [searchKey]: data.albums.items

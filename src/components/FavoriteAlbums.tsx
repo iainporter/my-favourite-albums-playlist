@@ -16,12 +16,8 @@ interface SortState {
 
 import { SpotifyAlbum, SpotifyTrack } from '../types/spotify';
 
-interface FavoriteAlbumsProps {
-  accessToken: string;
-  refreshToken: string;
-}
 
-export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAlbumsProps) {
+export default function FavoriteAlbums() {
   const [activeTab, setActiveTab] = useState<'import' | 'search' | 'publications'>('import');
   const [albums, setAlbums] = useState<Album[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -192,7 +188,7 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const data = await spotifyApi.getAlbumTracks(accessToken, refreshToken, albumId);
+      const data = await spotifyApi.getAlbumTracks(albumId);
       setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
     } catch (error) {
       console.error('Error fetching tracks:', error);
@@ -203,8 +199,6 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
     try {
       // First attempt: search with both artist and album
       const data = await spotifyApi.searchByArtistAndAlbum(
-        accessToken,
-        refreshToken,
         album.artist,
         album.album
       );
@@ -213,8 +207,6 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
       if (data.albums.items.length === 0) {
         console.log('No results found with album name, trying artist-only search');
         const fallbackData = await spotifyApi.searchByArtist(
-          accessToken,
-          refreshToken,
           album.artist
         );
         updateSearchResults({ [album.id]: fallbackData.albums.items });
@@ -320,13 +312,11 @@ export default function FavoriteAlbums({ accessToken, refreshToken }: FavoriteAl
 
       {activeTab === 'publications' ? (
         <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm overflow-hidden">
-             <Publications accessToken={accessToken} refreshToken={refreshToken} />
+             <Publications />
         </div>
       ) : activeTab === 'search' ? (
         <div className="flex-1 overflow-y-auto px-6">
           <SearchForm 
-            accessToken={accessToken}
-            refreshToken={refreshToken}
             albumSearchResults={searchAlbumResults}
             setAlbumSearchResults={setSearchAlbumResults}
             initialPage={searchState.currentPage}

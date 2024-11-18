@@ -1,6 +1,6 @@
 import { SPOTIFY_CONFIG } from '../config/spotify';
 
-import { SpotifyAlbum } from '../types/spotify';
+import { SpotifyAlbum, SpotifyApi as ISpotifyApi } from '../types/spotify';
 
 export interface SpotifySearchResponse {
   albums: {
@@ -11,7 +11,7 @@ export interface SpotifySearchResponse {
   };
 }
 
-class SpotifyApi {
+class SpotifyApi implements ISpotifyApi {
   constructor() {
     // Debug logging for SPOTIFY_CONFIG when SpotifyApi is instantiated
     console.log('SpotifyApi initialized with config:', {
@@ -21,89 +21,99 @@ class SpotifyApi {
     });
   }
 
-  private async refreshAccessToken(refreshToken: string): Promise<any> {
-    if (!SPOTIFY_CONFIG.CLIENT_ID) {
-      throw new Error('Missing Spotify client credentials');
-    }
+  async function refreshAccessToken(refreshToken) {
+  const response = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: SPOTIFY_CONFIG.CLIENT_ID
+    }),
+  });
 
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + Buffer.from(
-          SPOTIFY_CONFIG.CLIENT_ID + ':' + SPOTIFY_CONFIG.CLIENT_SECRET
-        ).toString('base64'),
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-        client_id: SPOTIFY_CONFIG.CLIENT_ID,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to refresh access token');
-    }
-
-    const data = await response.json();
-    localStorage.setItem('accessToken', data.access_token);
-    if (data.refresh_token) {
-      localStorage.setItem('refreshToken', data.refresh_token);
-    }
-    return data;
+  if (!response.ok) {
+    throw new Error('Failed to refresh access token');
   }
 
-  private async fetchWithTokenRefresh(url: string, options: RequestInit): Promise<any> {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-      throw new Error('No access token available');
-    }
+  return response.json();
+}
 
-    const requestOptions = {
-      ...options,
-      headers: {
-        ...options.headers,
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    };
 
-    let response = await fetch(url, requestOptions);
+  private async fetchWithTokenRefresh(
+    url: string,
+    options: RequestInit
+  ): Promise<any> {
+    try {
 
-    if (response.status === 401) {
-      // Token expired, refresh it
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
+      let response = await fetch(url, options);
+      let responseData;
+
+      if (response.status === 401) {
+        console.log('Access token expired, attempting to refresh...');
+        try {
+          if (!SPOTIFY_CONFIG.CLIENT_ID) {
+            throw new Error('Missing Spotify client credentials. Please check your .env file and ensure SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are set.');
+          }
+
+          // Token expired, refresh it
+          const refreshToken = localStorage.getItem('refreshToken');
+          const newTokens = await refreshAccessToken(refreshToken);
+          const newAccessToken = newTokens.access_token;
+          localStorage.setItem('accessToken', newAccessToken);
+//           localStorage.setItem('refreshToken', newTokens.refresh_token);
+
+          // Update Authorization header with new token
+          const newOptions = {
+            ...options,
+            headers: {
+              ...(options.headers || {}),
+              Authorization: `Bearer ${newAccessToken}`,
+            },
+          };
+
+
+          // Retry the request with new token
+          response = await fetch(url, newOptions);
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          if (refreshError.message.includes('Missing Spotify client credentials')) {
+            throw refreshError;
+          }
+          throw new Error(`Token refresh failed: ${refreshError.message}`);
+        }
       }
 
-      const newTokens = await this.refreshAccessToken(refreshToken);
-      
-      // Retry the request with the new access token
-      const retryOptions = {
-        ...options,
-        headers: {
-          ...options.headers,
-          'Authorization': `Bearer ${newTokens.access_token}`,
-        },
-      };
+      try {
+        responseData = await response.json();
+      } catch (e) {
+        // Response might not be JSON
+        responseData = null;
+      }
 
-      response = await fetch(url, retryOptions);
+      if (!response.ok) {
+        const errorMessage = responseData?.error?.message || responseData?.error || `Request failed with status ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      return responseData;
+    } catch (error) {
+      console.error('Error in fetchWithTokenRefresh:', error);
+      throw error;
     }
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch Spotify data');
-    }
-
-    return response.json();
   }
 
   async createPlaylist(name: string, isPrivate: boolean = false) {
+    const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/me/playlists`;
     return await this.fetchWithTokenRefresh(
       url,
       {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
@@ -115,26 +125,33 @@ class SpotifyApi {
   }
 
   async getUserPlaylists(offset: number = 0, limit: number = 20) {
+    const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/me/playlists?offset=${offset}&limit=${limit}`;
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {},
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       }
     );
   }
 
   async getPlaylist(playlistId: string) {
+    const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/playlists/${playlistId}`;
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {},
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       }
     );
   }
 
   async addToPlaylist(playlistId: string, uriString: string) {
+    const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
     const uris = uriString.includes(',') ? uriString.split(',') : [uriString];
     return await this.fetchWithTokenRefresh(
@@ -142,6 +159,7 @@ class SpotifyApi {
       {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ uris }),
@@ -150,22 +168,27 @@ class SpotifyApi {
   }
 
   async getPlaylistItems(playlistId: string) {
+    const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {},
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       }
     );
   }
 
   async removeItemFromPlaylist(playlistId: string, uriString: string) {
+    const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
     return await this.fetchWithTokenRefresh(
       url,
       {
         method: 'DELETE',
         headers: {
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -181,13 +204,16 @@ class SpotifyApi {
     offset: number = 0,
     limit: number = 20
   ): Promise<SpotifySearchResponse> {
+    const accessToken = localStorage.getItem('accessToken');
     const fullQuery = `${artist ? `artist:${artist}` : ''} ${album ? `album:${album}` : ''}`.trim();
     const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(fullQuery)}&type=album&limit=${limit}&offset=${offset}`;
     
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {}
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
       }
     );
   }
@@ -197,13 +223,16 @@ class SpotifyApi {
     album: string,
     limit: number = 10
   ): Promise<SpotifySearchResponse> {
+    const accessToken = localStorage.getItem('accessToken');
     const query = `artist:${artist} album:${album}`;
     const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=${limit}`;
     
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {}
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
       }
     );
   }
@@ -212,62 +241,83 @@ class SpotifyApi {
     artist: string,
     limit: number = 10
   ): Promise<SpotifySearchResponse> {
+    const accessToken = localStorage.getItem('accessToken');
     const query = `artist:${artist}`;
     const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=${limit}`;
     
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {}
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
       }
     );
   }
 
+
   async getAlbumTracks(albumId: string) {
+    const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/albums/${albumId}/tracks`;
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {},
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       }
     );
   }
 
   async getUserSavedAlbums() {
+    const accessToken = localStorage.getItem('accessToken');
     const url = 'https://api.spotify.com/v1/me/albums';
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {},
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       }
     );
   }
 
   async getCurrentUser() {
+    const accessToken = localStorage.getItem('accessToken');
     const url = 'https://api.spotify.com/v1/me';
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {},
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       }
     );
   }
 
   async getTrack(trackId: string) {
+    const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/tracks/${trackId}`;
     return await this.fetchWithTokenRefresh(
       url,
       {
-        headers: {},
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
       }
     );
   }
 
-  async searchByUrl(searchUrl: string): Promise<SpotifySearchResponse> {
+  async searchByUrl(
+    searchUrl: string
+  ): Promise<SpotifySearchResponse> {
+    const accessToken = localStorage.getItem('accessToken');
     return await this.fetchWithTokenRefresh(
       searchUrl,
       {
-        headers: {}
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
       }
     );
   }

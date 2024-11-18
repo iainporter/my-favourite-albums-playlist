@@ -8,15 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const session = await getSession({ req });
-    if (!session || !session.accessToken) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const data = await spotifyApi.getUserSavedAlbums(
-      session.accessToken,
-      session.refreshToken
-    );
+    const data = await spotifyApi.getUserSavedAlbums();
     
     // Transform the Spotify response into our Album format
     const albums = data.items.map((item: any) => ({
