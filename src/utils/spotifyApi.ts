@@ -35,10 +35,7 @@ class SpotifyApi implements ISpotifyApi {
     });
 
     if (!response.ok) {
-      // Clear tokens from localStorage
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      throw new AuthError('Failed to refresh access token');
+      this.rethrowAuthError()
     }
 
     return response.json();
@@ -66,8 +63,10 @@ class SpotifyApi implements ISpotifyApi {
           const newTokens = await this.refreshAccessToken(refreshToken);
           const newAccessToken = newTokens.access_token;
           localStorage.setItem('accessToken', newAccessToken);
-//           localStorage.setItem('refreshToken', newTokens.refresh_token);
-
+          // Check if a new refresh token is provided and update it if necessary
+         if (newTokens.refresh_token) {
+            localStorage.setItem('refreshToken', newTokens.refresh_token);
+         }
           // Update Authorization header with new token
           const newOptions = {
             ...options,
@@ -323,6 +322,14 @@ class SpotifyApi implements ISpotifyApi {
         }
       }
     );
+  }
+
+  //This will cause the user to be thrown out to a login page
+  private rethrowAuthError() {
+          // Clear tokens from localStorage
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      throw new AuthError('Failed to refresh access token');
   }
 }
 

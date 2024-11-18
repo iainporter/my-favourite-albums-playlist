@@ -144,7 +144,7 @@ export default function Publications() {
                 ? 'DIY New Albums'
                 : 'Pitchfork 8.0+ Albums'}
             </h2>
-            <div className="max-h-96 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto min-h-0">
               {albums.map((album, index) => (
                 <div key={index}>
                   <div
