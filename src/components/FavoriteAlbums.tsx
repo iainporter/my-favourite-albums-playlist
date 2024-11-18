@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { Album } from '../types/album';
 import Publications from './Publications';
 import { spotifyApi } from '../utils/spotifyApi';
+const typedSpotifyApi = spotifyApi as SpotifyApi;
 
 
 type SortField = 'artist' | 'album' | 'year' | 'rating';
@@ -14,7 +15,7 @@ interface SortState {
   direction: SortDirection;
 }
 
-import { SpotifyAlbum, SpotifyTrack } from '../types/spotify';
+import { SpotifyAlbum, SpotifyTrack, SpotifyApi } from '../types/spotify';
 
 
 export default function FavoriteAlbums() {
@@ -188,7 +189,7 @@ export default function FavoriteAlbums() {
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
-      const data = await spotifyApi.getAlbumTracks(albumId);
+      const data = await typedSpotifyApi.getAlbumTracks(albumId);
       setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
     } catch (error) {
       console.error('Error fetching tracks:', error);
@@ -198,7 +199,7 @@ export default function FavoriteAlbums() {
   const handleAlbumClick = async (album: Album) => {
     try {
       // First attempt: search with both artist and album
-      const data = await spotifyApi.searchByArtistAndAlbum(
+      const data = await typedSpotifyApi.searchByArtistAndAlbum(
         album.artist,
         album.album
       );
@@ -206,7 +207,7 @@ export default function FavoriteAlbums() {
       // If no results found, try searching with just the artist
       if (data.albums.items.length === 0) {
         console.log('No results found with album name, trying artist-only search');
-        const fallbackData = await spotifyApi.searchByArtist(
+        const fallbackData = await typedSpotifyApi.searchByArtist(
           album.artist
         );
         updateSearchResults({ [album.id]: fallbackData.albums.items });
