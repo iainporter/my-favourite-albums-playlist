@@ -1,6 +1,6 @@
 import { SPOTIFY_CONFIG } from '../config/spotify';
-
 import { SpotifyAlbum, SpotifyApi as ISpotifyApi } from '../types/spotify';
+import { AuthError } from './errorHandler';
 
 export interface SpotifySearchResponse {
   albums: {
@@ -35,7 +35,10 @@ class SpotifyApi implements ISpotifyApi {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to refresh access token');
+      // Clear tokens from localStorage
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      throw new AuthError('Failed to refresh access token');
     }
 
     return response.json();
