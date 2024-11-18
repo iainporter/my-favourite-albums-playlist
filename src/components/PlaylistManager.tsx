@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Analytics } from "@vercel/analytics/react";
 import { spotifyApi } from '../utils/spotifyApi';
+import { SpotifyApi } from '../types/spotify';
+
+const typedSpotifyApi = spotifyApi as SpotifyApi;
 
 interface CreatePlaylistModalProps {
   isOpen: boolean;
@@ -255,10 +258,10 @@ export default function PlaylistManager() {
 
   const handleRemoveTrack = async (playlistId: string, trackId: string) => {
     try {
-      await spotifyApi.removeItemFromPlaylist(playlistId, `spotify:track:${trackId}`);
+      await typedSpotifyApi.removeItemFromPlaylist(playlistId, `spotify:track:${trackId}`);
 
       // Update the playlist in the UI
-      const tracksData = await spotifyApi.getPlaylistItems(playlistId);
+      const tracksData = await typedSpotifyApi.getPlaylistItems(playlistId);
       
       if (!tracksData) {
         console.error('No tracks data received');
@@ -303,19 +306,19 @@ export default function PlaylistManager() {
 
       if (isTrack) {
         // If it's a track, add it directly to the playlist
-        await spotifyApi.addToPlaylist(targetPlaylistId, item.uri);
+        await typedSpotifyApi.addToPlaylist(targetPlaylistId, item.uri);
       } else {
         // If it's an album, get all tracks from the album
-        const albumTracks = await spotifyApi.getAlbumTracks(item.id);
+        const albumTracks = await typedSpotifyApi.getAlbumTracks(item.id);
         
         // Add each track to the playlist
         for (const track of albumTracks.items) {
-          await spotifyApi.addToPlaylist(targetPlaylistId, track.uri);
+          await typedSpotifyApi.addToPlaylist(targetPlaylistId, track.uri);
         }
       }
       
       // Fetch the updated tracks for the target playlist
-      const tracksData = await spotifyApi.getPlaylistItems(targetPlaylistId);
+      const tracksData = await typedSpotifyApi.getPlaylistItems(targetPlaylistId);
       
       // Transform the tracks data to match the expected Track format
       const transformedTracks = tracksData.items.map((item: any) => ({
@@ -345,7 +348,7 @@ export default function PlaylistManager() {
     setIsLoading(true);
     try {
       const offset = (currentPage - 1) * itemsPerPage;
-      const data = await spotifyApi.getUserPlaylists(offset, itemsPerPage);
+      const data = await typedSpotifyApi.getUserPlaylists(offset, itemsPerPage);
 
       if (data && data.items && Array.isArray(data.items)) {
         setPlaylists(data.items);
@@ -389,7 +392,7 @@ export default function PlaylistManager() {
     // Expand and load tracks if not loaded
     setLoadingTracks(playlistId);
     try {
-      const data = await spotifyApi.getPlaylistItems(playlistId);
+      const data = await typedSpotifyApi.getPlaylistItems(playlistId);
       
       // Transform the Spotify API response into our Track format
       const transformedTracks = data.items.map((item: any) => ({
@@ -442,7 +445,7 @@ export default function PlaylistManager() {
 
   const handleCreatePlaylist = async (name: string, isPrivate: boolean) => {
     try {
-      await spotifyApi.createPlaylist(name, isPrivate);
+      await typedSpotifyApi.createPlaylist(name, isPrivate);
       setIsCreateModalOpen(false);
       await fetchPlaylists();
     } catch (error) {
