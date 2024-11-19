@@ -102,17 +102,10 @@ function formatDuration(ms: number | undefined): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-function TrackList({ tracks, playlistId, onRemoveTrack, paginationInfo }: { 
+function TrackList({ tracks, playlistId, onRemoveTrack }: { 
   tracks: Track[], 
   playlistId: string, 
-  onRemoveTrack: (trackId: string) => void,
-  paginationInfo?: {
-    limit: number;
-    next: string | null;
-    previous: string | null;
-    total: number;
-    offset: number;
-  }
+  onRemoveTrack: (trackId: string) => void
 }) {
   return (
     <div className="overflow-y-auto" style={{ height: 'calc(2.5rem * 10 + 2.5rem)' }}>
@@ -146,13 +139,6 @@ function TrackList({ tracks, playlistId, onRemoveTrack, paginationInfo }: {
           ))}
         </tbody>
       </table>
-      {paginationInfo && (
-        <div className="bg-gray-800/50 px-4 py-2 border-t border-gray-700">
-          <div className="text-sm text-gray-400">
-            Showing {paginationInfo.offset + 1}-{Math.min(paginationInfo.offset + paginationInfo.limit, paginationInfo.total)} of {paginationInfo.total} tracks
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -241,16 +227,15 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, o
               tracks={playlist.tracks} 
               playlistId={playlist.id}
               onRemoveTrack={(trackId) => onRemoveTrack(playlist.id, trackId)}
-              paginationInfo={playlist.paginationInfo}
             />
-            <div className="bg-gray-800/50 px-4 py-2 border-t border-gray-700">
+          </div>
+          {playlist.paginationInfo && (
+            <div className="mt-2 px-4 py-2 bg-gray-800/50 rounded-lg">
               <div className="text-sm text-gray-400">
-                {playlist.tracks.length > 10 
-                  ? `Showing tracks 1-10 of ${playlist.tracks.length} total tracks`
-                  : `Showing all ${playlist.tracks.length} tracks`}
+                Showing {playlist.paginationInfo.offset + 1}-{Math.min(playlist.paginationInfo.offset + playlist.paginationInfo.limit, playlist.paginationInfo.total)} of {playlist.paginationInfo.total} tracks
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>
