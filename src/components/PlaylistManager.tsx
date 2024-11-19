@@ -298,8 +298,12 @@ export default function PlaylistManager() {
     try {
       await typedSpotifyApi.removeItemFromPlaylist(playlistId, `spotify:track:${trackId}`);
 
-      // Update the playlist in the UI
-      const tracksData = await typedSpotifyApi.getPlaylistItems(playlistId);
+      // Get the current playlist and its pagination info
+      const currentPlaylist = playlists.find(p => p.id === playlistId);
+      const currentOffset = currentPlaylist?.paginationInfo?.offset || 0;
+
+      // Update the playlist in the UI with the same pagination offset
+      const tracksData = await typedSpotifyApi.getPlaylistItems(playlistId, currentOffset);
       
       if (!tracksData) {
         console.error('No tracks data received');
@@ -320,9 +324,19 @@ export default function PlaylistManager() {
           uri: item.track.uri
         }));
 
+      // Create updated pagination info
+      const paginationInfo = {
+        limit: tracksData.limit,
+        next: tracksData.next,
+        previous: tracksData.previous,
+        total: tracksData.total,
+        offset: tracksData.offset || currentOffset
+      };
+
+      // Update the playlist with both new tracks and pagination info
       setPlaylists(currentPlaylists => currentPlaylists.map(p =>
         p.id === playlistId
-          ? { ...p, tracks: transformedTracks }
+          ? { ...p, tracks: transformedTracks, paginationInfo }
           : p
       ));
     } catch (error) {
