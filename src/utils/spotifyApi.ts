@@ -182,12 +182,14 @@ class SpotifyApi implements ISpotifyApi {
     );
     
     return {
-      items: response.items,
-      limit: response.limit,
-      next: response.next,
-      previous: response.previous,
-      total: response.total,
-      offset: response.offset
+      body: {
+        items: response.items,
+        limit: response.limit,
+        next: response.next,
+        previous: response.previous,
+        total: response.total,
+        offset: response.offset
+      }
     };
   }
 

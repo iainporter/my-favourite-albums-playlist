@@ -161,9 +161,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { playlist_id } = req.query;
 
       if (playlist_id) {
-        // Fetch tracks for a specific playlist
+        // Fetch tracks for a specific playlist with pagination
         console.log('Fetching tracks for playlist:', playlist_id);
-        const data = await typedSpotifyApi.getPlaylistItems(playlist_id as string);
+        const limit = 50; // Number of tracks per page
+        const offset = parseInt(req.query.offset as string) || 0;
+        
+        const data = await typedSpotifyApi.getPlaylistItems(playlist_id as string, offset, limit);
         
         const formattedTracks = data.body.items.map(item => ({
           id: item.track.id,
@@ -173,7 +176,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           duration: item.track.duration_ms
         }));
 
-        return res.status(200).json({ items: formattedTracks });
+        // Include pagination information in the response
+        const accessToken = localStorage.getItem('accessToken');
+        return res.status(200).json({
+          items: formattedTracks,
+          next: data.body.next ? `/api/spotify/playlists/${playlist_id}?access_token=${accessToken}&offset=${offset + limit}` : null,
+          previous: offset > 0 ? `/api/spotify/playlists/${playlist_id}?access_token=${accessToken}&offset=${Math.max(0, offset - limit)}` : null,
+          total: data.body.total,
+          offset: offset,
+          limit: limit
+        });
       }
 
       // Fetch all playlists with pagination
