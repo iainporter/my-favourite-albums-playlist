@@ -85,6 +85,13 @@ interface Playlist {
   images: { url: string }[];
   tracks?: Track[];
   isExpanded?: boolean;
+  paginationInfo?: {
+    limit: number;
+    next: string | null;
+    previous: string | null;
+    total: number;
+    offset: number;
+  };
 }
 
 
@@ -95,7 +102,18 @@ function formatDuration(ms: number | undefined): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-function TrackList({ tracks, playlistId, onRemoveTrack }: { tracks: Track[], playlistId: string, onRemoveTrack: (trackId: string) => void }) {
+function TrackList({ tracks, playlistId, onRemoveTrack, paginationInfo }: { 
+  tracks: Track[], 
+  playlistId: string, 
+  onRemoveTrack: (trackId: string) => void,
+  paginationInfo?: {
+    limit: number;
+    next: string | null;
+    previous: string | null;
+    total: number;
+    offset: number;
+  }
+}) {
   return (
     <div className="overflow-y-auto" style={{ height: 'calc(2.5rem * 10 + 2.5rem)' }}>
       <table className="min-w-full divide-y divide-gray-700">
@@ -128,6 +146,13 @@ function TrackList({ tracks, playlistId, onRemoveTrack }: { tracks: Track[], pla
           ))}
         </tbody>
       </table>
+      {paginationInfo && (
+        <div className="bg-gray-800/50 px-4 py-2 border-t border-gray-700">
+          <div className="text-sm text-gray-400">
+            Showing {paginationInfo.offset + 1}-{Math.min(paginationInfo.offset + paginationInfo.limit, paginationInfo.total)} of {paginationInfo.total} tracks
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -216,6 +241,7 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, o
               tracks={playlist.tracks} 
               playlistId={playlist.id}
               onRemoveTrack={(trackId) => onRemoveTrack(playlist.id, trackId)}
+              paginationInfo={playlist.paginationInfo}
             />
             <div className="bg-gray-800/50 px-4 py-2 border-t border-gray-700">
               <div className="text-sm text-gray-400">
@@ -406,9 +432,22 @@ export default function PlaylistManager() {
         uri: item.track.uri
       }));
 
+      const paginationInfo = {
+        limit: data.limit,
+        next: data.next,
+        previous: data.previous,
+        total: data.total,
+        offset: data.offset || 0
+      };
+
       setPlaylists(playlists.map(p =>
         p.id === playlistId
-          ? { ...p, tracks: transformedTracks, isExpanded: true }
+          ? { 
+              ...p, 
+              tracks: transformedTracks, 
+              isExpanded: true,
+              paginationInfo: paginationInfo 
+            }
           : { ...p, isExpanded: false }
       ));
     } catch (error) {

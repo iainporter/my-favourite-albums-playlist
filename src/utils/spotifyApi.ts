@@ -169,10 +169,10 @@ class SpotifyApi implements ISpotifyApi {
     );
   }
 
-  async getPlaylistItems(playlistId: string) {
+  async getPlaylistItems(playlistId: string, offset: number = 0, limit: number = 20) {
     const accessToken = localStorage.getItem('accessToken');
-    const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
-    return await this.fetchWithTokenRefresh(
+    const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${offset}&limit=${limit}`;
+    const response = await this.fetchWithTokenRefresh(
       url,
       {
         headers: {
@@ -180,6 +180,15 @@ class SpotifyApi implements ISpotifyApi {
         },
       }
     );
+    
+    return {
+      items: response.items,
+      limit: response.limit,
+      next: response.next,
+      previous: response.previous,
+      total: response.total,
+      offset: response.offset
+    };
   }
 
   async removeItemFromPlaylist(playlistId: string, uriString: string) {
