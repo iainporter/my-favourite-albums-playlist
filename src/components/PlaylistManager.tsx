@@ -143,13 +143,14 @@ function TrackList({ tracks, playlistId, onRemoveTrack }: {
   );
 }
 
-function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, onRemoveTrack }: {
+function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, onRemoveTrack, onPageChange }: {
   playlist: Playlist;
   onToggle: () => void;
   isLoading: boolean;
   onDrop: (e: React.DragEvent, playlistId: string) => void;
   isAddingTracks?: boolean;
   onRemoveTrack: (playlistId: string, trackId: string) => void;
+  onPageChange?: (playlistId: string, offset: number) => void;
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -232,20 +233,30 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, o
           {playlist.paginationInfo && (
             <div className="mt-2 px-4 py-2 bg-gray-800/50 rounded-lg">
               <div className="flex items-center justify-between text-sm text-gray-400">
-                <div className="flex items-center space-x-2">
-                  {playlist.paginationInfo.previous && (
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => onPageChange?.(playlist.id, playlist.paginationInfo!.offset - playlist.paginationInfo!.limit)}
+                    disabled={!playlist.paginationInfo.previous}
+                    className={`flex items-center space-x-1 ${!playlist.paginationInfo.previous ? 'opacity-50 cursor-not-allowed' : 'hover:text-white cursor-pointer'}`}
+                  >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
-                  )}
+                    <span>Previous</span>
+                  </button>
                   <span>
                     Showing {playlist.paginationInfo.offset + 1}-{Math.min(playlist.paginationInfo.offset + playlist.paginationInfo.limit, playlist.paginationInfo.total)} of {playlist.paginationInfo.total} tracks
                   </span>
-                  {playlist.paginationInfo.next && (
+                  <button
+                    onClick={() => onPageChange?.(playlist.id, playlist.paginationInfo!.offset + playlist.paginationInfo!.limit)}
+                    disabled={!playlist.paginationInfo.next}
+                    className={`flex items-center space-x-1 ${!playlist.paginationInfo.next ? 'opacity-50 cursor-not-allowed' : 'hover:text-white cursor-pointer'}`}
+                  >
+                    <span>Next</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                  )}
+                  </button>
                 </div>
               </div>
             </div>
@@ -404,22 +415,10 @@ export default function PlaylistManager() {
     setIsLoading(false);
   };
 
-  const togglePlaylist = async (playlistId: string) => {
-    const playlist = playlists.find(p => p.id === playlistId);
-    if (!playlist) return;
-
-    if (playlist.isExpanded) {
-      // Collapse the playlist
-      setPlaylists(playlists.map(p =>
-        p.id === playlistId ? { ...p, isExpanded: false } : p
-      ));
-      return;
-    }
-
-    // Expand and load tracks if not loaded
+  const loadPlaylistTracks = async (playlistId: string, offset: number = 0) => {
     setLoadingTracks(playlistId);
     try {
-      const data = await typedSpotifyApi.getPlaylistItems(playlistId);
+      const data = await typedSpotifyApi.getPlaylistItems(playlistId, offset);
       
       // Transform the Spotify API response into our Track format
       const transformedTracks = data.items.map((item: any) => ({
@@ -447,12 +446,32 @@ export default function PlaylistManager() {
               isExpanded: true,
               paginationInfo: paginationInfo 
             }
-          : { ...p, isExpanded: false }
+          : p
       ));
     } catch (error) {
       console.error('Error loading tracks:', error);
     }
     setLoadingTracks(null);
+  };
+
+  const togglePlaylist = async (playlistId: string) => {
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (!playlist) return;
+
+    if (playlist.isExpanded) {
+      // Collapse the playlist
+      setPlaylists(playlists.map(p =>
+        p.id === playlistId ? { ...p, isExpanded: false } : p
+      ));
+      return;
+    }
+
+    // Expand and load tracks if not loaded
+    await loadPlaylistTracks(playlistId);
+  };
+
+  const handlePlaylistTrackPageChange = async (playlistId: string, offset: number) => {
+    await loadPlaylistTracks(playlistId, offset);
   };
 
   useEffect(() => {
@@ -475,6 +494,7 @@ export default function PlaylistManager() {
             isAddingTracks={addingToPlaylist === playlist.id}
             onDrop={handleDrop}
             onRemoveTrack={handleRemoveTrack}
+            onPageChange={handlePlaylistTrackPageChange}
           />
         ))}
       </div>
