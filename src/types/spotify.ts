@@ -22,7 +22,7 @@ export interface SpotifyApi {
   getAlbumTracks(albumId: string): Promise<any>;
   getPlaylist(playlistId: string): Promise<any>;
   addToPlaylist(playlistId: string, uriString: string): Promise<any>;
-  getPlaylistItems(playlistId: string): Promise<any>;
+  getPlaylistItems(playlistId: string, offset?: number, limit?: number): Promise<any>;
   removeItemFromPlaylist(playlistId: string, uriString: string): Promise<any>;
   searchSpotify(artist: string, album: string, offset?: number, limit?: number): Promise<any>;
   searchByArtistAndAlbum(artist: string, album: string, limit?: number): Promise<any>;
