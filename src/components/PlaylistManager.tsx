@@ -235,7 +235,12 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, o
               <div className="flex items-center justify-between text-sm text-gray-400">
                 <div className="flex items-center space-x-4">
                   <button
-                    onClick={() => onPageChange?.(playlist.id, playlist.paginationInfo!.offset - playlist.paginationInfo!.limit)}
+                    onClick={() => {
+                      if (playlist.paginationInfo && onPageChange) {
+                        const newOffset = Math.max(0, playlist.paginationInfo.offset - playlist.paginationInfo.limit);
+                        onPageChange(playlist.id, newOffset);
+                      }
+                    }}
                     disabled={!playlist.paginationInfo.previous}
                     className={`flex items-center space-x-1 ${!playlist.paginationInfo.previous ? 'opacity-50 cursor-not-allowed' : 'hover:text-white cursor-pointer'}`}
                   >
@@ -292,7 +297,7 @@ export default function PlaylistManager() {
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [totalPlaylists, setTotalPlaylists] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 100;
+  const itemsPerPage = 20;
 
   const handleRemoveTrack = async (playlistId: string, trackId: string) => {
     try {
@@ -485,7 +490,18 @@ export default function PlaylistManager() {
   };
 
   const handlePlaylistTrackPageChange = async (playlistId: string, offset: number) => {
-    await loadPlaylistTracks(playlistId, offset);
+    // Ensure offset is not negative
+    const validOffset = Math.max(0, offset);
+    // Get the current playlist
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (playlist?.paginationInfo) {
+      // Ensure offset doesn't exceed total items
+      const maxOffset = Math.max(0, playlist.paginationInfo.total - playlist.paginationInfo.limit);
+      const boundedOffset = Math.min(validOffset, maxOffset);
+      await loadPlaylistTracks(playlistId, boundedOffset);
+    } else {
+      await loadPlaylistTracks(playlistId, validOffset);
+    }
   };
 
   useEffect(() => {

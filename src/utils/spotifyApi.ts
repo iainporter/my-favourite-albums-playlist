@@ -169,7 +169,7 @@ class SpotifyApi implements ISpotifyApi {
     );
   }
 
-  async getPlaylistItems(playlistId: string, offset: number = 0, limit: number = 100) {
+  async getPlaylistItems(playlistId: string, offset: number = 0, limit: number = 50) {
     const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${offset}&limit=${limit}`;
     const response = await this.fetchWithTokenRefresh(
