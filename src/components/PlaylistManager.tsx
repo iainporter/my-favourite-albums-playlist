@@ -105,7 +105,7 @@ function formatDuration(ms: number | undefined): string {
 function TrackList({ tracks, playlistId, onRemoveTrack }: { 
   tracks: Track[], 
   playlistId: string, 
-  onRemoveTrack: (trackId: string) => void
+  onRemoveTrack: (playlistId: string, trackId: string) => void
 }) {
   return (
     <div className="overflow-y-auto" style={{ height: 'calc(2.5rem * 10 + 2.5rem)' }}>
@@ -124,7 +124,7 @@ function TrackList({ tracks, playlistId, onRemoveTrack }: {
             <tr key={track.id} className="hover:bg-gray-700/50">
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
                 <button
-                  onClick={() => onRemoveTrack(track.id)}
+                  onClick={() => onRemoveTrack(playlistId, track.id)}
                   className="text-gray-400 hover:text-red-500 transition-colors duration-200"
                   title="Remove from playlist"
                 >
