@@ -105,7 +105,7 @@ function formatDuration(ms: number | undefined): string {
 function TrackList({ tracks, playlistId, onRemoveTrack }: { 
   tracks: Track[], 
   playlistId: string, 
-  onRemoveTrack: (playlistId: string, trackId: string) => void
+  onRemoveTrack: (trackId: string) => void
 }) {
   return (
     <div className="overflow-y-auto" style={{ height: 'calc(2.5rem * 10 + 2.5rem)' }}>
@@ -124,7 +124,7 @@ function TrackList({ tracks, playlistId, onRemoveTrack }: {
             <tr key={track.id} className="hover:bg-gray-700/50">
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
                 <button
-                  onClick={() => onRemoveTrack(playlistId, track.id)}
+                  onClick={() => onRemoveTrack(track.id)}
                   className="text-gray-400 hover:text-red-500 transition-colors duration-200"
                   title="Remove from playlist"
                 >
@@ -292,7 +292,7 @@ export default function PlaylistManager() {
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [totalPlaylists, setTotalPlaylists] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = 100;
 
   const handleRemoveTrack = async (playlistId: string, trackId: string) => {
     try {
