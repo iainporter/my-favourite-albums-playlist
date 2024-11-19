@@ -231,8 +231,22 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, o
           </div>
           {playlist.paginationInfo && (
             <div className="mt-2 px-4 py-2 bg-gray-800/50 rounded-lg">
-              <div className="text-sm text-gray-400">
-                Showing {playlist.paginationInfo.offset + 1}-{Math.min(playlist.paginationInfo.offset + playlist.paginationInfo.limit, playlist.paginationInfo.total)} of {playlist.paginationInfo.total} tracks
+              <div className="flex items-center justify-between text-sm text-gray-400">
+                <div className="flex items-center space-x-2">
+                  {playlist.paginationInfo.previous && (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  )}
+                  <span>
+                    Showing {playlist.paginationInfo.offset + 1}-{Math.min(playlist.paginationInfo.offset + playlist.paginationInfo.limit, playlist.paginationInfo.total)} of {playlist.paginationInfo.total} tracks
+                  </span>
+                  {playlist.paginationInfo.next && (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -527,13 +541,16 @@ export default function PlaylistManager() {
               setCurrentPage(prev => Math.max(1, prev - 1));
             }}
             disabled={currentPage <= 1 || isLoading}
-            className={`px-4 py-2 rounded-full transition-colors duration-200 ${
+            className={`px-4 py-2 rounded-full transition-colors duration-200 flex items-center space-x-2 ${
               currentPage > 1 && !isLoading
                 ? 'bg-spotify-green text-white hover:bg-green-600'
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
           >
-            Previous
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Previous</span>
           </button>
           <span className="text-gray-300">Page {currentPage} of {Math.ceil(totalPlaylists / itemsPerPage)}</span>
           <button
@@ -541,13 +558,16 @@ export default function PlaylistManager() {
               setCurrentPage(prev => Math.min(Math.ceil(totalPlaylists / itemsPerPage), prev + 1));
             }}
             disabled={currentPage >= Math.ceil(totalPlaylists / itemsPerPage) || isLoading}
-            className={`px-4 py-2 rounded-full transition-colors duration-200 ${
+            className={`px-4 py-2 rounded-full transition-colors duration-200 flex items-center space-x-2 ${
               currentPage < Math.ceil(totalPlaylists / itemsPerPage) && !isLoading
                 ? 'bg-spotify-green text-white hover:bg-green-600'
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
           >
-            Next
+            <span>Next</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       </div>
