@@ -25,6 +25,14 @@ interface SearchFormProps {
 }
 
 export default function SearchForm({
+  // Add console log for props
+  console.log('SearchForm props:', {
+    initialPage,
+    initialArtist,
+    initialAlbum,
+    initialTotalResults,
+    hasSearchResults: albumSearchResults.length > 0
+  });
   albumSearchResults, 
   setAlbumSearchResults,
   initialPage = 1,
@@ -48,6 +56,7 @@ export default function SearchForm({
   const [previousUrl, setPreviousUrl] = useState<string | null>(initialPrevUrl);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  console.log('init SearchForm...');
   // Check authentication status on mount and when localStorage changes
   useEffect(() => {
     const checkAuth = () => {
@@ -63,6 +72,14 @@ export default function SearchForm({
 
     return () => {
       window.removeEventListener('storage', checkAuth);
+    };
+  }, []);
+
+  // Debug logging for component lifecycle
+  useEffect(() => {
+    console.log('SearchForm mounted');
+    return () => {
+      console.log('SearchForm unmounted');
     };
   }, []);
 
@@ -101,6 +118,12 @@ export default function SearchForm({
 
 
   const handleSearch = async (e: React.FormEvent | string) => {
+    console.log('handleSearch called:', { 
+      eventType: typeof e === 'string' ? 'URL' : e.type,
+      artist,
+      album,
+      currentPage
+    });
     if (typeof e !== 'string' && e.preventDefault) {
       e.preventDefault();
     }
