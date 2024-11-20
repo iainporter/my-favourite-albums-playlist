@@ -182,10 +182,6 @@ export default function FavoriteAlbums() {
     reader.readAsText(file);
   };
 
-  const handleDelete = (albumId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click event
-    setAlbums(albums.filter(album => album.id !== albumId));
-  };
 
   const fetchAlbumTracks = async (albumId: string) => {
     try {
@@ -354,7 +350,6 @@ export default function FavoriteAlbums() {
             <table className="min-w-full">
               <thead className="sticky top-0 z-10">
                 <tr className="bg-gray-800 text-white">
-                  <th className="w-12"></th>
                   {[
                     { field: 'artist', label: 'Artist' },
                     { field: 'album', label: 'Album' },
@@ -405,17 +400,6 @@ export default function FavoriteAlbums() {
                       onClick={() => handleAlbumClick(album)}
                       title="Click to view Spotify matches"
                     >
-                      <td className="px-3 py-2 whitespace-nowrap w-8">
-                        <button
-                          onClick={(e) => handleDelete(album.id, e)}
-                          className="text-gray-400 hover:text-red-500 transition-colors duration-200"
-                          title="Delete album"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </td>
                       <td className="px-3 py-2 whitespace-nowrap text-sm">{album.artist}</td>
                       <td className="px-3 py-2 whitespace-nowrap text-sm">{album.album}</td>
                       <td className="px-3 py-2 whitespace-nowrap text-sm">{album.year}</td>
@@ -423,7 +407,7 @@ export default function FavoriteAlbums() {
                     </tr>
                     {expandedRow === album.id && searchResults[album.id] && (
                       <tr>
-                        <td colSpan={5} className="px-6 py-4 bg-gray-800">
+                        <td colSpan={4} className="px-6 py-4 bg-gray-800">
                           {searchResults[album.id].map((spotifyAlbum) => (
                             <div key={spotifyAlbum.id}>
                               <div 
