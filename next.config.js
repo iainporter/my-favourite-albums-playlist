@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Prevent console.log stripping
+  compiler: {
+    removeConsole: false,
+  },
   env: {
     SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID,
     SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET,
