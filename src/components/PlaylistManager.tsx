@@ -387,8 +387,12 @@ export default function PlaylistManager() {
         }
       }
       
+      // Get the current playlist and its pagination info
+      const currentPlaylist = playlists.find(p => p.id === targetPlaylistId);
+      const currentOffset = currentPlaylist?.paginationInfo?.offset || 0;
+      
       // Fetch the updated tracks for the target playlist
-      const tracksData = await typedSpotifyApi.getPlaylistItems(targetPlaylistId);
+      const tracksData = await typedSpotifyApi.getPlaylistItems(targetPlaylistId, currentOffset);
       
       // Transform the tracks data to match the expected Track format
       const transformedTracks = tracksData.items.map((item: any) => ({
@@ -400,10 +404,19 @@ export default function PlaylistManager() {
         uri: item.track.uri
       }));
 
-      // Update the playlists state with the new tracks
+      // Create updated pagination info
+      const paginationInfo = {
+        limit: tracksData.limit,
+        next: tracksData.next,
+        previous: tracksData.previous,
+        total: tracksData.total,
+        offset: tracksData.offset || 0
+      };
+
+      // Update the playlists state with the new tracks and pagination info
       setPlaylists(currentPlaylists => currentPlaylists.map(p =>
         p.id === targetPlaylistId
-          ? { ...p, tracks: transformedTracks, isExpanded: true }
+          ? { ...p, tracks: transformedTracks, isExpanded: true, paginationInfo }
           : { ...p, isExpanded: false }
       ));
     } catch (error) {
