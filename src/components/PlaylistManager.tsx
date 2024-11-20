@@ -305,10 +305,23 @@ export default function PlaylistManager() {
 
       // Get the current playlist and its pagination info
       const currentPlaylist = playlists.find(p => p.id === playlistId);
-      const currentOffset = currentPlaylist?.paginationInfo?.offset || 0;
+      const currentPaginationInfo = currentPlaylist?.paginationInfo;
+      
+      if (!currentPaginationInfo) {
+        throw new Error('No pagination info found');
+      }
 
-      // Update the playlist in the UI with the same pagination offset
-      const tracksData = await typedSpotifyApi.getPlaylistItems(playlistId, currentOffset);
+      // Calculate new total and offset
+      const newTotal = currentPaginationInfo.total - 1;
+      let newOffset = currentPaginationInfo.offset;
+      
+      // If we're on the last page and removed the last item, go to previous page
+      if (newOffset >= newTotal && newOffset > 0) {
+        newOffset = Math.max(0, newOffset - currentPaginationInfo.limit);
+      }
+
+      // Update the playlist in the UI with adjusted offset
+      const tracksData = await typedSpotifyApi.getPlaylistItems(playlistId, newOffset);
       
       if (!tracksData) {
         console.error('No tracks data received');
@@ -329,13 +342,13 @@ export default function PlaylistManager() {
           uri: item.track.uri
         }));
 
-      // Create updated pagination info
+      // Create updated pagination info with adjusted total and offset
       const paginationInfo = {
         limit: tracksData.limit,
-        next: tracksData.next,
-        previous: tracksData.previous,
-        total: tracksData.total,
-        offset: tracksData.offset || currentOffset
+        next: newOffset + tracksData.limit < newTotal ? 'next' : null,
+        previous: newOffset > 0 ? 'prev' : null,
+        total: newTotal,
+        offset: newOffset
       };
 
       // Update the playlist with both new tracks and pagination info
