@@ -25,14 +25,6 @@ interface SearchFormProps {
 }
 
 export default function SearchForm({
-  // Add console log for props
-  console.log('SearchForm props:', {
-    initialPage,
-    initialArtist,
-    initialAlbum,
-    initialTotalResults,
-    hasSearchResults: albumSearchResults.length > 0
-  });
   albumSearchResults, 
   setAlbumSearchResults,
   initialPage = 1,
@@ -43,6 +35,14 @@ export default function SearchForm({
   initialPrevUrl = null,
   onSearchStateChange
 }: SearchFormProps) {
+  // Add console log for props
+  console.log('SearchForm props:', {
+    initialPage,
+    initialArtist,
+    initialAlbum,
+    initialTotalResults,
+    hasSearchResults: albumSearchResults.length > 0
+  });
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [artist, setArtist] = useState(initialArtist);
