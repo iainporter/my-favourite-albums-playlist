@@ -270,85 +270,86 @@ export default function SearchForm({
           albumSearchResults.map((spotifyAlbum) => {
             logger.info(`Processing album: ${spotifyAlbum.name} (ID: ${spotifyAlbum.id})`);
             return (
-          <div key={spotifyAlbum.id} className="bg-gray-800 rounded-lg overflow-hidden">
-            <div 
-              className="flex items-center space-x-4 p-4 hover:bg-gray-700 cursor-pointer"
-              onClick={() => {
-                if (expandedTracks === spotifyAlbum.id) {
-                  setExpandedTracks(null);
-                } else {
-                  setExpandedTracks(spotifyAlbum.id);
-                  if (!albumTracks[spotifyAlbum.id]) {
-                    fetchAlbumTracks(spotifyAlbum.id);
-                  }
-                }
-              }}
-              draggable="true"
-              onDragStart={(e) => {
-                e.dataTransfer.setData('application/json', JSON.stringify({
-                  id: spotifyAlbum.id,
-                  name: spotifyAlbum.name,
-                  artist: artist,
-                  releaseDate: spotifyAlbum.release_date,
-                  image: spotifyAlbum.images[0]?.url,
-                  uri: spotifyAlbum.uri
-                }));
-                e.dataTransfer.effectAllowed = 'copy';
-              }}
-            >
-              <img
-                src={spotifyAlbum.images[0]?.url}
-                alt={spotifyAlbum.name}
-                className="w-16 h-16 rounded-md object-cover"
-              />
-              <div className="flex-1">
-                <h3 className="text-white">{spotifyAlbum.name}</h3>
-                <p className="text-gray-400">{spotifyAlbum.release_date}</p>
-              </div>
-              <svg 
-                className={`w-6 h-6 text-gray-400 transform transition-transform ${expandedTracks === spotifyAlbum.id ? 'rotate-180' : ''}`}
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-            {expandedTracks === spotifyAlbum.id && (
-              <div className="border-t border-gray-700">
-                {albumTracks[spotifyAlbum.id] ? (
-                  albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
-                    <div 
-                      key={track.id}
-                      className="flex items-center text-sm text-gray-300 p-3 hover:bg-gray-700/50 cursor-move"
-                      draggable="true"
-                      onDragStart={(e) => {
-                        e.dataTransfer.setData('application/json', JSON.stringify({
-                          id: track.id,
-                          name: track.name,
-                          artist: track.artists[0]?.name,
-                          album: spotifyAlbum.name,
-                          duration: track.duration_ms,
-                          uri: `spotify:track:${track.id}`
-                        }));
-                        e.dataTransfer.effectAllowed = 'copy';
-                      }}
-                    >
-                      <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
-                      <span className="ml-4">{track.name}</span>
-                      <span className="ml-auto text-gray-500">
-                        {Math.floor(track.duration_ms / 60000)}:
-                        {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-gray-400 text-sm p-4">Loading tracks...</div>
+              <div key={spotifyAlbum.id} className="bg-gray-800 rounded-lg overflow-hidden">
+                <div 
+                  className="flex items-center space-x-4 p-4 hover:bg-gray-700 cursor-pointer"
+                  onClick={() => {
+                    if (expandedTracks === spotifyAlbum.id) {
+                      setExpandedTracks(null);
+                    } else {
+                      setExpandedTracks(spotifyAlbum.id);
+                      if (!albumTracks[spotifyAlbum.id]) {
+                        fetchAlbumTracks(spotifyAlbum.id);
+                      }
+                    }
+                  }}
+                  draggable="true"
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('application/json', JSON.stringify({
+                      id: spotifyAlbum.id,
+                      name: spotifyAlbum.name,
+                      artist: artist,
+                      releaseDate: spotifyAlbum.release_date,
+                      image: spotifyAlbum.images[0]?.url,
+                      uri: spotifyAlbum.uri
+                    }));
+                    e.dataTransfer.effectAllowed = 'copy';
+                  }}
+                >
+                  <img
+                    src={spotifyAlbum.images[0]?.url}
+                    alt={spotifyAlbum.name}
+                    className="w-16 h-16 rounded-md object-cover"
+                  />
+                  <div className="flex-1">
+                    <h3 className="text-white">{spotifyAlbum.name}</h3>
+                    <p className="text-gray-400">{spotifyAlbum.release_date}</p>
+                  </div>
+                  <svg 
+                    className={`w-6 h-6 text-gray-400 transform transition-transform ${expandedTracks === spotifyAlbum.id ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                {expandedTracks === spotifyAlbum.id && (
+                  <div className="border-t border-gray-700">
+                    {albumTracks[spotifyAlbum.id] ? (
+                      albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
+                        <div 
+                          key={track.id}
+                          className="flex items-center text-sm text-gray-300 p-3 hover:bg-gray-700/50 cursor-move"
+                          draggable="true"
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData('application/json', JSON.stringify({
+                              id: track.id,
+                              name: track.name,
+                              artist: track.artists[0]?.name,
+                              album: spotifyAlbum.name,
+                              duration: track.duration_ms,
+                              uri: `spotify:track:${track.id}`
+                            }));
+                            e.dataTransfer.effectAllowed = 'copy';
+                          }}
+                        >
+                          <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
+                          <span className="ml-4">{track.name}</span>
+                          <span className="ml-auto text-gray-500">
+                            {Math.floor(track.duration_ms / 60000)}:
+                            {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-gray-400 text-sm p-4">Loading tracks...</div>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
-          }))
+            );
+          })
         )}
       </div>
 
