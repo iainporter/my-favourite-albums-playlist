@@ -167,7 +167,11 @@ export default function Publications() {
                   >
                     <div className="font-bold">{album.artist}</div>
                     <div className="text-gray-300">{album.album}</div>
-                    <div className="text-sm text-gray-400">{album.publishDate}</div>
+                    <div className="text-sm text-gray-400">
+                      {currentList === 'acclaimed' && (album as any).year 
+                        ? (album as any).year 
+                        : album.publishDate}
+                    </div>
                   </div>
                   {expandedAlbum === `${album.artist}-${album.album}` && (
                     <div className="ml-4 mb-4 p-4 bg-gray-700 rounded">
