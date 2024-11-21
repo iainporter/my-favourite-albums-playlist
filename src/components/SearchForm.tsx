@@ -268,9 +268,10 @@ export default function SearchForm({
           <div className="text-center text-gray-400 py-8">No Results Found</div>
         ) : (
           albumSearchResults.filter(album => album !== null).map((spotifyAlbum) => {
+            logger.info(`Processing album: ${spotifyAlbum.name} (ID: ${spotifyAlbum.id})`);
             return (
               <div key={spotifyAlbum.id} className="bg-gray-800 rounded-lg overflow-hidden">
-                <div 
+                <div
                   className="flex items-center space-x-4 p-4 hover:bg-gray-700 cursor-pointer"
                   onClick={() => {
                     if (expandedTracks === spotifyAlbum.id) {
