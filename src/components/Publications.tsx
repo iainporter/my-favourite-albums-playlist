@@ -157,7 +157,7 @@ export default function Publications() {
                   </div>
                   {expandedAlbum === `${album.artist}-${album.album}` && (
                     <div className="ml-4 mb-4 p-4 bg-gray-700 rounded">
-                      {searchResults[`${album.artist}-${album.album}`]?.map((spotifyAlbum) => (
+                      {searchResults[`${album.artist}-${album.album}`]?.filter(album => album != null).map((spotifyAlbum) => (
                         <div key={spotifyAlbum.id}>
                           <div 
                             className="flex items-center space-x-2 p-2 hover:bg-gray-600 rounded cursor-pointer"
@@ -191,9 +191,9 @@ export default function Publications() {
                             }}
                           >
                             <div className="flex items-center">
-                              {spotifyAlbum.images[2] && (
+                              {spotifyAlbum.images[0] && (
                                 <img
-                                  src={spotifyAlbum.images[2].url}
+                                  src={spotifyAlbum.images[0].url}
                                   alt={spotifyAlbum.name}
                                   className="w-12 h-12"
                                 />
