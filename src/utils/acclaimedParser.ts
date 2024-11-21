@@ -11,6 +11,11 @@ export const parseAcclaimedHtml = (html: string): Album[] => {
   
   rows.forEach((row) => {
     try {
+      // Skip rows with class "tableheader_ya"
+      if (row.classList.contains('tableheader_ya')) {
+        return;
+      }
+      
       const cells = row.querySelectorAll('td');
       if (cells.length >= 3) {
         const artistCell = cells[1]?.querySelector('a');
