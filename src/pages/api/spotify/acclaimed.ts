@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { parseAcclaimedHtml } from '../../../utils/acclaimedParser';
-import { errorHandler } from '../../../utils/errorHandler';
+import { handleApiError } from '../../../utils/errorHandler';
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,6 +16,6 @@ export default async function handler(
     const albums = parseAcclaimedHtml(html);
     res.status(200).json(albums);
   } catch (error) {
-    errorHandler(error, res);
+    handleApiError(error);
   }
 }
