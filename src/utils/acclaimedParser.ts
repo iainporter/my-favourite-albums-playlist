@@ -16,18 +16,18 @@ export const parseAcclaimedHtml = (html: string): Album[] => {
         const artistCell = cells[1]?.querySelector('a');
         const albumCell = cells[2]?.querySelector('a');
 
-        if (artistCell && albumCell) {
-          const artist = artistCell.textContent?.trim() || '';
-          const album = albumCell.textContent?.trim() || '';
+        // Get the text content and trim it
+        const artist = artistCell?.textContent?.trim() || '';
+        const album = albumCell?.textContent?.trim() || '';
 
-          if (artist && album) {
-            albums.push({
-              artist,
-              album,
-              year: '',  // Empty year as per requirement
-              rating: '' // Empty rating as per requirement
-            });
-          }
+        // Only add the album if both artist and album are present and non-empty
+        if (artist.length > 0 && album.length > 0) {
+          albums.push({
+            artist,
+            album,
+            year: '',  // Empty year as per requirement
+            rating: '' // Empty rating as per requirement
+          });
         }
       }
     } catch (error) {
