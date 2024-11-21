@@ -408,7 +408,6 @@ export default function FavoriteAlbums() {
                     {expandedRow === album.id && searchResults[album.id] && (
                       <tr>
                         <td colSpan={4} className="px-6 py-4 bg-gray-800">
-                        logger.info(`Processing album: ${album.id}`)
                           {searchResults[album.id].filter(spotifyAlbum => spotifyAlbum !== null).map((spotifyAlbum) => (
                             <div key={spotifyAlbum.id}>
                               <div 
