@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AuthError } from '../utils/errorHandler';
 
 interface Props {
   children: ReactNode;
@@ -6,15 +7,20 @@ interface Props {
 
 interface State {
   hasError: boolean;
+  isAuthError: boolean;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
+    isAuthError: false
   };
 
-  public static getDerivedStateFromError(_: Error): State {
-    return { hasError: true };
+  public static getDerivedStateFromError(error: Error): State {
+    return { 
+      hasError: true,
+      isAuthError: error instanceof AuthError
+    };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -33,8 +39,14 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
-            <p className="mb-4">Redirecting to login...</p>
+            <h2 className="text-2xl font-bold mb-4">
+              {this.state.isAuthError ? 'Authentication Required' : 'Something went wrong'}
+            </h2>
+            <p className="mb-4">
+              {this.state.isAuthError 
+                ? 'Your session has expired. Redirecting to login...'
+                : 'An unexpected error occurred. Redirecting to login...'}
+            </p>
           </div>
         </div>
       );
