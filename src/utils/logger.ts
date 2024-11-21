@@ -1,45 +1,79 @@
 import { createLogger, format, transports } from 'winston';
+import 'winston-daily-rotate-file';
 
-// Create a browser-compatible logger
+// Create a timestamp formatter
+const timestampFormatter = () => {
+  return new Date().toISOString();
+};
+
+// Create a browser-compatible logger with formatted output
 const createBrowserLogger = () => ({
-  debug: (message: string) => console.debug(message),
-  info: (message: string) => console.info(message),
-  warn: (message: string) => console.warn(message),
-  error: (message: string) => console.error(message),
+  debug: (message: string, ...args: any[]) => {
+    const timestamp = timestampFormatter();
+    console.debug(`${timestamp} [DEBUG]:`, message, ...args);
+  },
+  info: (message: string, ...args: any[]) => {
+    const timestamp = timestampFormatter();
+    console.info(`${timestamp} [INFO]:`, message, ...args);
+  },
+  warn: (message: string, ...args: any[]) => {
+    const timestamp = timestampFormatter();
+    console.warn(`${timestamp} [WARN]:`, message, ...args);
+  },
+  error: (message: string, ...args: any[]) => {
+    const timestamp = timestampFormatter();
+    console.error(`${timestamp} [ERROR]:`, message, ...args);
+  },
 });
 
-// Create a server-side logger
+// Create a server-side logger with file rotation
 const createServerLogger = () => {
-  const transportsArray = [
-    new transports.Console({
-      level: 'debug',
-      format: format.combine(
-        format.colorize(),
-        format.simple()
-      ),
-    })
-  ];
+  const logFormat = format.combine(
+    format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    format.errors({ stack: true }),
+    format.splat(),
+    format.json()
+  );
 
-  transportsArray.push(
-    new transports.File({
-      filename: 'logs/app.log',
-      level: 'info',
-    }),
-    new transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
+  const consoleFormat = format.combine(
+    format.colorize(),
+    format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    format.printf(({ timestamp, level, message, stack }) => {
+      if (stack) {
+        return `${timestamp} [${level}]: ${message}\n${stack}`;
+      }
+      return `${timestamp} [${level}]: ${message}`;
     })
   );
 
+  const transportsArray = [
+    new transports.Console({
+      format: consoleFormat,
+      level: 'debug',
+    }),
+    new transports.DailyRotateFile({
+      filename: 'logs/app-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '14d',
+      level: 'info',
+      format: logFormat,
+    }),
+    new transports.DailyRotateFile({
+      filename: 'logs/error-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '14d',
+      level: 'error',
+      format: logFormat,
+    })
+  ];
+
   return createLogger({
-    level: 'info',
-    format: format.combine(
-      format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-      format.printf(({ timestamp, level, message }) => {
-        return `${timestamp} [${level.toUpperCase()}]: ${message}`;
-      })
-    ),
+    level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+    format: logFormat,
     transports: transportsArray,
+    exitOnError: false,
   });
 };
 
