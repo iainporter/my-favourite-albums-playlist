@@ -1,13 +1,8 @@
 import { JSDOM } from 'jsdom';
+import { Album } from '../types/album';
 
-export interface AcclaimedAlbum {
-  artist: string;
-  album: string;
-  publishDate: string;
-}
-
-export const parseAcclaimedHtml = (html: string): AcclaimedAlbum[] => {
-  const albums: AcclaimedAlbum[] = [];
+export const parseAcclaimedHtml = (html: string): Album[] => {
+  const albums: Album[] = [];
   const dom = new JSDOM(html);
   const doc = dom.window.document;
 
@@ -17,22 +12,22 @@ export const parseAcclaimedHtml = (html: string): AcclaimedAlbum[] => {
   rows.forEach((row) => {
     try {
       const cells = row.querySelectorAll('td');
-      if (cells.length >= 4) {
-        // Skip header row and ensure we have enough cells
-        const albumCell = cells[2];
-        if (!albumCell) return;
+      if (cells.length >= 3) {
+        const artistCell = cells[1]?.querySelector('a');
+        const albumCell = cells[2]?.querySelector('a');
 
-        const albumText = albumCell.textContent?.trim() || '';
-        // The format is typically "Artist / Album (Year)"
-        const match = albumText.match(/(.+)\s*\/\s*(.+)\s*\((\d{4})\)/);
-        
-        if (match) {
-          const [_, artist, album, year] = match;
-          albums.push({
-            artist: artist.trim(),
-            album: album.trim(),
-            publishDate: year
-          });
+        if (artistCell && albumCell) {
+          const artist = artistCell.textContent?.trim() || '';
+          const album = albumCell.textContent?.trim() || '';
+
+          if (artist && album) {
+            albums.push({
+              artist,
+              album,
+              year: '',  // Empty year as per requirement
+              rating: '' // Empty rating as per requirement
+            });
+          }
         }
       }
     } catch (error) {
