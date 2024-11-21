@@ -20,6 +20,11 @@ export const parseAcclaimedHtml = (html: string): Album[] => {
       if (cells.length >= 3) {
         const artistCell = cells[1]?.querySelector('a');
         const albumCell = cells[2]?.querySelector('a');
+        
+        // Get the year from the last cell with class "notmobile"
+        const yearCell = row.querySelector('td.notmobile:last-of-type a');
+        const yearMatch = yearCell?.textContent?.match(/\d{4}/);
+        const year = yearMatch ? yearMatch[0] : '';
 
         // Get the text content and trim it
         const artist = artistCell?.textContent?.trim() || '';
@@ -30,7 +35,7 @@ export const parseAcclaimedHtml = (html: string): Album[] => {
           albums.push({
             artist,
             album,
-            year: '',  // Empty year as per requirement
+            year,  // Add the extracted year
             rating: '' // Empty rating as per requirement
           });
         }
