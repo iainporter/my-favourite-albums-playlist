@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { spotifyApi as spotifyApiClient } from '../../../utils/spotifyApi';
-import { logger } from '../../utils/logger';
+import { logger } from '../../../utils/logger';
 
 import { SpotifyApi } from '../../../types/spotify';
 
