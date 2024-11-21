@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Analytics } from "@vercel/analytics/react";
 import { spotifyApi } from '../utils/spotifyApi';
 import { SpotifyApi } from '../types/spotify';
+import { logger } from '../utils/logger';
+
 
 const typedSpotifyApi = spotifyApi as SpotifyApi;
 
@@ -301,6 +303,7 @@ export default function PlaylistManager() {
 
   const handleRemoveTrack = async (playlistId: string, trackId: string) => {
     try {
+      logger.debug(`Removing track ${trackId} from Playlist ${playlistId}`);
       await typedSpotifyApi.removeItemFromPlaylist(playlistId, `spotify:track:${trackId}`);
 
       // Get the current playlist and its pagination info
