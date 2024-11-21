@@ -393,7 +393,7 @@ export default function FavoriteAlbums() {
                 </tr>
               </thead>
               <tbody className="bg-gray-700 divide-y divide-gray-600">
-                {currentAlbums.map((album) => (
+                {currentAlbums.filter(album => album !== null).map((album) => (
                   <React.Fragment key={album.id}>
                     <tr
                       className="text-gray-200 hover:bg-gray-600/50 transition-colors duration-200 cursor-pointer"
@@ -408,7 +408,8 @@ export default function FavoriteAlbums() {
                     {expandedRow === album.id && searchResults[album.id] && (
                       <tr>
                         <td colSpan={4} className="px-6 py-4 bg-gray-800">
-                          {searchResults[album.id].map((spotifyAlbum) => (
+                        logger.info(`Processing album: ${album.id}`)
+                          {searchResults[album.id].filter(spotifyAlbum => spotifyAlbum !== null).map((spotifyAlbum) => (
                             <div key={spotifyAlbum.id}>
                               <div 
                                 className="flex items-center space-x-2 p-1 hover:bg-gray-700 rounded-lg cursor-pointer text-sm"
