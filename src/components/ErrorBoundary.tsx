@@ -20,12 +20,12 @@ class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo);
     // Clear any stored tokens
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      // Redirect to login
-      window.location.href = '/api/auth/login';
-    }
+//     if (typeof window !== 'undefined') {
+//       localStorage.removeItem('accessToken');
+//       localStorage.removeItem('refreshToken');
+//       // Redirect to login
+//       window.location.href = '/api/auth/login';
+//     }
   }
 
   public render() {

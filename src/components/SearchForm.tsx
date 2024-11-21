@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { spotifyApi } from '../utils/spotifyApi';
 import { SpotifyApi } from '../types/spotify';
+import { logger } from '../utils/logger';
 const typedSpotifyApi = spotifyApi as SpotifyApi;
 
 import { SpotifyAlbum, SpotifyTrack } from '../types/spotify';
@@ -266,7 +267,9 @@ export default function SearchForm({
         {albumSearchResults.length === 0 ? (
           <div className="text-center text-gray-400 py-8">No Results Found</div>
         ) : (
-          albumSearchResults.map((spotifyAlbum) => (
+          albumSearchResults.map((spotifyAlbum) => {
+            logger.info(`Processing album: ${spotifyAlbum.name} (ID: ${spotifyAlbum.id})`);
+            return (
           <div key={spotifyAlbum.id} className="bg-gray-800 rounded-lg overflow-hidden">
             <div 
               className="flex items-center space-x-4 p-4 hover:bg-gray-700 cursor-pointer"
@@ -345,7 +348,7 @@ export default function SearchForm({
               </div>
             )}
           </div>
-          ))
+          }))
         )}
       </div>
 
