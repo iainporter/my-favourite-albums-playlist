@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Analytics } from "@vercel/analytics/react";
 import { spotifyApi } from '../utils/spotifyApi';
 import { SpotifyApi } from '../types/spotify';
@@ -16,6 +16,13 @@ interface CreatePlaylistModalProps {
 function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalProps) {
   const [playlistName, setPlaylistName] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -32,6 +39,7 @@ function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalP
         <h2 className="text-xl font-bold text-white mb-4">Create New Playlist</h2>
         <form onSubmit={handleSubmit}>
           <input
+            ref={inputRef}
             type="text"
             value={playlistName}
             onChange={(e) => setPlaylistName(e.target.value)}
