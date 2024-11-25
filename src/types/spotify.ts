@@ -19,7 +19,7 @@ export interface SpotifyTrack {
 export interface SpotifyApi {
   createPlaylist(name: string, isPrivate?: boolean): Promise<any>;
   getUserPlaylists(offset?: number, limit?: number): Promise<any>;
-  getAlbumTracks(albumId: string): Promise<any>;
+  getAlbumTracks(albumId: string, offset?: number, limit?: number): Promise<any>;
   getPlaylist(playlistId: string): Promise<any>;
   addToPlaylist(playlistId: string, uriString: string): Promise<any>;
   getPlaylistItems(playlistId: string, offset?: number, limit?: number): Promise<any>;
