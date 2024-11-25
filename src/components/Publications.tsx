@@ -33,6 +33,14 @@ export default function Publications() {
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [currentList, setCurrentList] = useState<PublicationType | null>(null);
+  const [tracksPagination, setTracksPagination] = useState<{
+    [key: string]: {
+      offset: number;
+      limit: number;
+      total: number;
+      hasMore: boolean;
+    };
+  }>({});
 
   const fetchAlbums = async (type: PublicationType) => {
     if (loading) return;
@@ -68,10 +76,22 @@ export default function Publications() {
     }
   };
 
-    const fetchAlbumTracks = async (albumId: string) => {
+    const fetchAlbumTracks = async (albumId: string, offset: number = 0) => {
     try {
-      const data = await typedSpotifyApi.getAlbumTracks(albumId);
-      setAlbumTracks(prev => ({ ...prev, [albumId]: data.items }));
+      const data = await typedSpotifyApi.getAlbumTracks(albumId, offset);
+      setAlbumTracks(prev => ({
+        ...prev,
+        [albumId]: offset === 0 ? data.items : [...(prev[albumId] || []), ...data.items]
+      }));
+      setTracksPagination(prev => ({
+        ...prev,
+        [albumId]: {
+          offset: offset,
+          limit: data.limit,
+          total: data.total,
+          hasMore: data.total > offset + data.items.length
+        }
+      }));
     } catch (error) {
       console.error('Error fetching tracks:', error);
     }
@@ -251,37 +271,56 @@ export default function Publications() {
                           {expandedTracks === spotifyAlbum.id && (
                             <div className="mt-2 ml-14 space-y-1">
                               {albumTracks[spotifyAlbum.id] ? (
-                                albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
-                                  <div 
-                                    key={track.id}
-                                    className="flex items-center text-sm text-gray-300 p-2 hover:bg-gray-600 rounded cursor-move"
-                                    draggable="true"
-                                    onDragStart={(e) => {
-                                      e.dataTransfer.setData('application/json', JSON.stringify({
-                                        id: track.id,
-                                        name: track.name,
-                                        artist: track.artists[0].name,
-                                        album: spotifyAlbum.name,
-                                        duration: track.duration_ms,
-                                        uri: `spotify:track:${track.id}`
-                                      }));
-                                      e.dataTransfer.effectAllowed = 'copy';
-                                      const dragIcon = document.createElement('div');
-                                      dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
-                                      dragIcon.innerHTML = `${track.name} - ${track.artists[0].name}`;
-                                      document.body.appendChild(dragIcon);
-                                      e.dataTransfer.setDragImage(dragIcon, 0, 0);
-                                      setTimeout(() => document.body.removeChild(dragIcon), 0);
-                                    }}
-                                  >
-                                    <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
-                                    <span className="ml-4">{track.name}</span>
-                                    <span className="ml-auto text-gray-500">
-                                      {Math.floor(track.duration_ms / 60000)}:
-                                      {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
-                                    </span>
-                                  </div>
-                                ))
+                                <>
+                                  {albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
+                                    <div 
+                                      key={track.id}
+                                      className="flex items-center text-sm text-gray-300 p-2 hover:bg-gray-600 rounded cursor-move"
+                                      draggable="true"
+                                      onDragStart={(e) => {
+                                        e.dataTransfer.setData('application/json', JSON.stringify({
+                                          id: track.id,
+                                          name: track.name,
+                                          artist: track.artists[0].name,
+                                          album: spotifyAlbum.name,
+                                          duration: track.duration_ms,
+                                          uri: `spotify:track:${track.id}`
+                                        }));
+                                        e.dataTransfer.effectAllowed = 'copy';
+                                        const dragIcon = document.createElement('div');
+                                        dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
+                                        dragIcon.innerHTML = `${track.name} - ${track.artists[0].name}`;
+                                        document.body.appendChild(dragIcon);
+                                        e.dataTransfer.setDragImage(dragIcon, 0, 0);
+                                        setTimeout(() => document.body.removeChild(dragIcon), 0);
+                                      }}
+                                    >
+                                      <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
+                                      <span className="ml-4">{track.name}</span>
+                                      <span className="ml-auto text-gray-500">
+                                        {Math.floor(track.duration_ms / 60000)}:
+                                        {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
+                                      </span>
+                                    </div>
+                                  ))}
+                                  {tracksPagination[spotifyAlbum.id]?.hasMore && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const currentPagination = tracksPagination[spotifyAlbum.id];
+                                        if (currentPagination) {
+                                          fetchAlbumTracks(
+                                            spotifyAlbum.id,
+                                            currentPagination.offset + currentPagination.limit
+                                          );
+                                        }
+                                      }}
+                                      className="w-full mt-2 px-4 py-2 bg-gray-600 text-gray-300 rounded-md hover:bg-gray-500 transition-colors duration-200"
+                                    >
+                                      Load More Tracks
+                                    </button>
+                                  )}
+                                </>
                               ) : (
                                 <div className="text-gray-400 text-sm p-2">Loading tracks...</div>
                               )}
