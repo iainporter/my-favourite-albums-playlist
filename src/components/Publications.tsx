@@ -234,10 +234,10 @@ export default function Publications() {
                               </div>
                             </div>
                             <div className="flex-1">
-                              <div className="text-white font-semibold">{spotifyAlbum.name}</div>
-                              <div className="text-gray-300 text-sm">
+                              <div className="text-gray-300 text-m">
                                 {spotifyAlbum.artists.map(a => a.name).join(', ')}
                               </div>
+                              <div className="text-white font-semibold">{spotifyAlbum.name}</div>
                             </div>
                             <svg 
                               className={`w-6 h-6 text-gray-400 transform transition-transform ${expandedTracks === spotifyAlbum.id ? 'rotate-180' : ''}`}
