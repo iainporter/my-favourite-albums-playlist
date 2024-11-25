@@ -24,7 +24,11 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    // Only log non-auth errors
+    if (!(error instanceof AuthError)) {
+      console.error('Uncaught error:', error);
+    }
+    
     // Clear any stored tokens
     if (typeof window !== 'undefined') {
       localStorage.removeItem('accessToken');

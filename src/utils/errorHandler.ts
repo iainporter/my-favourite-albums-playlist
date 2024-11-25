@@ -6,17 +6,19 @@ export class AuthError extends Error {
 }
 
 export const handleApiError = (error: any) => {
-  console.error('API Error:', error);
-  
   // Check if it's an authentication error
   if (error.status === 401 || error.message?.includes('auth')) {
+    // For auth errors, we don't log the full error to prevent sensitive data exposure
+    console.log('Authentication error occurred');
     if (typeof window !== 'undefined') {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       window.location.href = '/api/auth/login';
     }
-    throw new AuthError('Authentication failed');
+    throw new AuthError('Authentication required');
   }
   
+  // For other errors, we can log them but should still be careful about exposure
+  console.error('API Error:', error.message);
   throw error;
 };
