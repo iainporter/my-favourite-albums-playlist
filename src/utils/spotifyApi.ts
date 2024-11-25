@@ -107,7 +107,7 @@ class SpotifyApi implements ISpotifyApi {
     }
   }
 
-  async createPlaylist(name: string, isPrivate: boolean = false) {
+  async createPlaylist(name: string, description: string = '', isPrivate: boolean = false) {
     const accessToken = localStorage.getItem('accessToken');
     const url = `https://api.spotify.com/v1/me/playlists`;
     return await this.fetchWithTokenRefresh(
@@ -120,6 +120,7 @@ class SpotifyApi implements ISpotifyApi {
         },
         body: JSON.stringify({ 
           name,
+          description,
           public: !isPrivate 
         }),
       }

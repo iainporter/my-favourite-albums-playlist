@@ -10,11 +10,12 @@ const typedSpotifyApi = spotifyApi as SpotifyApi;
 interface CreatePlaylistModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, isPrivate: boolean) => void;
+  onSubmit: (name: string, description: string, isPrivate: boolean) => void;
 }
 
 function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalProps) {
   const [playlistName, setPlaylistName] = useState('');
+  const [playlistDescription, setPlaylistDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -28,8 +29,9 @@ function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(playlistName, isPrivate);
+    onSubmit(playlistName, playlistDescription, isPrivate);
     setPlaylistName('');
+    setPlaylistDescription('');
     setIsPrivate(false);
   };
 
@@ -46,6 +48,13 @@ function CreatePlaylistModal({ isOpen, onClose, onSubmit }: CreatePlaylistModalP
             placeholder="Enter playlist name"
             className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-spotify-green focus:outline-none mb-4"
             required
+          />
+          <textarea
+            value={playlistDescription}
+            onChange={(e) => setPlaylistDescription(e.target.value)}
+            placeholder="Enter playlist description (optional)"
+            className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-spotify-green focus:outline-none mb-4 resize-none"
+            rows={3}
           />
           <div className="flex items-center mb-4">
             <input
@@ -563,9 +572,9 @@ export default function PlaylistManager() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const handleCreatePlaylist = async (name: string, isPrivate: boolean) => {
+  const handleCreatePlaylist = async (name: string, description: string, isPrivate: boolean) => {
     try {
-      await typedSpotifyApi.createPlaylist(name, isPrivate);
+      await typedSpotifyApi.createPlaylist(name, description, isPrivate);
       setIsCreateModalOpen(false);
       await fetchPlaylists();
     } catch (error) {
