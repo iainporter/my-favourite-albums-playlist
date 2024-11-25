@@ -267,9 +267,9 @@ class SpotifyApi implements ISpotifyApi {
   }
 
 
-  async getAlbumTracks(albumId: string) {
+  async getAlbumTracks(albumId: string, offset: number = 0, limit: number = 20) {
     const accessToken = localStorage.getItem('accessToken');
-    const url = `https://api.spotify.com/v1/albums/${albumId}/tracks`;
+    const url = `https://api.spotify.com/v1/albums/${albumId}/tracks?offset=${offset}&limit=${limit}`;
     return await this.fetchWithTokenRefresh(
       url,
       {
