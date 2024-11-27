@@ -1,6 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import SearchForm from './SearchForm';
-import { Analytics } from "@vercel/analytics/react"
 import { Album } from '../types/album';
 import Publications from './Publications';
 import { spotifyApi } from '../utils/spotifyApi';

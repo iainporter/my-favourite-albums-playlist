@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { Analytics } from "@vercel/analytics/react";
 import { spotifyApi } from '../utils/spotifyApi';
 import { SpotifyApi } from '../types/spotify';
 import { logger } from '../utils/logger';

@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     if (req.method === 'POST' && !req.query.action) {
       // Create a new playlist
-      const { name } = req.body;
+      const { name, description = '', isPrivate = true } = req.body;
       
       if (!name) {
         return res.status(400).json({ error: 'Missing playlist name' });
@@ -39,7 +39,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Create the playlist
       const response = await typedSpotifyApi.createPlaylist(
         name,
-        true // make it private
+        description,
+        isPrivate
       );
 
       if (!response.ok) {
