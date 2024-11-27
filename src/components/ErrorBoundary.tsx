@@ -29,12 +29,21 @@ class ErrorBoundary extends Component<Props, State> {
       console.error('Uncaught error:', error);
     }
     
-    // Clear any stored tokens
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      // Redirect to login
-      window.location.href = '/api/auth/login';
+    if (error instanceof AuthError) {
+      // Handle auth errors silently
+      if (typeof window !== 'undefined') {
+        // Redirect to login page after a short delay to allow the error message to be shown
+        setTimeout(() => {
+          window.location.href = '/api/auth/login';
+        }, 1500);
+      }
+    } else {
+      // For non-auth errors, clear tokens and redirect
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/api/auth/login';
+      }
     }
   }
 

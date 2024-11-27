@@ -334,12 +334,14 @@ class SpotifyApi implements ISpotifyApi {
     );
   }
 
-  //This will cause the user to be thrown out to a login page
   private rethrowAuthError() {
-          // Clear tokens from localStorage
+    // Clear tokens from localStorage
+    if (typeof window !== 'undefined') {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      throw new AuthError('Failed to refresh access token');
+      // Throw the auth error which will be caught by ErrorBoundary
+      throw new AuthError('Authentication session expired');
+    }
   }
 }
 
