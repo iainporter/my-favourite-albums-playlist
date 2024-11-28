@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { parsePitchforkHtml, convertToAlbum } from '../../../utils/pitchforkParser';
+import { logger } from '../../../utils/logger';
+
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,9 +10,9 @@ export default async function handler(
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
-
   try {
     const type = req.query.type as string;
+    logger.debug(`getting list of ${type} albums from Pitchfork`)
     let url;
     switch (type) {
       case 'best-new':

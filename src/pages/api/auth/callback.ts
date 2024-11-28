@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // Exchange code for tokens using PKCE
-    const response = await fetch('https://accounts.spotify.com/api/token', {
+    const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -34,6 +34,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         code_verifier: codeVerifier,
       }),
     });
+
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.text();
+      console.error('Spotify token exchange failed:', {
+        status: tokenResponse.status,
+        statusText: tokenResponse.statusText,
+        error: errorData
+      });
+      return res.redirect(`/?error=token_exchange_failed&status=${tokenResponse.status}`);
+    }
+
+    const response = tokenResponse;
 
     if (!response.ok) {
       throw new Error('Failed to exchange code for tokens');
@@ -56,7 +68,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     res.redirect(`/?${encodedParams.toString()}`);
   } catch (error) {
-    console.error('Error getting tokens:', error);
-    res.redirect('/?error=auth_failed');
+    console.error('Error in Spotify authentication callback:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.redirect(`/?error=auth_failed&message=${encodeURIComponent(errorMessage)}`);
   }
 }

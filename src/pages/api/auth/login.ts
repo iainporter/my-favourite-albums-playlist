@@ -13,9 +13,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .join('');
 
   // Store code verifier in session/cookie (you should implement this securely)
+  // Set secure cookies with appropriate attributes
+  const cookieOptions = `HttpOnly; Path=/; SameSite=Lax; ${process.env.NODE_ENV === 'production' ? 'Secure;' : ''}`;
   res.setHeader('Set-Cookie', [
-    `code_verifier=${codeVerifier}; HttpOnly; Path=/; SameSite=Lax`,
-    `auth_state=${state}; HttpOnly; Path=/; SameSite=Lax`
+    `code_verifier=${codeVerifier}; ${cookieOptions}`,
+    `auth_state=${state}; ${cookieOptions}`
   ]);
 
   const params = new URLSearchParams({
