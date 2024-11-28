@@ -8,24 +8,14 @@ export interface PitchforkAlbum {
   publishDate: string;
 }
 
-let cache = new Map<string, Map<string, PitchforkAlbum[]>>();
+let cache = new Map<string, PitchforkAlbum[]>();
 
 export const parsePitchforkHtml = async (type: string, html: string): Promise<PitchforkAlbum[]> => {
   // Check if the result is already in the cache
-  const typeCache = cache.get(type);
-  if (typeCache && typeCache.has(html)) {
-    return typeCache.get(html)!;
+  const found = cache.get(type);
+  if (found) {
+    return found!;
   }
-
-  // Parse the HTML and store the result in the cache
-  const albums = await parsePitchforkHtml(type, html);
-  if (!cache.has(type)) {
-    cache.set(type, new Map());
-  }
-  const typeCacheUpdated = cache.get(type)!;
-  typeCacheUpdated.set(html, albums);
-  cache.set(type, typeCacheUpdated);
-  return albums;
   if (!JSDOM) {
     const jsdom = await import('jsdom');
     JSDOM = jsdom.JSDOM;
@@ -88,7 +78,7 @@ export const parsePitchforkHtml = async (type: string, html: string): Promise<Pi
       }
     }
   }
-  
+  cache.set(type, albums);
   return albums;
 };
 
