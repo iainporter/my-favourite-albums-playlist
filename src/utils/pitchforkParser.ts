@@ -1,5 +1,4 @@
 import { Album } from '../types/album';
-import {logger} from '../utils/logger';
 
 let JSDOM: any;
 
@@ -51,14 +50,14 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
             publishDate
           });
         } else {
-          logger.warn(`Skipping incomplete album entry. Artist: ${artist || 'missing'}, Album: ${album || 'missing'}, Date: ${publishDate || 'missing'}`);
+//           logger.warn(`Skipping incomplete album entry. Artist: ${artist || 'missing'}, Album: ${album || 'missing'}, Date: ${publishDate || 'missing'}`);
         }
       } catch (error) {
-        logger.error('Error parsing individual album item:', error instanceof Error ? error.message : String(error));
+//         logger.error('Error parsing individual album item:', error instanceof Error ? error.message : String(error));
       }
     });
   } catch (error) {
-    logger.error('Error in JSDOM parsing:', error instanceof Error ? error.message : String(error));
+//     logger.error('Error in JSDOM parsing:', error instanceof Error ? error.message : String(error));
     // Return empty array instead of failing completely
     return [];
   } finally {
@@ -68,7 +67,7 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
       try {
         dom?.window?.close();
       } catch (error) {
-        logger.error('Error closing JSDOM window:', error instanceof Error ? error.message : String(error));
+//         logger.error('Error closing JSDOM window:', error instanceof Error ? error.message : String(error));
       }
     }
   }
