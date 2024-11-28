@@ -1,5 +1,6 @@
 import { Album } from '../types/album';
 import { JSDOM } from 'jsdom';
+import { logger } from './logger';
 
 export interface DIYAlbum {
   artist: string;
@@ -13,16 +14,17 @@ export const parseDIYHtml = (html: string): DIYAlbum[] => {
   // Create a temporary DOM element to parse the HTML using jsdom
   const dom = new JSDOM(html);
   const doc = dom.window.document;
-  
+  logger.info('Starting DIY HTML parsing');
   // Find all header elements
   const headers = doc.querySelectorAll('header');
-  
-  headers.forEach((header) => {
+  logger.info(`Found ${headers.length} summary items to process`);
+  headers.forEach((header, index) => {
     try {
+      logger.info(`Processing album ${index + 1} of ${headers.length}`);
       // Extract artist and album from the h3 element
       const titleElement = header.querySelector('.h-headline p strong');
       const titleText = header.querySelector('.h-headline p')?.textContent;
-      
+
       if (titleElement && titleText) {
         const artist = titleElement.textContent?.trim() || '';
         // Extract album name by removing the artist and the em dash
@@ -39,6 +41,7 @@ export const parseDIYHtml = (html: string): DIYAlbum[] => {
             publishDate
           });
         }
+        logger.info(`Successfully parsed album: "${album}" by ${artist}, published ${publishDate}`);
       }
     } catch (error) {
       console.error('Error parsing album item:', error);
