@@ -557,7 +557,7 @@ export default function PlaylistManager() {
 
     return (
       <div className="space-y-3 pb-4">
-        {playlists.map((playlist) => (
+        {playlists.filter(playlist => playlist != null).map((playlist) => (
           <PlaylistItem
             key={playlist.id}
             playlist={playlist}

@@ -50,6 +50,9 @@ export default function Publications() {
     try {
       let url;
       switch (type) {
+        case 'high-rated':
+          url = url = '/api/spotify/pitchfork?type=high-rated';
+          break;
         case 'best-new':
           url = '/api/spotify/pitchfork?type=best-new';
           break;
@@ -60,7 +63,7 @@ export default function Publications() {
           url = '/api/spotify/acclaimed';
           break;
         default:
-          url = '/api/spotify/pitchfork';
+          url = '/api/spotify/pitchfork?type=latest';
       }
       const response = await fetch(url);
       if (!response.ok) {
