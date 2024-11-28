@@ -14,13 +14,13 @@ export const parseDIYHtml = (html: string): DIYAlbum[] => {
   // Create a temporary DOM element to parse the HTML using jsdom
   const dom = new JSDOM(html);
   const doc = dom.window.document;
-  logger.info('Starting DIY HTML parsing');
+  logger.debug('Starting DIY HTML parsing');
   // Find all header elements
   const headers = doc.querySelectorAll('header');
-  logger.info(`Found ${headers.length} summary items to process`);
+  logger.debug(`Found ${headers.length} summary items to process`);
   headers.forEach((header, index) => {
     try {
-      logger.info(`Processing album ${index + 1} of ${headers.length}`);
+      logger.debug(`Processing album ${index + 1} of ${headers.length}`);
       // Extract artist and album from the h3 element
       const titleElement = header.querySelector('.h-headline p strong');
       const titleText = header.querySelector('.h-headline p')?.textContent;
@@ -41,7 +41,7 @@ export const parseDIYHtml = (html: string): DIYAlbum[] => {
             publishDate
           });
         }
-        logger.info(`Successfully parsed album: "${album}" by ${artist}, published ${publishDate}`);
+        logger.debug(`Successfully parsed album: "${album}" by ${artist}, published ${publishDate}`);
       }
     } catch (error) {
       console.error('Error parsing album item:', error);

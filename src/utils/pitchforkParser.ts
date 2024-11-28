@@ -14,7 +14,7 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
     const jsdom = await import('jsdom');
     JSDOM = jsdom.JSDOM;
   }
-  logger.info('Starting Pitchfork HTML parsing');
+  logger.debug('Starting Pitchfork HTML parsing');
   const albums: PitchforkAlbum[] = [];
   let dom: typeof JSDOM | undefined;
   
@@ -30,10 +30,10 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
     
     // Find all summary items
     const summaryItems = doc.querySelectorAll('.summary-item');
-    logger.info(`Found ${summaryItems.length} summary items to process`);
+    logger.debug(`Found ${summaryItems.length} summary items to process`);
     
     summaryItems.forEach((item, index) => {
-      logger.info(`Processing album ${index + 1} of ${summaryItems.length}`);
+      logger.debug(`Processing album ${index + 1} of ${summaryItems.length}`);
       try {
         // Extract artist
         const artistElement = item.querySelector('.summary-item__sub-hed');
@@ -48,7 +48,7 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
         const publishDate = dateElement ? dateElement.textContent?.trim() : '';
         
         if (artist && album && publishDate) {
-          logger.info(`Successfully parsed album: "${album}" by ${artist}, published ${publishDate}`);
+          logger.debug(`Successfully parsed album: "${album}" by ${artist}, published ${publishDate}`);
           albums.push({
             artist,
             album,
@@ -77,12 +77,12 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
     }
   }
   
-  logger.info(`Completed parsing Pitchfork HTML. Found ${albums.length} albums.`);
+  logger.debug(`Completed parsing Pitchfork HTML. Found ${albums.length} albums.`);
   return albums;
 };
 
 export const convertToAlbum = (pitchforkAlbum: PitchforkAlbum): Album => {
-  logger.info(`Converting Pitchfork album to standard format: ${pitchforkAlbum.album} by ${pitchforkAlbum.artist}`);
+  logger.debug(`Converting Pitchfork album to standard format: ${pitchforkAlbum.album} by ${pitchforkAlbum.artist}`);
   const year = new Date(pitchforkAlbum.publishDate).getFullYear().toString();
   
   return {
