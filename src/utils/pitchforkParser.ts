@@ -8,17 +8,23 @@ export interface PitchforkAlbum {
   publishDate: string;
 }
 
-let cache = new Map<string, PitchforkAlbum[]>();
+let cache = new Map<string, Map<string, PitchforkAlbum[]>>();
 
-export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]> => {
+export const parsePitchforkHtml = async (type: string, html: string): Promise<PitchforkAlbum[]> => {
   // Check if the result is already in the cache
-  if (cache.has(html)) {
-    return cache.get(html)!;
+  const typeCache = cache.get(type);
+  if (typeCache && typeCache.has(html)) {
+    return typeCache.get(html)!;
   }
 
   // Parse the HTML and store the result in the cache
-  const albums = await parsePitchforkHtml(html);
-  cache.set(html, albums);
+  const albums = await parsePitchforkHtml(type, html);
+  if (!cache.has(type)) {
+    cache.set(type, new Map());
+  }
+  const typeCacheUpdated = cache.get(type)!;
+  typeCacheUpdated.set(html, albums);
+  cache.set(type, typeCacheUpdated);
   return albums;
   if (!JSDOM) {
     const jsdom = await import('jsdom');
