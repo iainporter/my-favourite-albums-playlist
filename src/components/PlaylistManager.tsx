@@ -488,7 +488,7 @@ export default function PlaylistManager() {
       
       // Transform the Spotify API response into our Track format
       const transformedTracks = data.items
-        .filter((item: any) => item && item.track && item.track.id) // Filter out null tracks or tracks without id
+        .filter((item: any) => item && item.track && item.track.id && item.track.name) // Filter out null tracks or tracks without required fields
         .map((item: any) => ({
           id: item.track.id,
           name: item.track.name,
