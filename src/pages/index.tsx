@@ -46,8 +46,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
-      <main className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white overflow-auto">
+      <main className="container mx-auto px-4 py-8 relative">
         <div className="max-w-8xl mx-auto">
           <h1 className="text-5xl md:text-2xl font-bold mb-4 text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
             Spotify Playlist Manager
