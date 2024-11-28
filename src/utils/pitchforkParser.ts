@@ -1,5 +1,6 @@
 import { Album } from '../types/album';
 import { JSDOM } from 'jsdom';
+import { logger } from './logger';
 
 export interface PitchforkAlbum {
   artist: string;
@@ -8,6 +9,7 @@ export interface PitchforkAlbum {
 }
 
 export const parsePitchforkHtml = (html: string): PitchforkAlbum[] => {
+  logger.info('Starting Pitchfork HTML parsing');
   const albums: PitchforkAlbum[] = [];
   let dom: JSDOM | undefined;
   
@@ -19,11 +21,14 @@ export const parsePitchforkHtml = (html: string): PitchforkAlbum[] => {
       pretendToBeVisual: false,
     });
     const doc = dom.window.document;
+
     
     // Find all summary items
     const summaryItems = doc.querySelectorAll('.summary-item');
+    logger.info(`Found ${summaryItems.length} summary items to process`);
     
-    summaryItems.forEach((item) => {
+    summaryItems.forEach((item, index) => {
+      logger.info(`Processing album ${index + 1} of ${summaryItems.length}`);
       try {
         // Extract artist
         const artistElement = item.querySelector('.summary-item__sub-hed');
@@ -38,18 +43,21 @@ export const parsePitchforkHtml = (html: string): PitchforkAlbum[] => {
         const publishDate = dateElement ? dateElement.textContent?.trim() : '';
         
         if (artist && album && publishDate) {
+          logger.info(`Successfully parsed album: "${album}" by ${artist}, published ${publishDate}`);
           albums.push({
             artist,
             album,
             publishDate
           });
+        } else {
+          logger.warn(`Skipping incomplete album entry. Artist: ${artist || 'missing'}, Album: ${album || 'missing'}, Date: ${publishDate || 'missing'}`);
         }
       } catch (error) {
-        console.error('Error parsing individual album item:', error);
+        logger.error('Error parsing individual album item:', error instanceof Error ? error.message : String(error));
       }
     });
   } catch (error) {
-    console.error('Error in JSDOM parsing:', error);
+    logger.error('Error in JSDOM parsing:', error instanceof Error ? error.message : String(error));
     // Return empty array instead of failing completely
     return [];
   } finally {
@@ -59,15 +67,17 @@ export const parsePitchforkHtml = (html: string): PitchforkAlbum[] => {
       try {
         dom?.window?.close();
       } catch (error) {
-        console.error('Error closing JSDOM window:', error);
+        logger.error('Error closing JSDOM window:', error instanceof Error ? error.message : String(error));
       }
     }
   }
   
+  logger.info(`Completed parsing Pitchfork HTML. Found ${albums.length} albums.`);
   return albums;
 };
 
 export const convertToAlbum = (pitchforkAlbum: PitchforkAlbum): Album => {
+  logger.info(`Converting Pitchfork album to standard format: ${pitchforkAlbum.album} by ${pitchforkAlbum.artist}`);
   const year = new Date(pitchforkAlbum.publishDate).getFullYear().toString();
   
   return {
