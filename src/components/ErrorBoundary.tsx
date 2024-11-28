@@ -29,7 +29,8 @@ class ErrorBoundary extends Component<Props, State> {
       console.error('Uncaught error:', error);
     }
     
-    if (error instanceof AuthError) {
+/*     if (error instanceof AuthError) {
+      console.error('caught AuthError:', error);
       // Handle auth errors silently
       if (typeof window !== 'undefined') {
         // Redirect to login page after a short delay to allow the error message to be shown
@@ -44,7 +45,7 @@ class ErrorBoundary extends Component<Props, State> {
         localStorage.removeItem('refreshToken');
         window.location.href = '/api/auth/login';
       }
-    }
+    } */
   }
 
   public render() {
