@@ -1,5 +1,5 @@
 import { Album } from '../types/album';
-import { logger } from './logger';
+import {logger} from '../utils/logger';
 
 let JSDOM: any;
 
@@ -14,7 +14,6 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
     const jsdom = await import('jsdom');
     JSDOM = jsdom.JSDOM;
   }
-  logger.debug('Starting Pitchfork HTML parsing');
   const albums: PitchforkAlbum[] = [];
   let dom: typeof JSDOM | undefined;
   
@@ -30,10 +29,8 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
     
     // Find all summary items
     const summaryItems = doc.querySelectorAll('.summary-item');
-    logger.debug(`Found ${summaryItems.length} summary items to process`);
-    
+
     summaryItems.forEach((item, index) => {
-      logger.debug(`Processing album ${index + 1} of ${summaryItems.length}`);
       try {
         // Extract artist
         const artistElement = item.querySelector('.summary-item__sub-hed');
@@ -48,7 +45,6 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
         const publishDate = dateElement ? dateElement.textContent?.trim() : '';
         
         if (artist && album && publishDate) {
-          logger.debug(`Successfully parsed album: "${album}" by ${artist}, published ${publishDate}`);
           albums.push({
             artist,
             album,
@@ -77,12 +73,10 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
     }
   }
   
-  logger.debug(`Completed parsing Pitchfork HTML. Found ${albums.length} albums.`);
   return albums;
 };
 
 export const convertToAlbum = (pitchforkAlbum: PitchforkAlbum): Album => {
-  logger.debug(`Converting Pitchfork album to standard format: ${pitchforkAlbum.album} by ${pitchforkAlbum.artist}`);
   const year = new Date(pitchforkAlbum.publishDate).getFullYear().toString();
   
   return {
