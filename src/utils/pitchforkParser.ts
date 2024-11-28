@@ -26,7 +26,7 @@ export const parsePitchforkHtml = async (type: string, html: string): Promise<Pi
   if (cachedData && cachedData.expiry < Date.now()) {
     cache.delete(type);
   }
-};
+  };
 
 const found = cache.get(type)?.albums;
   if (found) {
