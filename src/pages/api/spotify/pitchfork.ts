@@ -26,8 +26,7 @@ export default async function handler(
 
   try {
     const type = req.query.type as string;
-    logger.debug(`getting list of ${type} albums from Pitchfork`);
-    
+
     let url;
     switch (type) {
       case 'best-new':
