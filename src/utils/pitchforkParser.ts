@@ -9,10 +9,11 @@ export interface PitchforkAlbum {
 
 export const parsePitchforkHtml = (html: string): PitchforkAlbum[] => {
   const albums: PitchforkAlbum[] = [];
+  let dom: JSDOM | undefined;
   
   try {
     // Create a temporary DOM element to parse the HTML using jsdom with minimal features
-    const dom = new JSDOM(html, {
+    dom = new JSDOM(html, {
       runScripts: 'outside-only',
       resources: 'usable',
       pretendToBeVisual: false,
