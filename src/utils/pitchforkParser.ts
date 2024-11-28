@@ -8,11 +8,27 @@ export interface PitchforkAlbum {
   publishDate: string;
 }
 
-let cache = new Map<string, PitchforkAlbum[]>();
+let cache = new Map<string, {albums: PitchforkAlbum[], expiry: number}>();
+
+const cacheExpiryTime = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+const checkCacheExpiry = (type: string) => {
+  const cachedData = cache.get(type);
+  if (cachedData && cachedData.expiry < Date.now()) {
+    cache.delete(type);
+  }
+};
 
 export const parsePitchforkHtml = async (type: string, html: string): Promise<PitchforkAlbum[]> => {
   // Check if the result is already in the cache
-  const found = cache.get(type);
+  const checkCacheExpiry = (type: string) => {
+  const cachedData = cache.get(type);
+  if (cachedData && cachedData.expiry < Date.now()) {
+    cache.delete(type);
+  }
+};
+
+const found = cache.get(type)?.albums;
   if (found) {
     return found!;
   }
@@ -78,7 +94,7 @@ export const parsePitchforkHtml = async (type: string, html: string): Promise<Pi
       }
     }
   }
-  cache.set(type, albums);
+  cache.set(type, {albums, expiry: Date.now() + cacheExpiryTime});
   return albums;
 };
 
