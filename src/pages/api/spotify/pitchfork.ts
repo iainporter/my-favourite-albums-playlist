@@ -11,9 +11,17 @@ export default async function handler(
 
   try {
     const type = req.query.type as string;
-    const url = type === 'best-new' 
-      ? 'https://pitchfork.com/reviews/best/albums/'
-      : 'https://pitchfork.com/reviews/best/high-scoring-albums/';
+    let url;
+    switch (type) {
+      case 'best-new':
+        url = 'https://pitchfork.com/reviews/best/albums/';
+        break;
+      case 'latest':
+        url = 'https://pitchfork.com/reviews/albums/';
+        break;
+      default:
+        url = 'https://pitchfork.com/reviews/best/high-scoring-albums/';
+    }
 
     const response = await fetch(url);
     const html = await response.text();

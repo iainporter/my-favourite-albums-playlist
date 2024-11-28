@@ -21,7 +21,7 @@ interface PitchforkAlbum {
 
 type SpotifyAlbum = SpotifyApiAlbum;
 
-type PublicationType = 'high-rated' | 'best-new' | 'diy' | 'acclaimed';
+type PublicationType = 'high-rated' | 'best-new' | 'diy' | 'acclaimed' | 'latest';
 
 
 export default function Publications() {
@@ -158,6 +158,15 @@ export default function Publications() {
             {loading && currentList === 'acclaimed' ? 'Loading...' : 'Acclaimed Music All Time Albums'}
           </span>
         </button>
+        <button
+          onClick={() => fetchAlbums('latest')}
+          className={`w-40 h-16 ${currentList === 'latest' ? 'bg-gray-700' : 'bg-black'} text-white rounded-lg shadow-lg flex items-center justify-center p-4 hover:bg-gray-900 transition-colors duration-200`}
+          disabled={loading}
+        >
+          <span className="text-sm font-bold">
+            {loading && currentList === 'latest' ? 'Loading...' : 'Pitchfork Latest Albums'}
+          </span>
+        </button>
       </div>
 
       {error && (
@@ -176,6 +185,8 @@ export default function Publications() {
                 ? 'DIY New Albums'
                 : currentList === 'acclaimed'
                 ? 'Acclaimed Music All Time Albums'
+                : currentList === 'latest'
+                ? 'Pitchfork Latest Albums'
                 : 'Pitchfork 8.0+ Albums'}
             </h2>
             <div className="flex-1 overflow-y-auto min-h-0">
