@@ -351,13 +351,13 @@ export default function PlaylistManager() {
       
       // Transform the tracks data to match the expected Track format
       const transformedTracks = items
-        .filter((item: any) => item && item.track)
+        .filter((item: any) => item && item.track && item.track.id) // Filter out null tracks or tracks without id
         .map((item: any) => ({
           id: item.track.id,
-          name: item.track.name,
-          artist: item.track.artists.map((a: any) => a.name).join(', '),
-          album: item.track.album.name,
-          duration_ms: item.track.duration_ms,
+          name: item.track.name || 'Unknown Track',
+          artist: item.track.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist',
+          album: item.track.album?.name || 'Unknown Album',
+          duration_ms: item.track.duration_ms || 0,
           uri: item.track.uri
         }));
 
@@ -414,14 +414,16 @@ export default function PlaylistManager() {
       const tracksData = await typedSpotifyApi.getPlaylistItems(targetPlaylistId, currentOffset);
       
       // Transform the tracks data to match the expected Track format
-      const transformedTracks = tracksData.items.map((item: any) => ({
-        id: item.track.id,
-        name: item.track.name,
-        artist: item.track.artists.map((a: any) => a.name).join(', '),
-        album: item.track.album.name,
-        duration_ms: item.track.duration_ms,
-        uri: item.track.uri
-      }));
+      const transformedTracks = tracksData.items
+        .filter((item: any) => item && item.track && item.track.id) // Filter out null tracks or tracks without id
+        .map((item: any) => ({
+          id: item.track.id,
+          name: item.track.name || 'Unknown Track',
+          artist: item.track.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist',
+          album: item.track.album?.name || 'Unknown Album',
+          duration_ms: item.track.duration_ms || 0,
+          uri: item.track.uri
+        }));
 
       // Create updated pagination info
       const paginationInfo = {
@@ -485,14 +487,16 @@ export default function PlaylistManager() {
       const data = await typedSpotifyApi.getPlaylistItems(playlistId, offset);
       
       // Transform the Spotify API response into our Track format
-      const transformedTracks = data.items.map((item: any) => ({
-        id: item.track.id,
-        name: item.track.name,
-        artist: item.track.artists.map((a: any) => a.name).join(', '),
-        album: item.track.album.name,
-        duration_ms: item.track.duration_ms,
-        uri: item.track.uri
-      }));
+      const transformedTracks = data.items
+        .filter((item: any) => item && item.track && item.track.id) // Filter out null tracks or tracks without id
+        .map((item: any) => ({
+          id: item.track.id,
+          name: item.track.name,
+          artist: item.track.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist',
+          album: item.track.album?.name || 'Unknown Album',
+          duration_ms: item.track.duration_ms || 0,
+          uri: item.track.uri
+        }));
 
       const paginationInfo = {
         limit: data.limit,
