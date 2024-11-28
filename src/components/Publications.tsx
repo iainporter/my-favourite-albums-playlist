@@ -51,7 +51,7 @@ export default function Publications() {
       let url;
       switch (type) {
         case 'high-rated':
-          url = url = '/api/spotify/pitchfork?type=high-rated';
+          url = '/api/spotify/pitchfork?type=high-rated';
           break;
         case 'best-new':
           url = '/api/spotify/pitchfork?type=best-new';
