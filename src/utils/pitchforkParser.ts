@@ -1,6 +1,7 @@
 import { Album } from '../types/album';
-import { JSDOM } from 'jsdom';
 import { logger } from './logger';
+
+let JSDOM: any;
 
 export interface PitchforkAlbum {
   artist: string;
@@ -8,7 +9,11 @@ export interface PitchforkAlbum {
   publishDate: string;
 }
 
-export const parsePitchforkHtml = (html: string): PitchforkAlbum[] => {
+export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]> => {
+  if (!JSDOM) {
+    const jsdom = await import('jsdom');
+    JSDOM = jsdom.JSDOM;
+  }
   logger.info('Starting Pitchfork HTML parsing');
   const albums: PitchforkAlbum[] = [];
   let dom: JSDOM | undefined;

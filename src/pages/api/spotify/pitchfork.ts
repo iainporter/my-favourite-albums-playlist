@@ -64,7 +64,7 @@ export default async function handler(
       return res.status(500).json({ message: 'Received empty response from Pitchfork' });
     }
 
-    const pitchforkAlbums = parsePitchforkHtml(html);
+    const pitchforkAlbums = await parsePitchforkHtml(html);
     
     if (!pitchforkAlbums || pitchforkAlbums.length === 0) {
       logger.warn('No albums found in Pitchfork response');
