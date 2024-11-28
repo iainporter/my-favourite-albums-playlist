@@ -16,7 +16,7 @@ export const parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]
   }
   logger.info('Starting Pitchfork HTML parsing');
   const albums: PitchforkAlbum[] = [];
-  let dom: JSDOM | undefined;
+  let dom: typeof JSDOM | undefined;
   
   try {
     // Create a temporary DOM element to parse the HTML using jsdom with minimal features
