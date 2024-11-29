@@ -49,13 +49,13 @@ export default function Publications() {
     setError(null);
     try {
       // Check cache first
+      const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
       const cacheKey = `pitchfork-${type}`;
       const cachedData = localStorage.getItem(cacheKey);
       if (cachedData) {
         const { data, timestamp } = JSON.parse(cachedData);
         const now = new Date().getTime();
-        // Cache for 7 days
-        if (now - timestamp < 7 * 24 * 60 * 60 * 1000) {
+        if (now - timestamp < SEVEN_DAYS_MS) {
           setAlbums(data);
           setCurrentList(type);
           setLoading(false);
