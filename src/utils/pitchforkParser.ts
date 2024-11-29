@@ -17,7 +17,7 @@ export class PitchforkParser implements HtmlParser {
     return pitchforkAlbums.map(album => this.convertToAlbum(album));
   }
 
-  private async parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]> => {
+  private parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]> => {
   if (!JSDOM) {
     const jsdom = await import('jsdom');
     JSDOM = jsdom.JSDOM;
