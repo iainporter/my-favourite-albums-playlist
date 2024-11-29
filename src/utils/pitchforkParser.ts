@@ -94,3 +94,4 @@ export class PitchforkParser implements HtmlParser {
     rating: '8' // Since these are high-scoring albums
   };
 };
+}
