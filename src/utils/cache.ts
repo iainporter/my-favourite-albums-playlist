@@ -8,6 +8,8 @@ interface CacheData<T> {
 }
 
 const CACHE_DIR = path.join(process.cwd(), '.cache');
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+
 export function ensureCacheDirectory() {
   if (!fs.existsSync(CACHE_DIR)) {
     fs.mkdirSync(CACHE_DIR, { recursive: true });
@@ -25,6 +27,13 @@ export function getCachedData<T>(key: string): T | null {
 
     const cacheContent = fs.readFileSync(cacheFile, 'utf-8');
     const cache: CacheData<T> = JSON.parse(cacheContent);
+    
+    // Check if cache is expired (older than 7 days)
+    const now = Date.now();
+    if (now - cache.timestamp > SEVEN_DAYS_MS) {
+      fs.unlinkSync(cacheFile);
+      return null;
+    }
     
     return cache.data;
   } catch (error) {

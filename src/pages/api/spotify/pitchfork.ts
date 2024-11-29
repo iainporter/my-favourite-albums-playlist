@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PitchforkParser } from '../../../utils/pitchforkParser';
+import { getCachedData, setCachedData } from '../../../utils/cache';
 
 
 export const config = {
@@ -25,6 +26,13 @@ export default async function handler(
 
   try {
     const type = req.query.type as string;
+    
+    // Check cache first
+    const cacheKey = `pitchfork-${type}`;
+    const cachedData = getCachedData(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
 
     let url;
     switch (type) {
@@ -66,6 +74,9 @@ export default async function handler(
     if (!albums || albums.length === 0) {
       return res.status(404).json({ message: 'No albums found' });
     }
+    
+    // Cache the results
+    setCachedData(cacheKey, albums);
     res.status(200).json(albums);
   } catch (error) {
     clearTimeout(timeout);

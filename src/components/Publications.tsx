@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { getCachedData, setCachedData } from '../utils/browserCache';
 import { spotifyApi } from '../utils/spotifyApi';
 import { SpotifyApi } from '../types/spotify';
 
@@ -49,16 +48,6 @@ export default function Publications() {
     setLoading(true);
     setError(null);
     try {
-      // Check cache first
-      const cacheKey = `${type}`;
-      const cachedData = getCachedData<PitchforkAlbum[]>(cacheKey);
-      if (cachedData) {
-        setAlbums(cachedData);
-        setCurrentList(type);
-        setLoading(false);
-        return;
-      }
-
       let url;
       switch (type) {
         case 'high-rated':
@@ -81,8 +70,6 @@ export default function Publications() {
         throw new Error('Failed to fetch albums');
       }
       const data = await response.json();
-      // Cache the response
-      setCachedData(`${type}`, data);
       setAlbums(data);
       setCurrentList(type);
     } catch (err) {
