@@ -1,4 +1,5 @@
 import { Album } from '../types/album';
+import { HtmlParser } from './HtmlParser';
 
 let JSDOM: any;
 
@@ -19,7 +20,23 @@ const checkCacheExpiry = (type: string) => {
   }
 };
 
-export const parsePitchforkHtml = async (type: string, html: string): Promise<PitchforkAlbum[]> => {
+export class PitchforkParser implements HtmlParser {
+  private cache = new Map<string, {albums: PitchforkAlbum[], expiry: number}>();
+  private readonly cacheExpiryTime = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+  private checkCacheExpiry(type: string) {
+    const cachedData = this.cache.get(type);
+    if (cachedData && cachedData.expiry < Date.now()) {
+      this.cache.delete(type);
+    }
+  }
+
+  async parseHtml(html: string): Promise<Album[]> {
+    const pitchforkAlbums = await this.parsePitchforkHtml('default', html);
+    return pitchforkAlbums.map(album => this.convertToAlbum(album));
+  }
+
+  private async parsePitchforkHtml = async (type: string, html: string): Promise<PitchforkAlbum[]> => {
   // Check if the result is already in the cache
   const checkCacheExpiry = (type: string) => {
   const cachedData = cache.get(type);
@@ -98,7 +115,7 @@ const found = cache.get(type)?.albums;
   return albums;
 };
 
-export const convertToAlbum = (pitchforkAlbum: PitchforkAlbum): Album => {
+  private convertToAlbum = (pitchforkAlbum: PitchforkAlbum): Album => {
   const year = new Date(pitchforkAlbum.publishDate).getFullYear().toString();
   
   return {

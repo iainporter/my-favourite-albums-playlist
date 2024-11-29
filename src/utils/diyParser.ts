@@ -1,5 +1,6 @@
 import { Album } from '../types/album';
 import { JSDOM } from 'jsdom';
+import { HtmlParser } from './HtmlParser';
 
 export interface DIYAlbum {
   artist: string;
@@ -7,7 +8,8 @@ export interface DIYAlbum {
   publishDate: string;
 }
 
-export const parseDIYHtml = (html: string): DIYAlbum[] => {
+export class DIYParser implements HtmlParser {
+  private parseDIYHtml = (html: string): DIYAlbum[] => {
   const albums: DIYAlbum[] = [];
   
   // Create a temporary DOM element to parse the HTML using jsdom
@@ -46,7 +48,13 @@ export const parseDIYHtml = (html: string): DIYAlbum[] => {
   return albums;
 };
 
-export const convertToAlbum = (diyAlbum: DIYAlbum): Album => {
+  parseHtml(html: string): Album[] {
+    const diyAlbums = this.parseDIYHtml(html);
+    return diyAlbums.map(album => this.convertToAlbum(album));
+  }
+}
+
+  private convertToAlbum = (diyAlbum: DIYAlbum): Album => {
   const year = new Date(diyAlbum.publishDate).getFullYear().toString();
   
   return {
