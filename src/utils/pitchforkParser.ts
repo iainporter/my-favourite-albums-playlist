@@ -1,5 +1,6 @@
 import { Album } from '../types/album';
 import { HtmlParser } from './HtmlParser';
+import { getCachedData, setCachedData } from './cache';
 
 let JSDOM: any;
 
@@ -9,27 +10,9 @@ export interface PitchforkAlbum {
   publishDate: string;
 }
 
-let cache = new Map<string, {albums: PitchforkAlbum[], expiry: number}>();
-
-const cacheExpiryTime = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
-const checkCacheExpiry = (type: string) => {
-  const cachedData = cache.get(type);
-  if (cachedData && cachedData.expiry < Date.now()) {
-    cache.delete(type);
-  }
-};
+const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 export class PitchforkParser implements HtmlParser {
-  private cache = new Map<string, {albums: PitchforkAlbum[], expiry: number}>();
-  private readonly cacheExpiryTime = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
-  private checkCacheExpiry(type: string) {
-    const cachedData = this.cache.get(type);
-    if (cachedData && cachedData.expiry < Date.now()) {
-      this.cache.delete(type);
-    }
-  }
 
   async parseHtml(html: string): Promise<Album[]> {
     const pitchforkAlbums = await this.parsePitchforkHtml('default', html);
@@ -37,18 +20,11 @@ export class PitchforkParser implements HtmlParser {
   }
 
   private async parsePitchforkHtml = async (type: string, html: string): Promise<PitchforkAlbum[]> => {
-  // Check if the result is already in the cache
-  const checkCacheExpiry = (type: string) => {
-  const cachedData = cache.get(type);
-  if (cachedData && cachedData.expiry < Date.now()) {
-    cache.delete(type);
-  }
-  };
-
-const found = cache.get(type)?.albums;
-  if (found) {
-    return found!;
-  }
+    const cacheKey = `pitchfork-${type}`;
+    const cachedData = getCachedData<PitchforkAlbum[]>(cacheKey);
+    if (cachedData) {
+      return cachedData;
+    }
   if (!JSDOM) {
     const jsdom = await import('jsdom');
     JSDOM = jsdom.JSDOM;
@@ -111,7 +87,7 @@ const found = cache.get(type)?.albums;
       }
     }
   }
-  cache.set(type, {albums, expiry: Date.now() + cacheExpiryTime});
+  setCachedData(cacheKey, albums);
   return albums;
 };
 
@@ -122,6 +98,6 @@ const found = cache.get(type)?.albums;
     artist: pitchforkAlbum.artist,
     album: pitchforkAlbum.album,
     year: pitchforkAlbum.publishDate,
-    rating: '8.0+' // Since these are high-scoring albums
+    rating: '8' // Since these are high-scoring albums
   };
 };
