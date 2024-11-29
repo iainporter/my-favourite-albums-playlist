@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getCachedData, setCachedData } from '../utils/browserCache';
 import { spotifyApi } from '../utils/spotifyApi';
 import { SpotifyApi } from '../types/spotify';
 
@@ -49,18 +50,13 @@ export default function Publications() {
     setError(null);
     try {
       // Check cache first
-      const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
       const cacheKey = `${type}`;
-      const cachedData = localStorage.getItem(cacheKey);
+      const cachedData = getCachedData<PitchforkAlbum[]>(cacheKey);
       if (cachedData) {
-        const { data, timestamp } = JSON.parse(cachedData);
-        const now = new Date().getTime();
-        if (now - timestamp < SEVEN_DAYS_MS) {
-          setAlbums(data);
-          setCurrentList(type);
-          setLoading(false);
-          return;
-        }
+        setAlbums(cachedData);
+        setCurrentList(type);
+        setLoading(false);
+        return;
       }
 
       let url;
@@ -86,11 +82,7 @@ export default function Publications() {
       }
       const data = await response.json();
       // Cache the response
-      const cacheData = {
-        data,
-        timestamp: new Date().getTime()
-      };
-      localStorage.setItem(`pitchfork-${type}`, JSON.stringify(cacheData));
+      setCachedData(`${type}`, data);
       setAlbums(data);
       setCurrentList(type);
     } catch (err) {
