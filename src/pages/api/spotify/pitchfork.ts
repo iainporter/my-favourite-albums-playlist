@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { parsePitchforkHtml, convertToAlbum } from '../../../utils/pitchforkParser';
+import { PitchforkParser } from '../../../utils/pitchforkParser';
 
 
 export const config = {
@@ -60,13 +60,12 @@ export default async function handler(
       return res.status(500).json({ message: 'Received empty response from Pitchfork' });
     }
 
-    const pitchforkAlbums = await parsePitchforkHtml(type, html);
+    const parser = new PitchforkParser();
+    const albums = await parser.parseHtml(html);
     
-    if (!pitchforkAlbums || pitchforkAlbums.length === 0) {
+    if (!albums || albums.length === 0) {
       return res.status(404).json({ message: 'No albums found' });
     }
-
-    const albums = pitchforkAlbums.map(convertToAlbum);
     res.status(200).json(albums);
   } catch (error) {
     clearTimeout(timeout);

@@ -48,6 +48,21 @@ export default function Publications() {
     setLoading(true);
     setError(null);
     try {
+      // Check cache first
+      const cacheKey = `pitchfork-${type}`;
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const now = new Date().getTime();
+        // Cache for 7 days
+        if (now - timestamp < 7 * 24 * 60 * 60 * 1000) {
+          setAlbums(data);
+          setCurrentList(type);
+          setLoading(false);
+          return;
+        }
+      }
+
       let url;
       switch (type) {
         case 'high-rated':
@@ -70,6 +85,12 @@ export default function Publications() {
         throw new Error('Failed to fetch albums');
       }
       const data = await response.json();
+      // Cache the response
+      const cacheData = {
+        data,
+        timestamp: new Date().getTime()
+      };
+      localStorage.setItem(`pitchfork-${type}`, JSON.stringify(cacheData));
       setAlbums(data);
       setCurrentList(type);
     } catch (err) {

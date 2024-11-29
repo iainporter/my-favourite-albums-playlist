@@ -1,6 +1,5 @@
 import { Album } from '../types/album';
 import { HtmlParser } from './HtmlParser';
-import { getCachedData, setCachedData } from './cache';
 
 let JSDOM: any;
 
@@ -10,21 +9,14 @@ export interface PitchforkAlbum {
   publishDate: string;
 }
 
-const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-
 export class PitchforkParser implements HtmlParser {
 
   async parseHtml(html: string): Promise<Album[]> {
-    const pitchforkAlbums = await this.parsePitchforkHtml('default', html);
+    const pitchforkAlbums = await this.parsePitchforkHtml(html);
     return pitchforkAlbums.map(album => this.convertToAlbum(album));
   }
 
-  private async parsePitchforkHtml = async (type: string, html: string): Promise<PitchforkAlbum[]> => {
-    const cacheKey = `pitchfork-${type}`;
-    const cachedData = getCachedData<PitchforkAlbum[]>(cacheKey);
-    if (cachedData) {
-      return cachedData;
-    }
+  private async parsePitchforkHtml = async (html: string): Promise<PitchforkAlbum[]> => {
   if (!JSDOM) {
     const jsdom = await import('jsdom');
     JSDOM = jsdom.JSDOM;
