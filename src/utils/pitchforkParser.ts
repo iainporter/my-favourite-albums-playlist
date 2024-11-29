@@ -1,5 +1,6 @@
 import { Album } from '../types/album';
 import { HtmlParser } from './HtmlParser';
+import { setCachedData } from './cache';
 
 let JSDOM: any;
 
@@ -79,7 +80,7 @@ export class PitchforkParser implements HtmlParser {
       }
     }
   }
-  setCachedData(cacheKey, albums);
+  setCachedData('pitchfork-albums', albums);
   return albums;
 };
 
