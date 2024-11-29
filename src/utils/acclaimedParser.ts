@@ -1,9 +1,7 @@
 import { JSDOM } from 'jsdom';
 import { Album } from '../types/album';
-import { HtmlParser } from './HtmlParser';
 
-export class AcclaimedParser implements HtmlParser {
-  parseHtml = (html: string): Album[] => {
+export const parseAcclaimedHtml = (html: string): Album[] => {
   const albums: Album[] = [];
   const dom = new JSDOM(html);
   const doc = dom.window.document;

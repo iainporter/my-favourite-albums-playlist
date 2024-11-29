@@ -50,7 +50,7 @@ export default function Publications() {
     try {
       // Check cache first
       const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-      const cacheKey = `pitchfork-${type}`;
+      const cacheKey = `${type}`;
       const cachedData = localStorage.getItem(cacheKey);
       if (cachedData) {
         const { data, timestamp } = JSON.parse(cachedData);
