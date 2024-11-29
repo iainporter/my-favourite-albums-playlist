@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { parseDIYHtml } from '../../../utils/diyParser';
+import { DIYParser } from '../../../utils/diyParser';
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,7 +16,8 @@ export default async function handler(
     }
     
     const html = await response.text();
-    const albums = parseDIYHtml(html);
+    const parser = new DIYParser();
+    const albums = parser.parseHtml(html);
     
     res.status(200).json(albums);
   } catch (error) {
