@@ -505,7 +505,7 @@ export default function PlaylistManager() {
       };
 
       setPlaylists(playlists.map(p =>
-        p.id === playlistId
+        p?.id === playlistId
           ? { 
               ...p, 
               tracks: transformedTracks, 
@@ -513,7 +513,7 @@ export default function PlaylistManager() {
               paginationInfo: paginationInfo 
             }
           : p
-      ));
+      ).filter(Boolean));
     } catch (error) {
       console.error('Error loading tracks:', error);
     }
@@ -521,7 +521,8 @@ export default function PlaylistManager() {
   };
 
   const togglePlaylist = async (playlistId: string) => {
-    const playlist = playlists.find(p => p.id === playlistId);
+    if (!playlistId) return;
+    const playlist = playlists.find(p => p?.id === playlistId);
     if (!playlist) return;
 
     if (playlist.isExpanded) {
