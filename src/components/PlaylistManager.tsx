@@ -370,7 +370,7 @@ export default function PlaylistManager() {
 
       // Update the playlist with both new tracks and pagination info
       setPlaylists(currentPlaylists => currentPlaylists.map(p =>
-        p.id === playlistId
+        p?.id === playlistId
           ? { ...p, tracks: transformedTracks, paginationInfo }
           : p
       ));
