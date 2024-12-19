@@ -1,7 +1,6 @@
 import { SPOTIFY_CONFIG } from '../config/spotify';
 import { SpotifyAlbum, SpotifyApi as ISpotifyApi } from '../types/spotify';
 import { AuthError } from './errorHandler';
-import { logger } from './logger';
 
 export interface SpotifySearchResponse {
   albums: {
@@ -15,7 +14,7 @@ export interface SpotifySearchResponse {
 class SpotifyApi implements ISpotifyApi {
   constructor() {
     // Debug logging for SPOTIFY_CONFIG when SpotifyApi is instantiated
-    logger.debug('SpotifyApi initialized with config:', {
+    console.log('SpotifyApi initialized with config:', {
       clientIdPresent: !!SPOTIFY_CONFIG.CLIENT_ID,
       clientSecretPresent: !!SPOTIFY_CONFIG.CLIENT_SECRET,
       redirectUri: SPOTIFY_CONFIG.REDIRECT_URI
@@ -48,13 +47,13 @@ class SpotifyApi implements ISpotifyApi {
     options: RequestInit
   ): Promise<any> {
     try {
-      logger.debug(`Making Spotify API request to: ${url}`);
+
 
       let response = await fetch(url, options);
       let responseData;
 
       if (response.status === 401) {
-        logger.info('Access token expired, attempting to refresh...');
+        console.log('Access token expired, attempting to refresh...');
         try {
           if (!SPOTIFY_CONFIG.CLIENT_ID) {
             throw new Error('Missing Spotify client credentials. Please check your .env file and ensure SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are set.');
@@ -82,7 +81,7 @@ class SpotifyApi implements ISpotifyApi {
           // Retry the request with new token
           response = await fetch(url, newOptions);
         } catch (refreshError) {
-          logger.error('Token refresh failed:', refreshError);
+          console.error('Token refresh failed:', refreshError);
           if (refreshError.message.includes('Missing Spotify client credentials')) {
             throw refreshError;
           }
@@ -104,7 +103,7 @@ class SpotifyApi implements ISpotifyApi {
 
       return responseData;
     } catch (error) {
-      logger.error('Error in fetchWithTokenRefresh:', error);
+      console.error('Error in fetchWithTokenRefresh:', error);
       throw error;
     }
   }
