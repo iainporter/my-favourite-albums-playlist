@@ -29,6 +29,9 @@ export default function FavoriteAlbums() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<Record<string, SpotifyAlbum[]>>({});
+  const updateSearchResults = (newResults: Record<string, SpotifyAlbum[]>) => {
+    setSearchResults(newResults);
+  };
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [tracksPagination, setTracksPagination] = useState<{
@@ -231,22 +234,12 @@ export default function FavoriteAlbums() {
         const fallbackData = await typedSpotifyApi.searchByArtist(
           album.artist
         );
-        if (album.id) {
-          setSearchResults(prev => ({
-            ...prev,
-            [album.id]: fallbackData.albums.items
-          }));
-        }
+        updateSearchResults({ [album.id]: fallbackData.albums.items });
       } else {
-        if (album.id) {
-          setSearchResults(prev => ({
-            ...prev,
-            [album.id]: data.albums.items
-          }));
-        }
+        updateSearchResults({ [album.id || 'temp']: data.albums.items });
       }
       
-      setExpandedRow(album.id);
+      setExpandedRow(album.id || 'temp');
     } catch (error) {
       console.error('Error searching Spotify:', error);
     }
@@ -438,18 +431,12 @@ export default function FavoriteAlbums() {
                 {currentAlbums.filter(album => album !== null).map((album) => (
                   <React.Fragment key={album.id}>
                     <tr
-                      className="text-gray-200 hover:bg-gray-600/50 transition-colors duration-200"
+                      className="text-gray-200 hover:bg-gray-600/50 transition-colors duration-200 cursor-pointer"
+                      onClick={() => handleAlbumClick(album)}
+                      title="Click to view Spotify matches"
                     >
                       <td className="px-3 py-2 whitespace-nowrap text-sm">{album.artist}</td>
-                      <td className="px-3 py-2 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => handleAlbumClick(album)}
-                          className="hover:text-spotify-green cursor-pointer"
-                          title="Click to view tracks"
-                        >
-                          {album.album}
-                        </button>
-                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm">{album.album}</td>
                       <td className="px-3 py-2 whitespace-nowrap text-sm">{album.year}</td>
                       <td className="px-3 py-2 whitespace-nowrap text-sm">{album.rating}</td>
                     </tr>
@@ -496,28 +483,24 @@ export default function FavoriteAlbums() {
                                     className="w-12 h-12 rounded-md object-cover"
                                   />
                                   <div className="flex-1">
-                                    <div className="flex items-center justify-between">
-                                      <h3 className="text-white">
+                                    <a
+                                      href={spotifyAlbum.external_urls.spotify}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="group"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <h3 className="text-white group-hover:text-spotify-green">
                                         {spotifyAlbum.name}
-                                      </h3>
-                                      <a 
-                                        href={spotifyAlbum.external_urls.spotify}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-gray-400 hover:text-spotify-green flex items-center space-x-1"
-                                        onClick={(e) => e.stopPropagation()}
-                                        title="Listen with Spotify"
-                                      >
-                                        <span>Listen with Spotify</span>
                                         <svg 
-                                          className="w-4 h-4" 
+                                          className="w-4 h-4 inline-block ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                           fill="currentColor" 
                                           viewBox="0 0 24 24"
                                         >
                                           <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
                                         </svg>
-                                      </a>
-                                    </div>
+                                      </h3>
+                                    </a>
                                     <p className="text-gray-400">{spotifyAlbum.release_date}</p>
                                     <SpotifyAttribution
                                       contentType="album"
@@ -564,17 +547,16 @@ export default function FavoriteAlbums() {
                                           }}
                                         >
                                           <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
-                                          <span className="ml-4 text-white">{track.name}</span>
                                           <a 
                                             href={`https://open.spotify.com/track/${track.id}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="ml-2 text-gray-400 hover:text-spotify-green"
+                                            className="ml-4 hover:text-spotify-green"
                                             onClick={(e) => e.stopPropagation()}
                                           >
-                                            <span className="text-sm">Listen with Spotify</span>
+                                            {track.name}
                                             <svg 
-                                              className="w-3 h-3 inline-block ml-1" 
+                                              className="w-3 h-3 inline-block ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
                                               fill="currentColor" 
                                               viewBox="0 0 24 24"
                                             >
