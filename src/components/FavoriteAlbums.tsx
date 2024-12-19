@@ -29,9 +29,6 @@ export default function FavoriteAlbums() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<Record<string, SpotifyAlbum[]>>({});
-  const updateSearchResults = (newResults: Record<string, SpotifyAlbum[]>) => {
-    setSearchResults(newResults);
-  };
   const [albumTracks, setAlbumTracks] = useState<{ [key: string]: SpotifyTrack[] }>({});
   const [expandedTracks, setExpandedTracks] = useState<string | null>(null);
   const [tracksPagination, setTracksPagination] = useState<{
@@ -234,12 +231,22 @@ export default function FavoriteAlbums() {
         const fallbackData = await typedSpotifyApi.searchByArtist(
           album.artist
         );
-        updateSearchResults({ [album.id]: fallbackData.albums.items });
+        if (album.id) {
+          setSearchResults(prev => ({
+            ...prev,
+            [album.id]: fallbackData.albums.items
+          }));
+        }
       } else {
-        updateSearchResults({ [album.id || 'temp']: data.albums.items });
+        if (album.id) {
+          setSearchResults(prev => ({
+            ...prev,
+            [album.id]: data.albums.items
+          }));
+        }
       }
       
-      setExpandedRow(album.id || 'temp');
+      setExpandedRow(album.id);
     } catch (error) {
       console.error('Error searching Spotify:', error);
     }
