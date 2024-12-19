@@ -3,13 +3,8 @@ import SearchForm from './SearchForm';
 import { Album } from '../types/album';
 import Publications from './Publications';
 import { spotifyApi } from '../utils/spotifyApi';
-import { SpotifyAlbum, SpotifyTrack, SpotifyApi } from '../types/spotify';
-import SpotifyAttribution from './SpotifyAttribution';
-import SpotifyUsageGuidelines from './SpotifyUsageGuidelines';
-import { useSpotifyGuidelines } from '../hooks/useSpotifyGuidelines';
-import SpotifyBadge from './SpotifyBadge';
-
 const typedSpotifyApi = spotifyApi as SpotifyApi;
+
 
 type SortField = 'artist' | 'album' | 'year' | 'rating';
 type SortDirection = 'asc' | 'desc';
@@ -18,6 +13,8 @@ interface SortState {
   field: SortField;
   direction: SortDirection;
 }
+
+import { SpotifyAlbum, SpotifyTrack, SpotifyApi } from '../types/spotify';
 
 
 export default function FavoriteAlbums() {
@@ -245,21 +242,8 @@ export default function FavoriteAlbums() {
     }
   };
 
-  const { showGuidelines, showGuidelinesOnce, acknowledgeGuidelines } = useSpotifyGuidelines();
-
-  // Show guidelines when user first tries to interact with content
-  useEffect(() => {
-    if (expandedRow || expandedTracks) {
-      showGuidelinesOnce();
-    }
-  }, [expandedRow, expandedTracks, showGuidelinesOnce]);
-
   return (
     <div className="h-full flex flex-col">
-      <SpotifyUsageGuidelines 
-        isOpen={showGuidelines} 
-        onClose={acknowledgeGuidelines} 
-      />
       <div className="flex items-center justify-between mb-2 sticky top-0 bg-gray-800/50 backdrop-blur-sm z-10 py-1">
         <div className="flex flex-col space-y-2">
           <h2 className="text-xl font-bold text-white">
@@ -443,82 +427,58 @@ export default function FavoriteAlbums() {
                     {expandedRow === album.id && searchResults[album.id] && (
                       <tr>
                         <td colSpan={4} className="px-6 py-4 bg-gray-800">
+                          <div className="text-gray-400 text-sm mb-3">Loaded by Spotify</div>
                           {searchResults[album.id].filter(spotifyAlbum => spotifyAlbum !== null).map((spotifyAlbum) => (
                             <div key={spotifyAlbum.id}>
-                              <div className="flex items-center justify-between p-1 hover:bg-gray-700 rounded-lg cursor-pointer text-sm">
-                                <div
-                                  className="flex items-center space-x-2 flex-1"
-                                  onClick={() => {
-                                    if (expandedTracks === spotifyAlbum.id) {
-                                      setExpandedTracks(null);
-                                    } else {
-                                      setExpandedTracks(spotifyAlbum.id);
-                                      if (!albumTracks[spotifyAlbum.id]) {
-                                        fetchAlbumTracks(spotifyAlbum.id);
-                                      }
+                              <div
+                                className="flex items-center space-x-2 p-1 hover:bg-gray-700 rounded-lg cursor-pointer text-sm"
+                                onClick={() => {
+                                  if (expandedTracks === spotifyAlbum.id) {
+                                    setExpandedTracks(null);
+                                  } else {
+                                    setExpandedTracks(spotifyAlbum.id);
+                                    if (!albumTracks[spotifyAlbum.id]) {
+                                      fetchAlbumTracks(spotifyAlbum.id);
                                     }
-                                  }}
-                                  draggable="true"
-                                  onDragStart={(e) => {
-                                    e.dataTransfer.setData('application/json', JSON.stringify({
-                                      id: spotifyAlbum.id,
-                                      name: spotifyAlbum.name,
-                                      artist: album.artist,
-                                      releaseDate: spotifyAlbum.release_date,
-                                      image: spotifyAlbum.images[0]?.url,
-                                      uri: spotifyAlbum.uri
-                                    }));
-                                    e.dataTransfer.effectAllowed = 'copy';
-                                    const dragIcon = document.createElement('div');
-                                    dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
-                                    dragIcon.innerHTML = `${album.artist} - ${spotifyAlbum.name}`;
-                                    document.body.appendChild(dragIcon);
-                                    e.dataTransfer.setDragImage(dragIcon, 0, 0);
-                                    setTimeout(() => document.body.removeChild(dragIcon), 0);
-                                  }}
-                                >
-                                  <img
-                                    src={spotifyAlbum.images[0]?.url}
-                                    alt={spotifyAlbum.name}
-                                    className="w-12 h-12 rounded-md object-cover"
-                                  />
-                                  <div className="flex-1">
-                                    <a
-                                      href={spotifyAlbum.external_urls.spotify}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="group"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <h3 className="text-white group-hover:text-spotify-green">
-                                        {spotifyAlbum.name}
-                                        <svg 
-                                          className="w-4 h-4 inline-block ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                          fill="currentColor" 
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
-                                        </svg>
-                                      </h3>
-                                    </a>
-                                    <p className="text-gray-400">{spotifyAlbum.release_date}</p>
-                                    <SpotifyAttribution
-                                      contentType="album"
-                                      contentId={spotifyAlbum.id}
-                                      contentName={spotifyAlbum.name}
-                                      artistName={album.artist}
-                                      className="mt-1"
-                                    />
-                                  </div>
-                                  <svg 
-                                    className={`w-6 h-6 text-gray-400 transform transition-transform ${expandedTracks === spotifyAlbum.id ? 'rotate-180' : ''}`}
-                                    fill="none" 
-                                    stroke="currentColor" 
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                  </svg>
+                                  }
+                                }}
+                                draggable="true"
+                                onDragStart={(e) => {
+                                  e.dataTransfer.setData('application/json', JSON.stringify({
+                                    id: spotifyAlbum.id,
+                                    name: spotifyAlbum.name,
+                                    artist: album.artist,
+                                    releaseDate: spotifyAlbum.release_date,
+                                    image: spotifyAlbum.images[0]?.url,
+                                    uri: spotifyAlbum.uri
+                                  }));
+                                  e.dataTransfer.effectAllowed = 'copy';
+                                  const dragIcon = document.createElement('div');
+                                  dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
+                                  dragIcon.innerHTML = `${album.artist} - ${spotifyAlbum.name}`;
+                                  document.body.appendChild(dragIcon);
+                                  e.dataTransfer.setDragImage(dragIcon, 0, 0);
+                                  setTimeout(() => document.body.removeChild(dragIcon), 0);
+                                }}
+                              >
+                                <img
+                                  src={spotifyAlbum.images[0]?.url}
+                                  alt={spotifyAlbum.name}
+                                  className="w-12 h-12 rounded-md object-cover"
+                                />
+                                <div className="flex-1">
+                                  <h3 className="text-white">{spotifyAlbum.name}</h3>
+                                  <p className="text-gray-400">{spotifyAlbum.release_date}</p>
                                 </div>
+                                <svg
+                                  className={`w-6 h-6 text-gray-400 transform transition-transform ${expandedTracks === spotifyAlbum.id ? 'rotate-180' : ''}`}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </div>
                               {expandedTracks === spotifyAlbum.id && (
                                 <div className="mt-2 space-y-1">
                                   {albumTracks[spotifyAlbum.id] ? (
@@ -526,7 +486,7 @@ export default function FavoriteAlbums() {
                                       {albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
                                         <div 
                                           key={track.id}
-                                          className="group flex items-center text-sm text-gray-300 p-2 hover:bg-gray-700/50 rounded cursor-move"
+                                          className="flex items-center text-sm text-gray-300 p-2 hover:bg-gray-700/50 rounded cursor-move"
                                           draggable="true"
                                           onDragStart={(e) => {
                                             e.dataTransfer.setData('application/json', JSON.stringify({
@@ -547,35 +507,11 @@ export default function FavoriteAlbums() {
                                           }}
                                         >
                                           <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
-                                          <a 
-                                            href={`https://open.spotify.com/track/${track.id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="ml-4 hover:text-spotify-green"
-                                            onClick={(e) => e.stopPropagation()}
-                                          >
-                                            {track.name}
-                                            <svg 
-                                              className="w-3 h-3 inline-block ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                              fill="currentColor" 
-                                              viewBox="0 0 24 24"
-                                            >
-                                              <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
-                                            </svg>
-                                          </a>
-                                          <div className="flex items-center ml-auto space-x-4">
-                                            <SpotifyAttribution
-                                              contentType="track"
-                                              contentId={track.id}
-                                              contentName={track.name}
-                                              artistName={album.artist}
-                                              className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                            />
-                                            <span className="text-gray-500">
-                                              {Math.floor(track.duration_ms / 60000)}:
-                                              {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
-                                            </span>
-                                          </div>
+                                          <span className="ml-4">{track.name}</span>
+                                          <span className="ml-auto text-gray-500">
+                                            {Math.floor(track.duration_ms / 60000)}:
+                                            {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
+                                          </span>
                                         </div>
                                       ))}
                                       {tracksPagination[spotifyAlbum.id]?.hasMore && (
@@ -600,7 +536,6 @@ export default function FavoriteAlbums() {
                                   )}
                                 </div>
                               )}
-                              </div>
                             </div>
                           ))}
                         </td>
