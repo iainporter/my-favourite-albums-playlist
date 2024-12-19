@@ -3,8 +3,13 @@ import SearchForm from './SearchForm';
 import { Album } from '../types/album';
 import Publications from './Publications';
 import { spotifyApi } from '../utils/spotifyApi';
-const typedSpotifyApi = spotifyApi as SpotifyApi;
+import { SpotifyAlbum, SpotifyTrack, SpotifyApi } from '../types/spotify';
+import SpotifyAttribution from './SpotifyAttribution';
+import SpotifyUsageGuidelines from './SpotifyUsageGuidelines';
+import { useSpotifyGuidelines } from '../hooks/useSpotifyGuidelines';
+import SpotifyBadge from './SpotifyBadge';
 
+const typedSpotifyApi = spotifyApi as SpotifyApi;
 
 type SortField = 'artist' | 'album' | 'year' | 'rating';
 type SortDirection = 'asc' | 'desc';
@@ -13,12 +18,6 @@ interface SortState {
   field: SortField;
   direction: SortDirection;
 }
-
-import { SpotifyAlbum, SpotifyTrack, SpotifyApi } from '../types/spotify';
-import SpotifyAttribution from './SpotifyAttribution';
-import SpotifyUsageGuidelines from './SpotifyUsageGuidelines';
-import { useSpotifyGuidelines } from '../hooks/useSpotifyGuidelines';
-import SpotifyBadge from './SpotifyBadge';
 
 
 export default function FavoriteAlbums() {
