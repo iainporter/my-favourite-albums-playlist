@@ -447,70 +447,70 @@ export default function FavoriteAlbums() {
                           {searchResults[album.id].filter(spotifyAlbum => spotifyAlbum !== null).map((spotifyAlbum) => (
                             <div key={spotifyAlbum.id}>
                               <div className="flex items-center justify-between p-1 hover:bg-gray-700 rounded-lg cursor-pointer text-sm">
-                                <div 
+                                <div
                                   className="flex items-center space-x-2 flex-1"
-                                onClick={() => {
-                                  if (expandedTracks === spotifyAlbum.id) {
-                                    setExpandedTracks(null);
-                                  } else {
-                                    setExpandedTracks(spotifyAlbum.id);
-                                    if (!albumTracks[spotifyAlbum.id]) {
-                                      fetchAlbumTracks(spotifyAlbum.id);
+                                  onClick={() => {
+                                    if (expandedTracks === spotifyAlbum.id) {
+                                      setExpandedTracks(null);
+                                    } else {
+                                      setExpandedTracks(spotifyAlbum.id);
+                                      if (!albumTracks[spotifyAlbum.id]) {
+                                        fetchAlbumTracks(spotifyAlbum.id);
+                                      }
                                     }
-                                  }
-                                }}
-                                draggable="true"
-                                onDragStart={(e) => {
-                                  e.dataTransfer.setData('application/json', JSON.stringify({
-                                    id: spotifyAlbum.id,
-                                    name: spotifyAlbum.name,
-                                    artist: album.artist,
-                                    releaseDate: spotifyAlbum.release_date,
-                                    image: spotifyAlbum.images[0]?.url,
-                                    uri: spotifyAlbum.uri
-                                  }));
-                                  e.dataTransfer.effectAllowed = 'copy';
-                                  const dragIcon = document.createElement('div');
-                                  dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
-                                  dragIcon.innerHTML = `${album.artist} - ${spotifyAlbum.name}`;
-                                  document.body.appendChild(dragIcon);
-                                  e.dataTransfer.setDragImage(dragIcon, 0, 0);
-                                  setTimeout(() => document.body.removeChild(dragIcon), 0);
-                                }}
-                              >
-                                <img
-                                  src={spotifyAlbum.images[0]?.url}
-                                  alt={spotifyAlbum.name}
-                                  className="w-12 h-12 rounded-md object-cover"
-                                />
-                                <div className="flex-1">
-                                  <a 
-                                    href={spotifyAlbum.external_urls.spotify}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="group"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <h3 className="text-white group-hover:text-spotify-green">
-                                      {spotifyAlbum.name}
-                                      <svg 
-                                        className="w-4 h-4 inline-block ml-2 opacity-0 group-hover:opacity-100 transition-opacity" 
-                                        fill="currentColor" 
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
-                                      </svg>
-                                    </h3>
-                                  </a>
-                                  <p className="text-gray-400">{spotifyAlbum.release_date}</p>
-                                  <SpotifyAttribution
-                                    contentType="album"
-                                    contentId={spotifyAlbum.id}
-                                    contentName={spotifyAlbum.name}
-                                    artistName={album.artist}
-                                    className="mt-1"
+                                  }}
+                                  draggable="true"
+                                  onDragStart={(e) => {
+                                    e.dataTransfer.setData('application/json', JSON.stringify({
+                                      id: spotifyAlbum.id,
+                                      name: spotifyAlbum.name,
+                                      artist: album.artist,
+                                      releaseDate: spotifyAlbum.release_date,
+                                      image: spotifyAlbum.images[0]?.url,
+                                      uri: spotifyAlbum.uri
+                                    }));
+                                    e.dataTransfer.effectAllowed = 'copy';
+                                    const dragIcon = document.createElement('div');
+                                    dragIcon.className = 'bg-gray-800 text-white p-2 rounded shadow';
+                                    dragIcon.innerHTML = `${album.artist} - ${spotifyAlbum.name}`;
+                                    document.body.appendChild(dragIcon);
+                                    e.dataTransfer.setDragImage(dragIcon, 0, 0);
+                                    setTimeout(() => document.body.removeChild(dragIcon), 0);
+                                  }}
+                                >
+                                  <img
+                                    src={spotifyAlbum.images[0]?.url}
+                                    alt={spotifyAlbum.name}
+                                    className="w-12 h-12 rounded-md object-cover"
                                   />
-                                </div>
+                                  <div className="flex-1">
+                                    <a 
+                                      href={spotifyAlbum.external_urls.spotify}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="group"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <h3 className="text-white group-hover:text-spotify-green">
+                                        {spotifyAlbum.name}
+                                        <svg 
+                                          className="w-4 h-4 inline-block ml-2 opacity-0 group-hover:opacity-100 transition-opacity" 
+                                          fill="currentColor" 
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
+                                        </svg>
+                                      </h3>
+                                    </a>
+                                    <p className="text-gray-400">{spotifyAlbum.release_date}</p>
+                                    <SpotifyAttribution
+                                      contentType="album"
+                                      contentId={spotifyAlbum.id}
+                                      contentName={spotifyAlbum.name}
+                                      artistName={album.artist}
+                                      className="mt-1"
+                                    />
+                                  </div>
                                 <svg 
                                   className={`w-6 h-6 text-gray-400 transform transition-transform ${expandedTracks === spotifyAlbum.id ? 'rotate-180' : ''}`}
                                   fill="none" 
