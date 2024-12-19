@@ -5,6 +5,11 @@ import { logger } from '../utils/logger';
 const typedSpotifyApi = spotifyApi as SpotifyApi;
 
 import { SpotifyAlbum, SpotifyTrack } from '../types/spotify';
+import SpotifyAttribution from './SpotifyAttribution';
+import SpotifyBadge from './SpotifyBadge';
+import Image from 'next/image';
+import SpotifyUsageGuidelines from './SpotifyUsageGuidelines';
+import { useSpotifyGuidelines } from '../hooks/useSpotifyGuidelines';
 
 interface SearchFormProps {
   albumSearchResults: SpotifyAlbum[];
@@ -218,8 +223,21 @@ export default function SearchForm({
     }
   };
 
+  const { showGuidelines, showGuidelinesOnce, acknowledgeGuidelines } = useSpotifyGuidelines();
+
+  // Show guidelines when user first interacts with search results
+  useEffect(() => {
+    if (albumSearchResults.length > 0 || expandedTracks) {
+      showGuidelinesOnce();
+    }
+  }, [albumSearchResults.length, expandedTracks, showGuidelinesOnce]);
+
   return (
     <div className="flex flex-col h-full">
+      <SpotifyUsageGuidelines 
+        isOpen={showGuidelines} 
+        onClose={acknowledgeGuidelines} 
+      />
       <div className="sticky top-0 bg-gray-800/95 backdrop-blur-sm z-10 space-y-4 pb-4">
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -250,24 +268,41 @@ export default function SearchForm({
               />
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={isSearching || !isAuthenticated}
-            className={`w-1/3 mx-auto px-4 py-2 rounded-full transition-colors duration-200 flex items-center justify-center ${
-              isSearching || !isAuthenticated
-                ? 'bg-gray-600 cursor-not-allowed'
-                : 'bg-spotify-green hover:bg-green-600'
-            } text-white`}
-          >
+          <div className="flex flex-col items-center space-y-2">
+            <button
+              type="submit"
+              disabled={isSearching || !isAuthenticated}
+              className={`w-1/3 px-4 py-2 rounded-full transition-colors duration-200 flex items-center justify-center ${
+                isSearching || !isAuthenticated
+                  ? 'bg-gray-600 cursor-not-allowed'
+                  : 'bg-spotify-green hover:bg-green-600'
+              } text-white`}
+            >
             {isSearching ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
                 Searching...
               </>
             ) : (
-              'Search Spotify'
+              <>
+                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
+                </svg>
+                Search Spotify
+              </>
             )}
-          </button>
+            </button>
+            <p className="text-xs text-gray-400 flex items-center space-x-2">
+              <Image
+                src="/spotify-logo.png"
+                alt="Spotify"
+                width={12}
+                height={12}
+                className="opacity-75"
+              />
+              <span>Content is provided through Spotify and subject to their terms of use</span>
+            </p>
+          </div>
         </form>
         
         {searchError && (
@@ -277,8 +312,20 @@ export default function SearchForm({
         )}
 
         {totalResults > 0 && (
-          <div className="text-gray-300 text-sm">
-            Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalResults)} of {totalResults} results
+          <div className="flex items-center justify-between text-gray-300 text-sm">
+            <div>
+              Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalResults)} of {totalResults} results
+            </div>
+            <div className="flex items-center space-x-2">
+              <Image
+                src="/spotify-logo.png"
+                alt="Spotify"
+                width={16}
+                height={16}
+                className="opacity-75"
+              />
+              <span className="text-gray-400">Results from Spotify</span>
+            </div>
           </div>
         )}
       </div>
@@ -321,8 +368,32 @@ export default function SearchForm({
                     className="w-16 h-16 rounded-md object-cover"
                   />
                   <div className="flex-1">
-                    <h3 className="text-white">{spotifyAlbum.name}</h3>
+                    <a 
+                      href={spotifyAlbum.external_urls.spotify}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h3 className="text-white group-hover:text-spotify-green">
+                        {spotifyAlbum.name}
+                        <svg 
+                          className="w-4 h-4 inline-block ml-2 opacity-0 group-hover:opacity-100 transition-opacity" 
+                          fill="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
+                        </svg>
+                      </h3>
+                    </a>
                     <p className="text-gray-400">{spotifyAlbum.release_date}</p>
+                    <SpotifyAttribution
+                      contentType="album"
+                      contentId={spotifyAlbum.id}
+                      contentName={spotifyAlbum.name}
+                      artistName={spotifyAlbum.artists?.[0]?.name}
+                      className="mt-1"
+                    />
                   </div>
                   <svg 
                     className={`w-6 h-6 text-gray-400 transform transition-transform ${expandedTracks === spotifyAlbum.id ? 'rotate-180' : ''}`}
@@ -340,7 +411,7 @@ export default function SearchForm({
                         {albumTracks[spotifyAlbum.id].map((track: SpotifyTrack) => (
                           <div 
                             key={track.id}
-                            className="flex items-center text-sm text-gray-300 p-3 hover:bg-gray-700/50 cursor-move"
+                            className="group flex items-center text-sm text-gray-300 p-3 hover:bg-gray-700/50 cursor-move"
                             draggable="true"
                             onDragStart={(e) => {
                               e.dataTransfer.setData('application/json', JSON.stringify({
@@ -355,11 +426,35 @@ export default function SearchForm({
                             }}
                           >
                             <span className="w-8 text-right text-gray-500">{track.track_number}.</span>
-                            <span className="ml-4">{track.name}</span>
-                            <span className="ml-auto text-gray-500">
-                              {Math.floor(track.duration_ms / 60000)}:
-                              {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
-                            </span>
+                            <a 
+                              href={`https://open.spotify.com/track/${track.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-4 hover:text-spotify-green"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {track.name}
+                              <svg 
+                                className="w-3 h-3 inline-block ml-1 opacity-0 group-hover:opacity-100 transition-opacity" 
+                                fill="currentColor" 
+                                viewBox="0 0 24 24"
+                              >
+                                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
+                              </svg>
+                            </a>
+                            <div className="flex items-center ml-auto space-x-4">
+                              <SpotifyAttribution
+                                contentType="track"
+                                contentId={track.id}
+                                contentName={track.name}
+                                artistName={track.artists?.[0]?.name}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              />
+                              <span className="text-gray-500">
+                                {Math.floor(track.duration_ms / 60000)}:
+                                {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
+                              </span>
+                            </div>
                           </div>
                         ))}
                         {tracksPagination[spotifyAlbum.id]?.hasMore && (

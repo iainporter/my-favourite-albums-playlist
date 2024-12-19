@@ -3,6 +3,9 @@ import { useRouter } from 'next/router';
 import PlaylistManager from '../components/PlaylistManager';
 import FavoriteAlbums from '../components/FavoriteAlbums';
 import Publications from '../components/Publications';
+import Header from '../components/Header';
+import StreamRippingWarning from '../components/StreamRippingWarning';
+import SpotifyTerms from '../components/SpotifyTerms';
 
 export default function Home() {
   const router = useRouter();
@@ -45,8 +48,22 @@ export default function Home() {
     window.location.href = '/api/auth/login';
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setAccessToken('');
+    setRefreshToken('');
+    router.push('/');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white overflow-auto">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white overflow-auto pb-16">
+      <StreamRippingWarning />
+      <Header 
+        isAuthenticated={!!accessToken}
+        onLogin={handleLogin}
+        onLogout={handleLogout}
+      />
       <main className="container mx-auto px-4 py-8 relative">
         <div className="max-w-8xl mx-auto">
           <h1 className="text-5xl md:text-2xl font-bold mb-4 text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
@@ -76,9 +93,10 @@ export default function Home() {
                     <li>Manage your playlists with an intuitive interface</li>
                   </ol>
                 </div>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-400 mb-8">
                   Your Spotify account will only be used to manage your playlists and access your music library.
                 </p>
+                <SpotifyTerms />
               </div>
               <button
                 onClick={handleLogin}

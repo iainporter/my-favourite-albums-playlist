@@ -91,7 +91,9 @@ interface Track {
   id: string;
   name: string;
   artist: string;
+  artistId: string;
   album: string;
+  albumId: string;
   duration_ms: number;
   uri: string;
 }
@@ -148,9 +150,46 @@ function TrackList({ tracks, playlistId, onRemoveTrack }: {
                   -
                 </button>
               </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-white">{track.artist}</td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.name}</td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{track.album}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-white">
+                <a 
+                  href={`https://open.spotify.com/artist/${track.artistId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-spotify-green"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {track.artist}
+                </a>
+              </td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                <a 
+                  href={`https://open.spotify.com/track/${track.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-spotify-green flex items-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {track.name}
+                  <svg 
+                    className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" 
+                    fill="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
+                  </svg>
+                </a>
+              </td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                <a 
+                  href={`https://open.spotify.com/album/${track.albumId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-spotify-green"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {track.album}
+                </a>
+              </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{formatDuration(track.duration_ms)}</td>
             </tr>
           ))}
@@ -216,7 +255,25 @@ function PlaylistItem({ playlist, onToggle, isLoading, onDrop, isAddingTracks, o
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-medium text-white truncate">{playlist.name}</h3>
+          <div className="flex flex-col">
+            <a 
+              href={`https://open.spotify.com/playlist/${playlist.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-base font-medium text-white hover:text-spotify-green truncate flex items-center"
+            >
+              {playlist.name}
+              <svg 
+                className="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" 
+                fill="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
+              </svg>
+            </a>
+            <span className="text-xs text-gray-400">Spotify Playlist</span>
+          </div>
         </div>
 
         <div className="flex-shrink-0 transition-transform duration-200">
@@ -354,7 +411,9 @@ export default function PlaylistManager() {
           id: item.track.id,
           name: item.track.name || 'Unknown Track',
           artist: item.track.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist',
+          artistId: item.track.artists?.[0]?.id || '',
           album: item.track.album?.name || 'Unknown Album',
+          albumId: item.track.album?.id || '',
           duration_ms: item.track.duration_ms || 0,
           uri: item.track.uri
         }));
@@ -418,7 +477,9 @@ export default function PlaylistManager() {
           id: item.track.id,
           name: item.track.name || 'Unknown Track',
           artist: item.track.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist',
+          artistId: item.track.artists?.[0]?.id || '',
           album: item.track.album?.name || 'Unknown Album',
+          albumId: item.track.album?.id || '',
           duration_ms: item.track.duration_ms || 0,
           uri: item.track.uri
         }));
@@ -491,7 +552,9 @@ export default function PlaylistManager() {
           id: item.track.id,
           name: item.track.name,
           artist: item.track.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist',
+          artistId: item.track.artists?.[0]?.id || '',
           album: item.track.album?.name || 'Unknown Album',
+          albumId: item.track.album?.id || '',
           duration_ms: item.track.duration_ms || 0,
           uri: item.track.uri
         }));
