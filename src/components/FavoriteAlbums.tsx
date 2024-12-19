@@ -600,6 +600,7 @@ export default function FavoriteAlbums() {
                                   )}
                                 </div>
                               )}
+                              </div>
                             </div>
                           ))}
                         </td>
