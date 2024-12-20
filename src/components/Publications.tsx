@@ -209,6 +209,7 @@ export default function Publications() {
                   </div>
                   {expandedAlbum === `${album.artist}-${album.album}` && (
                     <div className="ml-4 mb-4 p-4 bg-gray-700 rounded">
+                      <div className="text-gray-400 text-sm mb-3">Loaded by Spotify</div>
                       {searchResults[`${album.artist}-${album.album}`]?.filter(album => album != null).map((spotifyAlbum) => (
                         <div key={spotifyAlbum.id}>
                           <div 
