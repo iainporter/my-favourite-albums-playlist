@@ -467,7 +467,18 @@ export default function FavoriteAlbums() {
                                   className="w-12 h-12 rounded-md object-cover"
                                 />
                                 <div className="flex-1">
-                                  <h3 className="text-white">{spotifyAlbum.name}</h3>
+                                  <div className="flex items-center space-x-2">
+                                    <h3 className="text-white">{spotifyAlbum.name}</h3>
+                                    <a
+                                      href={spotifyAlbum.external_urls.spotify}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-spotify-green hover:text-green-400 transition-colors duration-200"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      Listen on Spotify
+                                    </a>
+                                  </div>
                                   <p className="text-gray-400">{spotifyAlbum.release_date}</p>
                                 </div>
                                 <svg
