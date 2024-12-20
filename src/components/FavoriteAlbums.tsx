@@ -473,10 +473,15 @@ export default function FavoriteAlbums() {
                                       href={spotifyAlbum.external_urls.spotify}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-xs text-spotify-green hover:text-green-400 transition-colors duration-200"
+                                      className="flex items-center hover:opacity-80 transition-opacity duration-200"
                                       onClick={(e) => e.stopPropagation()}
+                                      title="Listen on Spotify"
                                     >
-                                      Listen on Spotify
+                                      <img
+                                        src="/spotify-logo.png"
+                                        alt="Spotify"
+                                        className="w-5 h-5"
+                                      />
                                     </a>
                                   </div>
                                   <p className="text-gray-400">{spotifyAlbum.release_date}</p>
