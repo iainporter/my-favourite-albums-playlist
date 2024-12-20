@@ -202,17 +202,6 @@ export default function Publications() {
                     <div className="font-bold">{album.artist}</div>
                     <div className="flex items-center">
                       <div className="text-gray-300">{album.album}</div>
-                      {album.reviewUrl && (
-                        <a
-                          href={album.reviewUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="ml-2 text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200"
-                        >
-                          go to review
-                        </a>
-                      )}
                     </div>
                     <div className="text-sm text-gray-400">
                       {currentList === 'acclaimed' && (album as any).year 
