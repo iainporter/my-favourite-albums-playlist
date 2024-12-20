@@ -34,56 +34,84 @@ export class PitchforkParser implements HtmlParser {
     });
     const doc = dom.window.document;
 
-    
-    // Find all summary items
-    const summaryItems = doc.querySelectorAll('.summary-item');
+    // Find all summary items - try different possible selectors
+    const summaryItems = doc.querySelectorAll('.summary-item, article, [data-type="review"]');
 
     summaryItems.forEach((item, index) => {
       try {
-        // Extract artist
-        const artistElement = item.querySelector('.summary-item__sub-hed');
+        // Extract artist - try multiple possible selectors
+        const artistElement = 
+          item.querySelector('.summary-item__sub-hed') || 
+          item.querySelector('[data-testid="ReviewHeader__artist"]') ||
+          item.querySelector('.artist-name');
         const artist = artistElement ? artistElement.textContent?.trim() : '';
         
-        // Extract album
-        const albumElement = item.querySelector('[data-testid="SummaryItemHed"] em');
-        const album = albumElement ? albumElement.textContent?.trim() : '';
+        // Extract album - try multiple possible selectors and formats
+        let album = '';
+        const albumElement = 
+          item.querySelector('[data-testid="SummaryItemHed"] em') ||
+          item.querySelector('[data-testid="ReviewHeader__title"]') ||
+          item.querySelector('.review-title');
         
-        // Extract publish date
-        const dateElement = item.querySelector('.summary-item__publish-date');
-        const publishDate = dateElement ? dateElement.textContent?.trim() : '';
+        if (albumElement) {
+          album = albumElement.textContent?.trim() || '';
+        } else {
+          // Try to find album title in the heading text
+          const headingElement = item.querySelector('h2, h3, .heading');
+          if (headingElement) {
+            const headingText = headingElement.textContent?.trim() || '';
+            // Look for text between quotes or after a dash
+            const matches = headingText.match(/"([^"]+)"/) || headingText.match(/[–-]\s*(.+)$/);
+            if (matches && matches[1]) {
+              album = matches[1].trim();
+            }
+          }
+        }
         
-        // Extract review URL
-        const linkElement = item.querySelector('[data-testid="SummaryItemHed"]');
-        const reviewUrl = linkElement?.getAttribute('href') 
-          ? `https://pitchfork.com${linkElement.getAttribute('href')}`
-          : '';
+        // Extract publish date - try multiple possible selectors
+        const dateElement = 
+          item.querySelector('.summary-item__publish-date') ||
+          item.querySelector('time') ||
+          item.querySelector('.pub-date');
+        const publishDate = dateElement ? 
+          (dateElement.getAttribute('datetime') || dateElement.textContent?.trim()) : 
+          '';
         
-        if (artist && album && publishDate) {
+        // Extract review URL - try multiple possible ways
+        let reviewUrl = '';
+        const linkElement = 
+          item.querySelector('[data-testid="SummaryItemHed"]') ||
+          item.querySelector('a[href*="/reviews/"]') ||
+          item.querySelector('a');
+        
+        if (linkElement) {
+          const href = linkElement.getAttribute('href');
+          if (href) {
+            reviewUrl = href.startsWith('http') ? href : `https://pitchfork.com${href}`;
+          }
+        }
+        
+        if (artist && album) {
           albums.push({
             artist,
             album,
-            publishDate,
+            publishDate: publishDate || new Date().toISOString(),
             reviewUrl
           });
-        } else {
-//           logger.warn(`Skipping incomplete album entry. Artist: ${artist || 'missing'}, Album: ${album || 'missing'}, Date: ${publishDate || 'missing'}`);
         }
       } catch (error) {
-//         logger.error('Error parsing individual album item:', error instanceof Error ? error.message : String(error));
+        console.error('Error parsing individual album item:', error instanceof Error ? error.message : String(error));
       }
     });
   } catch (error) {
-//     logger.error('Error in JSDOM parsing:', error instanceof Error ? error.message : String(error));
-    // Return empty array instead of failing completely
+    console.error('Error in JSDOM parsing:', error instanceof Error ? error.message : String(error));
     return [];
   } finally {
-    // Cleanup JSDOM resources
     if (typeof window === 'undefined') {
-      // Only run on server-side
       try {
         dom?.window?.close();
       } catch (error) {
-//         logger.error('Error closing JSDOM window:', error instanceof Error ? error.message : String(error));
+        console.error('Error closing JSDOM window:', error instanceof Error ? error.message : String(error));
       }
     }
   }
@@ -91,14 +119,24 @@ export class PitchforkParser implements HtmlParser {
 };
 
   private convertToAlbum = (pitchforkAlbum: PitchforkAlbum): Album => {
-  const year = new Date(pitchforkAlbum.publishDate).getFullYear().toString();
-  
-  return {
-    artist: pitchforkAlbum.artist,
-    album: pitchforkAlbum.album,
-    year: pitchforkAlbum.publishDate,
-    rating: '8', // Since these are high-scoring albums
-    reviewUrl: pitchforkAlbum.reviewUrl
+    let year = new Date().getFullYear().toString();
+    try {
+      if (pitchforkAlbum.publishDate) {
+        const date = new Date(pitchforkAlbum.publishDate);
+        if (!isNaN(date.getTime())) {
+          year = date.getFullYear().toString();
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing date:', error);
+    }
+    
+    return {
+      artist: pitchforkAlbum.artist || 'Unknown Artist',
+      album: pitchforkAlbum.album || 'Unknown Album',
+      year: year,
+      rating: '8', // Since these are high-scoring albums
+      reviewUrl: pitchforkAlbum.reviewUrl || ''
+    };
   };
-};
 }
