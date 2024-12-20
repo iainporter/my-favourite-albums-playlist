@@ -24,6 +24,7 @@ export class PitchforkParser implements HtmlParser {
   }
   const albums: PitchforkAlbum[] = [];
   let dom: typeof JSDOM | undefined;
+  let doc: Document | undefined;
   
   try {
     // Create a temporary DOM element to parse the HTML using jsdom with minimal features
@@ -142,7 +143,7 @@ export class PitchforkParser implements HtmlParser {
   }
 
   // For albums found in JSON-LD, we still need to find their artists from the HTML
-  if (albums.length > 0) {
+  if (albums.length > 0 && doc) {
     const summaryItems = doc.querySelectorAll('.summary-item, article, [data-type="review"]');
     summaryItems.forEach((item) => {
       const artistElement = 
