@@ -123,11 +123,10 @@ export class PitchforkParser implements HtmlParser {
               reviewUrl
             });
           }
+        } catch (error) {
+          console.error('Error parsing individual album item:', error instanceof Error ? error.message : String(error));
         }
-      } catch (error) {
-        console.error('Error parsing individual album item:', error instanceof Error ? error.message : String(error));
-      }
-    });
+      });
   } catch (error) {
     console.error('Error in JSDOM parsing:', error instanceof Error ? error.message : String(error));
     return [];
