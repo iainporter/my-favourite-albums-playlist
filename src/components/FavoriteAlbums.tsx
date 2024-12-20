@@ -373,7 +373,8 @@ export default function FavoriteAlbums() {
                     { field: 'artist', label: 'Artist' },
                     { field: 'album', label: 'Album' },
                     { field: 'year', label: 'Year' },
-                    { field: 'rating', label: 'Rating' }
+                    { field: 'rating', label: 'Rating' },
+                    { field: 'review', label: 'Review' }
                   ].map(({ field, label }) => (
                     <th
                       key={field}
@@ -423,10 +424,23 @@ export default function FavoriteAlbums() {
                       <td className="px-3 py-2 whitespace-nowrap text-sm">{album.album}</td>
                       <td className="px-3 py-2 whitespace-nowrap text-sm">{album.year}</td>
                       <td className="px-3 py-2 whitespace-nowrap text-sm">{album.rating}</td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm">
+                        {album.reviewUrl && (
+                          <a
+                            href={album.reviewUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-spotify-green hover:text-green-400 transition-colors duration-200"
+                          >
+                            Review ↗
+                          </a>
+                        )}
+                      </td>
                     </tr>
                     {expandedRow === album.id && searchResults[album.id] && (
                       <tr>
-                        <td colSpan={4} className="px-6 py-4 bg-gray-800">
+                        <td colSpan={5} className="px-6 py-4 bg-gray-800">
                           <div className="text-gray-400 text-sm mb-3">Loaded by Spotify</div>
                           {searchResults[album.id].filter(spotifyAlbum => spotifyAlbum !== null).map((spotifyAlbum) => (
                             <div key={spotifyAlbum.id}>
