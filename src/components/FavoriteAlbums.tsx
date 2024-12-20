@@ -478,7 +478,7 @@ export default function FavoriteAlbums() {
                                       title="Listen on Spotify"
                                     >
                                       <svg 
-                                        className="w-4 h-4 opacity-75 hover:opacity-100 transition-opacity" 
+                                        className="w-4 h-4 text-spotify-green opacity-75 hover:opacity-100 transition-opacity" 
                                         fill="currentColor" 
                                         viewBox="0 0 24 24"
                                       >
