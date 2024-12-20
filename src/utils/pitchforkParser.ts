@@ -7,6 +7,7 @@ export interface PitchforkAlbum {
   artist: string;
   album: string;
   publishDate: string;
+  reviewUrl: string;
 }
 
 export class PitchforkParser implements HtmlParser {
