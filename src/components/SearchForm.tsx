@@ -8,8 +8,7 @@ import { SpotifyAlbum, SpotifyTrack } from '../types/spotify';
 import SpotifyAttribution from './SpotifyAttribution';
 import SpotifyBadge from './SpotifyBadge';
 import Image from 'next/image';
-import SpotifyUsageGuidelines from './SpotifyUsageGuidelines';
-import { useSpotifyGuidelines } from '../hooks/useSpotifyGuidelines';
+
 
 interface SearchFormProps {
   albumSearchResults: SpotifyAlbum[];
@@ -223,21 +222,13 @@ export default function SearchForm({
     }
   };
 
-  const { showGuidelines, showGuidelinesOnce, acknowledgeGuidelines } = useSpotifyGuidelines();
 
-  // Show guidelines when user first interacts with search results
-  useEffect(() => {
-    if (albumSearchResults.length > 0 || expandedTracks) {
-      showGuidelinesOnce();
-    }
-  }, [albumSearchResults.length, expandedTracks, showGuidelinesOnce]);
+
+  // Guidelines popup removed
 
   return (
     <div className="flex flex-col h-full">
-      <SpotifyUsageGuidelines 
-        isOpen={showGuidelines} 
-        onClose={acknowledgeGuidelines} 
-      />
+
       <div className="sticky top-0 bg-gray-800/95 backdrop-blur-sm z-10 space-y-4 pb-4">
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
