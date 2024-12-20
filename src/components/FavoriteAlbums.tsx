@@ -477,11 +477,13 @@ export default function FavoriteAlbums() {
                                       onClick={(e) => e.stopPropagation()}
                                       title="Listen on Spotify"
                                     >
-                                      <img
-                                        src="/spotify-logo.png"
-                                        alt="Spotify"
-                                        className="w-5 h-5"
-                                      />
+                                      <svg 
+                                        className="w-4 h-4 opacity-75 hover:opacity-100 transition-opacity" 
+                                        fill="currentColor" 
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02z"/>
+                                      </svg>
                                     </a>
                                   </div>
                                   <p className="text-gray-400">{spotifyAlbum.release_date}</p>
