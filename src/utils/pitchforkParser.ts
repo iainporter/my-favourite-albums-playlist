@@ -127,6 +127,7 @@ export class PitchforkParser implements HtmlParser {
           console.error('Error parsing individual album item:', error instanceof Error ? error.message : String(error));
         }
       });
+    }
   } catch (error) {
     console.error('Error in JSDOM parsing:', error instanceof Error ? error.message : String(error));
     return [];
