@@ -6,6 +6,7 @@ export interface DIYAlbum {
   artist: string;
   album: string;
   publishDate: string;
+  reviewUrl: string;
 }
 
 export class DIYParser implements HtmlParser {
