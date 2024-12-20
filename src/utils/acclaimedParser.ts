@@ -29,6 +29,7 @@ export const parseAcclaimedHtml = (html: string): Album[] => {
         // Get the text content and trim it
         const artist = artistCell?.textContent?.trim() || '';
         const album = albumCell?.textContent?.trim() || '';
+        const reviewUrl = albumCell?.getAttribute('href') || '';
 
         // Only add the album if both artist and album are present and non-empty
         if (artist.length > 0 && album.length > 0) {
@@ -36,7 +37,8 @@ export const parseAcclaimedHtml = (html: string): Album[] => {
             artist,
             album,
             year,  // Add the extracted year
-            rating: '' // Empty rating as per requirement
+            rating: '', // Empty rating as per requirement
+            reviewUrl: reviewUrl.startsWith('http') ? reviewUrl : `https://acclaimedmusic.net${reviewUrl}`
           });
         }
       }

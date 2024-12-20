@@ -4,6 +4,7 @@ export interface Album {
   album: string;
   year: string;
   rating: string;
+  reviewUrl?: string;
 }
 
 export interface ImportedAlbum extends Album {

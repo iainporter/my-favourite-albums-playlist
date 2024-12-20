@@ -22,6 +22,8 @@ export class DIYParser implements HtmlParser {
         // Extract artist and album from the h3 element
         const titleElement = header.querySelector('.h-headline p strong');
         const titleText = header.querySelector('.h-headline p')?.textContent;
+        const linkElement = header.querySelector('a');
+        const reviewUrl = linkElement?.href || '';
 
         if (titleElement && titleText) {
           const artist = titleElement.textContent?.trim() || '';
@@ -36,7 +38,8 @@ export class DIYParser implements HtmlParser {
             albums.push({
               artist,
               album,
-              publishDate
+              publishDate,
+              reviewUrl: reviewUrl.startsWith('http') ? reviewUrl : `https://diymag.com${reviewUrl}`
             });
           }
         }
@@ -55,7 +58,8 @@ export class DIYParser implements HtmlParser {
       artist: diyAlbum.artist,
       album: diyAlbum.album,
       year: diyAlbum.publishDate,
-      rating: 'DIY Featured'
+      rating: 'DIY Featured',
+      reviewUrl: diyAlbum.reviewUrl
     };
   }
 

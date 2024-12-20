@@ -51,11 +51,18 @@ export class PitchforkParser implements HtmlParser {
         const dateElement = item.querySelector('.summary-item__publish-date');
         const publishDate = dateElement ? dateElement.textContent?.trim() : '';
         
+        // Extract review URL
+        const linkElement = item.querySelector('[data-testid="SummaryItemHed"]');
+        const reviewUrl = linkElement?.getAttribute('href') 
+          ? `https://pitchfork.com${linkElement.getAttribute('href')}`
+          : '';
+        
         if (artist && album && publishDate) {
           albums.push({
             artist,
             album,
-            publishDate
+            publishDate,
+            reviewUrl
           });
         } else {
 //           logger.warn(`Skipping incomplete album entry. Artist: ${artist || 'missing'}, Album: ${album || 'missing'}, Date: ${publishDate || 'missing'}`);
@@ -89,7 +96,8 @@ export class PitchforkParser implements HtmlParser {
     artist: pitchforkAlbum.artist,
     album: pitchforkAlbum.album,
     year: pitchforkAlbum.publishDate,
-    rating: '8' // Since these are high-scoring albums
+    rating: '8', // Since these are high-scoring albums
+    reviewUrl: pitchforkAlbum.reviewUrl
   };
 };
 }
