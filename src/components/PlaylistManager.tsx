@@ -157,8 +157,9 @@ function TrackList({ tracks, playlistId, onRemoveTrack }: {
                   rel="noopener noreferrer"
                   className="hover:text-spotify-green"
                   onClick={(e) => e.stopPropagation()}
+                  title={track.artist}
                 >
-                  {track.artist}
+                  {track.artist.length > 30 ? `${track.artist.substring(0, 30)}...` : track.artist}
                 </a>
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
