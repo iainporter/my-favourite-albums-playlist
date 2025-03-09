@@ -11,7 +11,11 @@ const nextConfig = {
   },
   poweredByHeader: false,
   reactStrictMode: true,
+  // Disable webpack cache to fix "Unable to snapshot resolve dependencies" error
   webpack: (config, { isServer }) => {
+    // Disable the webpack cache
+    config.cache = false;
+    
     if (!isServer) {
       // Fallback for Node.js built-in modules
       config.resolve.fallback = {
