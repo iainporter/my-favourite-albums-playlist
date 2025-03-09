@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 
 interface SpotifyUsageGuidelinesProps {
   isOpen: boolean;
@@ -14,12 +13,6 @@ const SpotifyUsageGuidelines = ({ isOpen, onClose }: SpotifyUsageGuidelinesProps
       <div className="bg-gray-900 rounded-lg max-w-2xl w-full p-6 border border-gray-700">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <Image
-              src="/spotify-logo.png"
-              alt="Spotify Logo"
-              width={32}
-              height={32}
-            />
             <h2 className="text-xl font-bold text-white">Content Usage Guidelines</h2>
           </div>
           <button
@@ -36,19 +29,19 @@ const SpotifyUsageGuidelines = ({ isOpen, onClose }: SpotifyUsageGuidelinesProps
           <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-red-500">
             <h3 className="text-red-400 font-semibold mb-2">Prohibited Actions</h3>
             <ul className="list-disc pl-5 space-y-2">
-              <li>Downloading or "ripping" content from Spotify</li>
+              <li>Downloading or "ripping" content from Spotify®</li>
               <li>Copying or redistributing audio content</li>
               <li>Circumventing content protection measures</li>
               <li>Using content outside of Spotify's platform</li>
             </ul>
           </div>
 
-          <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-spotify-green">
-            <h3 className="text-spotify-green font-semibold mb-2">Permitted Usage</h3>
+          <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-green-600">
+            <h3 className="text-green-600 font-semibold mb-2">Permitted Usage</h3>
             <ul className="list-disc pl-5 space-y-2">
-              <li>Streaming through official Spotify applications</li>
+              <li>Streaming through official Spotify® applications</li>
               <li>Creating and sharing playlists</li>
-              <li>Linking to Spotify content</li>
+              <li>Linking to Spotify® content</li>
               <li>Using Spotify's official sharing features</li>
             </ul>
           </div>
@@ -58,6 +51,7 @@ const SpotifyUsageGuidelines = ({ isOpen, onClose }: SpotifyUsageGuidelinesProps
             <p className="text-sm">
               All content is protected by copyright and owned by Spotify or its licensors. 
               Any unauthorized use may result in account termination and potential legal action.
+              This application is not affiliated with, endorsed, or sponsored by Spotify®.
             </p>
           </div>
 
@@ -66,13 +60,13 @@ const SpotifyUsageGuidelines = ({ isOpen, onClose }: SpotifyUsageGuidelinesProps
               href="https://www.spotify.com/legal/end-user-agreement/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-spotify-green hover:text-green-400 transition-colors text-sm"
+              className="text-green-600 hover:text-green-400 transition-colors text-sm"
             >
               View Full Terms of Service →
             </a>
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-spotify-green text-white rounded-full hover:bg-green-600 transition-colors"
+              className="px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors"
             >
               I Understand
             </button>

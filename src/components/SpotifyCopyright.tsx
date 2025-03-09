@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 
 const SpotifyCopyright = () => {
   return (
@@ -7,15 +6,8 @@ const SpotifyCopyright = () => {
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Image
-              src="/spotify-logo.png"
-              alt="Spotify"
-              width={20}
-              height={20}
-              className="opacity-75"
-            />
             <span className="text-xs text-gray-400">
-              Content provided by Spotify®. Spotify is a trademark of Spotify AB.
+              Content accessed via Spotify® Web API. Spotify® is a trademark of Spotify AB.
             </span>
           </div>
           <div className="flex items-center space-x-4">
@@ -26,7 +18,7 @@ const SpotifyCopyright = () => {
               href="https://www.spotify.com/legal/end-user-agreement/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-spotify-green hover:text-green-400 transition-colors"
+              className="text-xs text-green-600 hover:text-green-400 transition-colors"
             >
               Terms of Use
             </a>

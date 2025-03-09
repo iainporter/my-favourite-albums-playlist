@@ -6,10 +6,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        spotify: {
-          green: '#1DB954',
-          black: '#191414',
-        },
+        // Removed spotify-specific branding colors
       },
       animation: {
         'shine': 'shine 1s linear infinite',
